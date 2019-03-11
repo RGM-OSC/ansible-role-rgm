@@ -1,0 +1,13 @@
+---
+# vars file for ansible-role-rgm
+
+rgm_services:
+- gedd
+- httpd
+- mariadb
+- nagios
+- chronyd
+- rsyslog
+- snmpd
+- snmptrapd
+- snmptt

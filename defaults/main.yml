@@ -1,0 +1,13 @@
+---
+# defaults file for ansible-role-rgm
+
+rgm_root_path: /srv/rgm
+
+rgm_group: rgm
+
+# internal MariaDB user used by RGM applications
+mariadb_root_password: 'dflgjhv'
+mariadb_user: rgm
+mariadb_pwd: sdffmljggt
+
+db_cacti: cacti

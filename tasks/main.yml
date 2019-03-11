@@ -1,0 +1,177 @@
+---
+# tasks file for ansible-role-rgm
+
+- name: install package dependencies
+  yum:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+    - sudo
+    - mariadb-server
+    - ged
+    - ged-mysql
+    - lilac
+    - thruk
+    - httpd
+    - mod_auth_rgm
+    - mod_perl
+    - php
+    - php-mysql
+    - php-ldap
+    - php-process
+    - php-xml
+    - nagios
+    - nagvis
+    - nagiosbp
+    - notifier
+    - net-snmp
+
+
+### selinux
+- name: disable SELinux
+  selinux:
+    state: disabled
+
+
+### system users & groups base configuration
+
+- name: "create RGM '{{ rgm_group }}' group"
+  group:
+    name: "{{ rgm_group }}"
+    state: present
+
+- name: "add {{ rgm_group }} to apache user"
+  user:
+    name: apache
+    groups: " {{ rgm_group }}"
+    append: yes
+
+
+### sudoers base configuration
+
+- name: set sudoers config file
+  template:
+    src: sudoers.j2
+    dest: "/etc/sudoers.d/rgm"
+    owner: root
+    group: root
+    mode: 0400
+    seuser: system_u
+    serole: object_r
+    setype: etc_t
+    selevel: s0
+
+# todo: config chronyd
+
+### MariaDB base configuration
+
+- name: ensure MariaDB is up & running
+  service:
+    name: mariadb
+    state: running
+
+- name: check is MariaDB root user is password protected
+  shell: mysql --host=localhost --user=root -e 'SHOW DATABASES;'
+  register: mariadb_status
+  failed_when: mariadb_status.rc == 2
+
+- name: Set root user password
+  mysql_user:
+    name: root
+    host: localhost
+    password: "{{ mariadb_root_password }}"
+    check_implicit_admin: yes
+    login_user: root
+    state: present
+  when: mariadb_status.rc == 0
+
+- name: ensure we can connect as root to MariaDB
+  shell: mysql --host=localhost --user=root --password={{ mariadb_root_password }} --execute='SHOW DATABASES;'
+  register: mariadb_status
+  failed_when: mariadb_status.rc == 2
+
+- fail:
+  msg: |
+    "Can't connect to MariaDB server using the provided credentials !"
+    "Please check the following variables:"
+    "  mariadb_root_password"
+    "  mariadb_user"
+    "  mariadb_pwd"
+  when: mariadb_status.rc != 0
+
+- name: check if TZINFO data are present in MariaDB core database
+  command: >
+    mysql --user=root --password={{ mariadb_root_password }} --batch --skip-column-names mysql
+      --execute="select count(*) from time_zone_name where Name = 'Europe/Paris';"
+  register: mariadb_tzinfo_count
+
+- name: inject TZINFO into MySQL core database
+  shell: mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql --user=root --password={{ mariadb_root_password }} mysql
+  args:
+    executable: /bin/bash
+  when: mariadb_tzinfo_count.stdout != "1"
+
+
+### php base configuration
+- shell: ls -l /etc/localtime |awk -F "zoneinfo/" '{print $2}'
+  args:
+    executable: /bin/bash
+  register: local_tz
+
+- name: set local time zone fact
+  set_fact:
+    localtime: local_tz.stdout
+
+- name: set local TZ for php
+  lineinfile:
+    path: /etc/php.ini
+    regexp: '^;*\s*date.timezone *=.*'
+    line: "date.timezone = {{ localtime }}"
+
+- name: set memory limit for php
+  lineinfile:
+    path: /etc/php.ini
+    regexp: '^;*\s*memory_limit *=.*'
+    line: "memory_limit = 256M"
+
+- name: set max_execution_time for php
+  lineinfile:
+    path: /etc/php.ini
+    regexp: '^;*\s*max_execution_time *=.*'
+    line: "max_execution_time = 300"
+
+- name: set error_reporting for php
+  lineinfile:
+    path: /etc/php.ini
+    regexp: '^;*\s*error_reporting *=.*'
+    line: "error_reporting = E_ERROR"
+
+
+### apache base configuration
+# todo: plus tard
+#if [ -d "/srv/eyesofnetwork/eonweb" ]; then
+#  sed -i 's/^DocumentRoot.*/DocumentRoot\ \"\/srv\/eyesofnetwork\/eonweb\"/g' /etc/httpd/conf/httpd.conf
+#elif [ -d "/srv/eyesofnetwork/glpi" ]; then
+#  sed -i 's/^DocumentRoot.*/DocumentRoot\ \"\/srv\/eyesofnetwork\/glpi\"/g' /etc/httpd/conf/httpd.conf
+#elif [ -d "/srv/eyesofnetwork/ocsinventory-reports" ]; then
+#        sed -i 's/^DocumentRoot.*/DocumentRoot\ \"\/srv\/eyesofnetwork\/ocsinventory-reports\/ocsreports\"/g' /etc/httpd/conf/httpd.conf
+#fi
+
+
+- name: enable RGM daemons
+  systemd:
+    name: "{{ item }}"
+    enabled: yes
+    state: started
+  with_items: "{{ rgm_services }}"
+
+- name: configure firewalld
+  firewalld:
+    service: "{{ item }}"
+    permanent: yes
+    state: enabled
+  with_items:
+  - ssh
+  - http
+  - https
