@@ -1,0 +1,45 @@
+- name: ensure MariaDB is up & running
+  service:
+    name: mariadb
+    state: running
+
+- name: check is MariaDB root user is password protected
+  shell: mysql --host=localhost --user=root -e 'SHOW DATABASES;'
+  register: mariadb_status
+  failed_when: mariadb_status.rc == 2
+
+- name: Set root user password
+  mysql_user:
+    name: root
+    host: localhost
+    password: "{{ mariadb_root_password }}"
+    check_implicit_admin: yes
+    login_user: root
+    state: present
+  when: mariadb_status.rc == 0
+
+- name: ensure we can connect as root to MariaDB
+  shell: mysql --host=localhost --user=root --password={{ mariadb_root_password }} --execute='SHOW DATABASES;'
+  register: mariadb_status
+  failed_when: mariadb_status.rc == 2
+
+- fail:
+  msg: |
+    "Can't connect to MariaDB server using the provided credentials !"
+    "Please check the following variables:"
+    "  mariadb_root_password"
+    "  mariadb_user"
+    "  mariadb_pwd"
+  when: mariadb_status.rc != 0
+
+- name: check if TZINFO data are present in MariaDB core database
+  command: >
+    mysql --user=root --password={{ mariadb_root_password }} --batch --skip-column-names mysql
+      --execute="select count(*) from time_zone_name where Name = 'Europe/Paris';"
+  register: mariadb_tzinfo_count
+
+- name: inject TZINFO into MySQL core database
+  shell: mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql --user=root --password={{ mariadb_root_password }} mysql
+  args:
+    executable: /bin/bash
+  when: mariadb_tzinfo_count.stdout != "1"

@@ -6,8 +6,7 @@ rgm_root_path: /srv/rgm
 rgm_group: rgm
 
 # internal MariaDB user used by RGM applications
-mariadb_root_password: 'dflgjhv'
-mariadb_user: rgm
-mariadb_pwd: sdffmljggt
+mariadb_root_password: ''
+mariadb_user: 'rgminternal'
+mariadb_pwd: '0rd0-c0m1735-b47h0n143'
 
-db_cacti: cacti

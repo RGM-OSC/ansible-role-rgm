@@ -1,2 +1,23 @@
 ---
 # handlers file for ansible-role-rgm
+
+
+- name: service_restart_mariadb
+  service:
+    name: mariadb
+    state: restarted
+
+- name: service_reload_http
+  service:
+    name: httpd
+    state: reloaded
+
+- name: service_reload_nagios
+  service:
+    name: nagios
+    state: reloaded
+
+- name: service_reload_ged
+  service:
+    name: gedd
+    state: reloaded
