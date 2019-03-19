@@ -4,6 +4,7 @@
 rgm_root_path: /srv/rgm
 
 rgm_group: rgm
+rgmweb_user: apache
 
 # internal MariaDB user used by RGM applications
 mariadb_root_password: ''

@@ -1,7 +1,7 @@
 ---
 # tasks file for ansible-role-rgm
 
-- name: install package dependencies
+- name: install package dependencies (please be patient, it may take some time...)
   yum:
     name: "{{ packages }}"
     state: present
