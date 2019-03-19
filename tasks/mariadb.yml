@@ -1,7 +1,7 @@
 - name: ensure MariaDB is up & running
   service:
     name: mariadb
-    state: running
+    state: started
 
 - name: check is MariaDB root user is password protected
   shell: mysql --host=localhost --user=root -e 'SHOW DATABASES;'
@@ -24,12 +24,12 @@
   failed_when: mariadb_status.rc == 2
 
 - fail:
-  msg: |
-    "Can't connect to MariaDB server using the provided credentials !"
-    "Please check the following variables:"
-    "  mariadb_root_password"
-    "  mariadb_user"
-    "  mariadb_pwd"
+    msg: |
+      "Can't connect to MariaDB server using the provided credentials !"
+      "Please check the following variables:"
+      "  mariadb_root_password"
+      "  mariadb_user"
+      "  mariadb_pwd"
   when: mariadb_status.rc != 0
 
 - name: check if TZINFO data are present in MariaDB core database
