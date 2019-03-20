@@ -16,11 +16,14 @@
     - httpd
     - mod_auth_rgm
     - mod_perl
+    - mod_ssl
+    - mod_fcgid
     - php
-    - php-mysql
+    - php-mysqlnd
     - php-ldap
     - php-process
     - php-xml
+    - php-snmp
     - nagios
     - nagvis
     - nagiosbp
