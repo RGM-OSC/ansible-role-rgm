@@ -1,7 +1,20 @@
 ---
 # tasks file for ansible-role-rgm
 
-- name: install package dependencies (please be patient, it may take some time...)
+### selinux
+# todo: configure RGM to work smoothly *with* selinux enabled
+- name: disable SELinux
+  selinux:
+    state: disabled
+
+### MariaDB base configuration
+- name: configure mariadb
+  include_tasks: mariadb.yml
+  tags:
+  - mariadb
+
+### installs RGM packages & dependencies
+- name: install RGM packages (it may take some time...)
   yum:
     name: "{{ packages }}"
     state: present
@@ -12,7 +25,6 @@
     - net-snmp
     - snmptt
     - chrony
-    - mariadb-server
     - httpd
     - mod_auth_rgm
     - mod_perl
@@ -38,12 +50,6 @@
   register: yum_result
   until: yum_result.rc == 0
 
-
-### selinux
-# todo: configure RGM to work smoothly *with* selinux enabled
-- name: disable SELinux
-  selinux:
-    state: disabled
 
 
 ###### system users & groups base configuration
@@ -81,11 +87,7 @@
   - chrony
 
 
-### MariaDB base configuration
-- name: configure mariadb
-  include_tasks: mariadb.yml
-  tags:
-  - mariadb
+
 
 
 ### php base configuration

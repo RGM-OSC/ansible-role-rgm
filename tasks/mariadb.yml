@@ -1,10 +1,21 @@
+
+- name: ensure mariadb is installed
+  yum:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+    - mariadb-server
+    - mariadb
+
 - name: ensure MariaDB is up & running
   service:
     name: mariadb
+    enabled: yes
     state: started
 
 - name: check is MariaDB root user is password protected
-  shell: mysql --host=localhost --user=root -e 'SHOW DATABASES;'
+  command: mysql --host=localhost --user=root -e '\q'
   register: mariadb_status
   failed_when: mariadb_status.rc == 2
 
