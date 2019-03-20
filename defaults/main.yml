@@ -11,3 +11,8 @@ mariadb_root_password: ''
 mariadb_user: 'rgminternal'
 mariadb_pwd: '0rd0-c0m1735-b47h0n143'
 
+ntp_servers:
+- '0.pool.ntp.org'
+- '1.pool.ntp.org'
+- '2.pool.ntp.org'
+- '3.pool.ntp.org'

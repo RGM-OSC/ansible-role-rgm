@@ -7,8 +7,11 @@
     state: present
   vars:
     packages:
+    - python2-PyMySQL
     - sudo
     - net-snmp
+    - snmptt
+    - chrony
     - mariadb-server
     - httpd
     - mod_auth_rgm
@@ -27,6 +30,10 @@
     - thruk
     - lilac
     - rgmweb
+  retries: 3
+  delay: 2
+  register: yum_result
+  until: yum_result.rc == 0
 
 
 ### selinux
@@ -63,7 +70,13 @@
     setype: etc_t
     selevel: s0
 
-# todo: config chronyd
+### configure chronyd
+- name: configure chrony daemon
+  include_tasks: ntp.yml
+  tags:
+  - ntp
+  - chrony
+
 
 ### MariaDB base configuration
 - name: configure mariadb
@@ -90,6 +103,7 @@
   - ssh
   - http
   - https
+
 
 ### enable and start RGM services
 - name: enable RGM daemons

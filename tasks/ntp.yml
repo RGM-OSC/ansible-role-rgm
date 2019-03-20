@@ -1,0 +1,33 @@
+---
+# Chrony daemon configuration
+
+- name: ensure Chronyd is running
+  systemd:
+    name: chronyd
+    enabled: yes
+    state: started
+
+- name: retrieve chronyd tracking status
+  shell: chronyc tracking | grep '^Leap status'
+  args:
+    executable: /bin/bash
+  register: chrony_tracking
+
+- block:
+  - name: set chrony config file
+    template:
+      src: chrony.conf.j2
+      dest: /etc/chrony.conf
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: restart Chronyd with new config
+    systemd:
+      name: chronyd
+      state: restarted
+
+  - name: force chronyd to correct time offsets
+    command: chronyc makestep
+
+  when: chrony_tracking.stdout | regex_search('Not synchronised')
