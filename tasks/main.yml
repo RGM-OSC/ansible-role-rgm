@@ -40,6 +40,9 @@
     - net-snmp
     - snmptt
     - chrony
+    - influxdb
+    - grafana
+    - elasticsearch
     - httpd
     - mod_auth_rgm
     - mod_perl
@@ -51,7 +54,11 @@
     - php-process
     - php-xml
     - php-snmp
+    - mk-livestatus
+    - nagflux
+    - histou
     - nagios
+    - nagios-plugins
     - nagvis
     - nagiosbp
     - notifier
@@ -60,8 +67,7 @@
     - thruk
     - lilac
     - rgmweb
-    - influxdb
-    - nagflux
+
   retries: 3
   delay: 2
   register: yum_result

@@ -5,6 +5,8 @@ rgm_services:
 - gedd
 - httpd
 - mariadb
+- influxdb
+- elasticsearch
 - nagios
 - chronyd
 - rsyslog
