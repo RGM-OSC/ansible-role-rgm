@@ -7,6 +7,7 @@
     packages:
     - mariadb-server
     - mariadb
+    - python2-PyMySQL
 
 - name: ensure MariaDB is up & running
   service:
