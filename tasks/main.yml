@@ -45,6 +45,7 @@
     - lilac
     - rgmweb
     - influxdb
+    - nagflux
   retries: 3
   delay: 2
   register: yum_result
