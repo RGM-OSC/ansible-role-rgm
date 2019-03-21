@@ -12,10 +12,12 @@
   - epel
   - epel-debuginfo
   - epel-source
+  register: update_epel
 
 - name: force yum clean & make cache
   yum:
     update_cache: yes
+  when: update_epel
 
 ### selinux
 # todo: configure RGM to work smoothly *with* selinux enabled
@@ -68,7 +70,7 @@
     - lilac
     - rgmweb
 
-  retries: 3
+  retries: 10
   delay: 2
   register: yum_result
   until: yum_result.rc == 0
