@@ -1,5 +1,13 @@
 ---
 
+## add apache user to rgm group
+
+- name: "add {{ rgm_group }} to apache user"
+  user:
+    name: apache
+    groups: " {{ rgm_group }}"
+    append: yes
+
 ## php configuration
 
 - shell: ls -l /etc/localtime |awk -F "zoneinfo/" '{print $2}'

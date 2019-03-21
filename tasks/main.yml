@@ -44,26 +44,11 @@
     - thruk
     - lilac
     - rgmweb
+    - influxdb
   retries: 3
   delay: 2
   register: yum_result
   until: yum_result.rc == 0
-
-
-
-###### system users & groups base configuration
-###- name: "create RGM '{{ rgm_group }}' group"
-###  group:
-###    name: "{{ rgm_group }}"
-###    state: present
-###
-###- name: "add {{ rgm_group }} to apache user"
-###  user:
-###    name: apache
-###    groups: " {{ rgm_group }}"
-###    append: yes
-# commented out as this should be done by packaging system
-
 
 ### sudoers base configuration
 - name: set sudoers config file
