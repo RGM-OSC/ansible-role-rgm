@@ -15,15 +15,15 @@
     executable: /bin/bash
   register: local_tz
 
-- name: set local time zone fact
-  set_fact:
-    localtime: local_tz.stdout
+#- name: set local time zone fact
+#  set_fact:
+#    localtime: local_tz.stdout
 
-- name: set local TZ for php
+- name: set Europe/Paris TZ for php
   lineinfile:
     path: /etc/php.ini
     regexp: '^;*\s*date.timezone *=.*'
-    line: "date.timezone = {{ localtime }}"
+    line: "date.timezone = Europe/Paris"
   notify: service_reload_http
 
 - name: set memory limit for php
