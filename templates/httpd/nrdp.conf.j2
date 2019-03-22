@@ -1,0 +1,30 @@
+Alias /nrdp "/srv/rgm/nrdp/server"
+
+<Directory "/srv/rgm/nrdp/server">
+        Options -Indexes -FollowSymLinks
+        AllowOverride None
+        <LimitExcept POST GET HEAD>
+            Order deny,allow
+            Deny from all
+        </LimitExcept>
+        Order allow,deny
+        # TEST
+        Allow from All
+        # PROD
+        #Allow from 127.0.0.1 X.X.X.X
+        Satisfy Any
+
+        AuthType Basic
+        AuthName "Restricted"
+        AuthEonAuthoritative On
+        AuthEonMySQLSocket /var/lib/mysql/mysql.sock
+        AuthrgmMySQLUsername {{ mariadb_user }}
+        AuthEonMySQLPassword {{ mariadb_pwd }}
+        AuthEonMySQLDB {{ db_rgmweb }}
+        AuthEonMySQLTableSID sessions,users,groupright
+        AuthEonMySQLFieldUID sessions.user_id
+        AuthEonMySQLTableSIDCondition "`sessions`.`session_id`=$session_id AND `sessions`.`user_id`=$user_id AND `users`.`user_id`=$user_id AND `users`.`user_name`=$user_name AND `users`.`group_id`=$group_id AND `groupright`.`group_id`=$group_id AND `groupright`.`tab_6`='1'"
+        AuthEonPageLogin /login.php
+        AuthEonSessionCookies On
+        Require valid-user
+</Directory>

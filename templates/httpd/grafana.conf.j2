@@ -1,0 +1,24 @@
+ProxyPreserveHost On
+<Location /grafana>
+    AuthType Basic
+    AuthName "Restricted"
+    AuthrgmAuthoritative On
+    AuthrgmMySQLSocket /var/lib/mysql/mysql.sock
+    AuthrgmMySQLUsername {{ mariadb_user }}
+    AuthrgmMySQLPassword {{ mariadb_pwd }}
+    AuthrgmMySQLDB {{ db_rgmweb }}
+    AuthrgmMySQLTableSID sessions,users,groupright
+    AuthrgmMySQLFieldUID sessions.user_id
+    AuthrgmMySQLTableSIDCondition "`sessions`.`session_id`=$session_id AND `sessions`.`user_id`=$user_id AND `users`.`user_id`=$user_id AND `users`.`user_name`=$user_name AND (`users`.`group_id`=$group_id AND `groupright`.`group_id`=$group_id AND `groupright`.`tab_7`='1' OR `users`.`user_limitation`='1')"
+	AuthrgmPageLogin /login.php
+	AuthrgmSessionCookies On
+	Require valid-user 
+	ProxyPass http://127.0.0.1:3000
+	ProxyPassReverse http://127.0.0.1:3000
+	ProxyPassReverseCookiePath /grafana /grafana
+	ProxyPassReverseCookiePath /grafana /grafana
+    # RewriteEngine On
+    # RewriteRule .* - [E=PROXY_USER:%{LA-U:REMOTE_USER},NS]
+    # RequestHeader set X-WEBAUTH-USER "%{PROXY_USER}e"
+    RequestHeader set X-WEBAUTH-USER "admin"
+</Location>

@@ -1,0 +1,146 @@
+#todo: replace IP with target ip or FQDN
+
+ProxyPreserveHost On
+<Location /kibana>
+        AuthType Basic
+        AuthName "Restricted"
+        AuthrgmAuthoritative On
+        AuthrgmMySQLSocket /var/lib/mysql/mysql.sock
+        AuthrgmMySQLUsername {{ mariadb_user }}
+        AuthrgmMySQLPassword {{ mariadb_pwd }}
+        AuthrgmMySQLDB {{ db_rgmweb }}
+        AuthrgmMySQLTableSID sessions,users,groupright
+        AuthrgmMySQLFieldUID sessions.user_id
+        AuthrgmMySQLTableSIDCondition "`sessions`.`session_id`=$session_id AND `sessions`.`user_id`=$user_id AND `users`.`user_id`=$user_id AND `users`.`user_name`=$user_name AND (`users`.`group_id`=$group_id AND `groupright`.`group_id`=$group_id AND `groupright`.`tab_7`='1' OR `users`.`user_limitation`='1')"
+        AuthrgmPageLogin /login.php
+        AuthrgmSessionCookies On
+        Require valid-user
+        ProxyPass http://10.112.11.38:5601/app/kibana retry=0
+        ProxyPassReverse http://10.112.11.38:5601/app/kibana
+</Location>
+
+<Location /bundles>
+        AuthType Basic
+        AuthName "Restricted"
+        AuthrgmAuthoritative On
+        AuthrgmMySQLSocket /var/lib/mysql/mysql.sock
+        AuthrgmMySQLUsername {{ mariadb_user }}
+        AuthrgmMySQLPassword {{ mariadb_pwd }}
+        AuthrgmMySQLDB {{ db_rgmweb }}
+        AuthrgmMySQLTableSID sessions,users,groupright
+        AuthrgmMySQLFieldUID sessions.user_id
+        AuthrgmMySQLTableSIDCondition "`sessions`.`session_id`=$session_id AND `sessions`.`user_id`=$user_id AND `users`.`user_id`=$user_id AND `users`.`user_name`=$user_name AND (`users`.`group_id`=$group_id AND `groupright`.`group_id`=$group_id AND `groupright`.`tab_7`='1' OR `users`.`user_limitation`='1')"
+        AuthrgmPageLogin /login.php
+        AuthrgmSessionCookies On
+        Require valid-user
+        ProxyPass http://10.112.11.38:5601/bundles
+        ProxyPassReverse http://10.112.11.38:5601/bundles
+</Location>
+
+<Location /plugins>
+        AuthType Basic
+        AuthName "Restricted"
+        AuthrgmAuthoritative On
+        AuthrgmMySQLSocket /var/lib/mysql/mysql.sock
+        AuthrgmMySQLUsername {{ mariadb_user }}
+        AuthrgmMySQLPassword {{ mariadb_pwd }}
+        AuthrgmMySQLDB {{ db_rgmweb }}
+        AuthrgmMySQLTableSID sessions,users,groupright
+        AuthrgmMySQLFieldUID sessions.user_id
+        AuthrgmMySQLTableSIDCondition "`sessions`.`session_id`=$session_id AND `sessions`.`user_id`=$user_id AND `users`.`user_id`=$user_id AND `users`.`user_name`=$user_name AND (`users`.`group_id`=$group_id AND `groupright`.`group_id`=$group_id AND `groupright`.`tab_7`='1' OR `users`.`user_limitation`='1')"
+        AuthrgmPageLogin /login.php
+        AuthrgmSessionCookies On
+        Require valid-user
+        ProxyPass http://10.112.11.38:5601/plugins
+        ProxyPassReverse http://10.112.11.38:5601/plugins
+</Location>
+
+<Location /api>
+        AuthType Basic
+        AuthName "Restricted"
+        AuthrgmAuthoritative On
+        AuthrgmMySQLSocket /var/lib/mysql/mysql.sock
+        AuthrgmMySQLUsername {{ mariadb_user }}
+        AuthrgmMySQLPassword {{ mariadb_pwd }}
+        AuthrgmMySQLDB {{ db_rgmweb }}
+        AuthrgmMySQLTableSID sessions,users,groupright
+        AuthrgmMySQLFieldUID sessions.user_id
+        AuthrgmMySQLTableSIDCondition "`sessions`.`session_id`=$session_id AND `sessions`.`user_id`=$user_id AND `users`.`user_id`=$user_id AND `users`.`user_name`=$user_name AND (`users`.`group_id`=$group_id AND `groupright`.`group_id`=$group_id AND `groupright`.`tab_7`='1' OR `users`.`user_limitation`='1')"
+        AuthrgmPageLogin /login.php
+        AuthrgmSessionCookies On
+        Require valid-user
+        ProxyPass http://10.112.11.38:5601/api
+        ProxyPassReverse http://10.112.11.38:5601/api
+</Location>
+
+<Location /ui>
+        AuthType Basic
+        AuthName "Restricted"
+        AuthrgmAuthoritative On
+        AuthrgmMySQLSocket /var/lib/mysql/mysql.sock
+        AuthrgmMySQLUsername {{ mariadb_user }}
+        AuthrgmMySQLPassword {{ mariadb_pwd }}
+        AuthrgmMySQLDB {{ db_rgmweb }}
+        AuthrgmMySQLTableSID sessions,users,groupright
+        AuthrgmMySQLFieldUID sessions.user_id
+        AuthrgmMySQLTableSIDCondition "`sessions`.`session_id`=$session_id AND `sessions`.`user_id`=$user_id AND `users`.`user_id`=$user_id AND `users`.`user_name`=$user_name AND (`users`.`group_id`=$group_id AND `groupright`.`group_id`=$group_id AND `groupright`.`tab_7`='1' OR `users`.`user_limitation`='1')"
+        AuthrgmPageLogin /login.php
+        AuthrgmSessionCookies On
+        Require valid-user
+        ProxyPass http://10.112.11.38:5601/ui
+        ProxyPassReverse http://10.112.11.38:5601/ui
+</Location>
+
+<Location /app>
+        AuthType Basic
+        AuthName "Restricted"
+        AuthrgmAuthoritative On
+        AuthrgmMySQLSocket /var/lib/mysql/mysql.sock
+        AuthrgmMySQLUsername {{ mariadb_user }}
+        AuthrgmMySQLPassword {{ mariadb_pwd }}
+        AuthrgmMySQLDB {{ db_rgmweb }}
+        AuthrgmMySQLTableSID sessions,users,groupright
+        AuthrgmMySQLFieldUID sessions.user_id
+        AuthrgmMySQLTableSIDCondition "`sessions`.`session_id`=$session_id AND `sessions`.`user_id`=$user_id AND `users`.`user_id`=$user_id AND `users`.`user_name`=$user_name AND (`users`.`group_id`=$group_id AND `groupright`.`group_id`=$group_id AND `groupright`.`tab_7`='1' OR `users`.`user_limitation`='1')"
+        AuthrgmPageLogin /login.php
+        AuthrgmSessionCookies On
+        Require valid-user
+        ProxyPass http://10.112.11.38:5601/app
+        ProxyPassReverse http://10.112.11.38:5601/app
+</Location>
+
+<Location /socket.io>
+        AuthType Basic
+        AuthName "Restricted"
+        AuthrgmAuthoritative On
+        AuthrgmMySQLSocket /var/lib/mysql/mysql.sock
+        AuthrgmMySQLUsername {{ mariadb_user }}
+        AuthrgmMySQLPassword {{ mariadb_pwd }}
+        AuthrgmMySQLDB {{ db_rgmweb }}
+        AuthrgmMySQLTableSID sessions,users,groupright
+        AuthrgmMySQLFieldUID sessions.user_id
+        AuthrgmMySQLTableSIDCondition "`sessions`.`session_id`=$session_id AND `sessions`.`user_id`=$user_id AND `users`.`user_id`=$user_id AND `users`.`user_name`=$user_name AND (`users`.`group_id`=$group_id AND `groupright`.`group_id`=$group_id AND `groupright`.`tab_7`='1' OR `users`.`user_limitation`='1')"
+        AuthrgmPageLogin /login.php
+        AuthrgmSessionCookies On
+        Require valid-user
+        ProxyPass http://10.112.11.38:5601/socket.io
+        ProxyPassReverse http://10.112.11.38:5601/socket.io
+</Location>
+
+<Location /elasticsearch>
+        AuthType Basic
+        AuthName "Restricted"
+        AuthrgmAuthoritative On
+        AuthrgmMySQLSocket /var/lib/mysql/mysql.sock
+        AuthrgmMySQLUsername {{ mariadb_user }}
+        AuthrgmMySQLPassword {{ mariadb_pwd }}
+        AuthrgmMySQLDB {{ db_rgmweb }}
+        AuthrgmMySQLTableSID sessions,users,groupright
+        AuthrgmMySQLFieldUID sessions.user_id
+        AuthrgmMySQLTableSIDCondition "`sessions`.`session_id`=$session_id AND `sessions`.`user_id`=$user_id AND `users`.`user_id`=$user_id AND `users`.`user_name`=$user_name AND (`users`.`group_id`=$group_id AND `groupright`.`group_id`=$group_id AND `groupright`.`tab_7`='1' OR `users`.`user_limitation`='1')"
+        AuthrgmPageLogin /login.php
+        AuthrgmSessionCookies On
+        Require valid-user
+        ProxyPass http://10.112.11.38:5601/elasticsearch
+        ProxyPassReverse http://10.112.11.38:5601/elasticsearch
+</Location>
