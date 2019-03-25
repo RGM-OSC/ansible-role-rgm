@@ -22,7 +22,7 @@
 
 - name: create mariadb internal RO account
   mysql_user:
-    name: "{{ mariadb_ro_user }"
+    name: "{{ mariadb_ro_user }}"
     host: localhost
     password: "{{ mariadb_ro_pwd }}"
     priv: 'mysql.*:SELECT'
