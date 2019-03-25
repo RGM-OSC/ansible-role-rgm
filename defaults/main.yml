@@ -10,6 +10,8 @@ rgmweb_user: apache
 mariadb_root_password: ''
 mariadb_user: 'rgminternal'
 mariadb_pwd: '0rd0-c0m1735-b47h0n143'
+mariadb_ro_user: 'rgmro'
+mariadb_ro_pwd: 'XgfLlyTmMeNntE9WrTE3ToQhy7ATZmDC'
 
 db_rgmweb: 'rgmweb'
 

@@ -20,6 +20,19 @@
   register: mariadb_status
   failed_when: mariadb_status.rc == 2
 
+-name: create mariadb internal RO account
+- name: Set root user password
+  mysql_user:
+    name: "{{ mariadb_ro_user }"
+    host: localhost
+    password: "{{ mariadb_ro_pwd }}"
+    priv: 'mysql.*:SELECT'
+    check_implicit_admin: yes
+    login_user: root
+    state: present
+
+
+
 - name: Set root user password
   mysql_user:
     name: root
