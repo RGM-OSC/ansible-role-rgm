@@ -16,15 +16,15 @@ Alias /nrdp "/srv/rgm/nrdp/server"
 
         AuthType Basic
         AuthName "Restricted"
-        AuthEonAuthoritative On
-        AuthEonMySQLSocket /var/lib/mysql/mysql.sock
+        AuthrgmAuthoritative On
+        AuthrgmMySQLSocket /var/lib/mysql/mysql.sock
         AuthrgmMySQLUsername {{ mariadb_user }}
-        AuthEonMySQLPassword {{ mariadb_pwd }}
-        AuthEonMySQLDB {{ db_rgmweb }}
-        AuthEonMySQLTableSID sessions,users,groupright
-        AuthEonMySQLFieldUID sessions.user_id
-        AuthEonMySQLTableSIDCondition "`sessions`.`session_id`=$session_id AND `sessions`.`user_id`=$user_id AND `users`.`user_id`=$user_id AND `users`.`user_name`=$user_name AND `users`.`group_id`=$group_id AND `groupright`.`group_id`=$group_id AND `groupright`.`tab_6`='1'"
-        AuthEonPageLogin /login.php
-        AuthEonSessionCookies On
+        AuthrgmMySQLPassword {{ mariadb_pwd }}
+        AuthrgmMySQLDB {{ db_rgmweb }}
+        AuthrgmMySQLTableSID sessions,users,groupright
+        AuthrgmMySQLFieldUID sessions.user_id
+        AuthrgmMySQLTableSIDCondition "`sessions`.`session_id`=$session_id AND `sessions`.`user_id`=$user_id AND `users`.`user_id`=$user_id AND `users`.`user_name`=$user_name AND `users`.`group_id`=$group_id AND `groupright`.`group_id`=$group_id AND `groupright`.`tab_6`='1'"
+        AuthrgmPageLogin /login.php
+        AuthrgmSessionCookies On
         Require valid-user
 </Directory>
