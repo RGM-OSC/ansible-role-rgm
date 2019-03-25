@@ -2,14 +2,11 @@
 #
 # RGM sudoers
 
-# Aliases
-User_Alias RGM_ALIAS = {{ rgmweb_user }}
-
-# command rules
-RGM_ALIAS ALL=NOPASSWD: \
-    /bin/systemctl * snmptt, \
-    /bin/systemctl * snmptrapd, \
-    /bin/systemctl * snmpd, \
-    /bin/systemctl * nagios, \
-    /bin/systemctl * gedd, \
+{{ rgmweb_user }} ALL=NOPASSWD:\
+    /bin/systemctl * snmptt,\
+    /bin/systemctl * snmptrapd,\
+    /bin/systemctl * snmpd,\
+    /bin/systemctl * nagios,\
+    /bin/systemctl * gedd,\
     /usr/bin/nmap
+
