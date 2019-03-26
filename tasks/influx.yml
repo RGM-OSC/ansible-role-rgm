@@ -15,21 +15,21 @@
   - auth.basic
   - auth.ldap
 
-- name: "grafana - configure paths section - {{ item.key }}"
+- name: "grafana - configure paths section"
   ini_file:
     path: /etc/grafana/grafana.ini
     section: 'paths'
     option: "{{ item.key }}"
     value: "{{ item.value }}"
-  loop: "{{ lookup('dict'), grafana_paths }}"
+  with_dict: "{{ grafana_paths }}"
 
-- name: "grafana - configure server section - {{ item.key }}"
+- name: "grafana - configure server section"
   ini_file:
     path: /etc/grafana/grafana.ini
     section: 'server'
     option: "{{ item.key }}"
     value: "{{ item.value }}"
-  loop: "{{ lookup('dict'), grafana_server }}"
+  with_dict: "{{ grafana_server }}"
 
 - name: "grafana - configure users section"
   ini_file:
@@ -38,18 +38,18 @@
     option: 'default_theme'
     value: 'light'
 
-- name: "grafana - configure auth section - {{ item.key }}"
+- name: "grafana - configure auth section"
   ini_file:
     path: /etc/grafana/grafana.ini
     section: 'auth'
     option: "{{ item.key }}"
     value: "{{ item.value }}"
-  loop: "{{ lookup('dict'), grafana_auth }}"
+  with_dict: "{{ grafana_auth }}"
 
-- name: "grafana - configure grafana_auth.anonymous section - {{ item.key }}"
+- name: "grafana - configure grafana_auth.anonymous section"
   ini_file:
     path: /etc/grafana/grafana.ini
     section: 'grafana_auth.anonymous'
     option: "{{ item.key }}"
     value: "{{ item.value }}"
-  loop: "{{ lookup('dict'), grafana_auth_anonymous }}"
+  with_dict: "{{ grafana_auth_anonymous }}"
