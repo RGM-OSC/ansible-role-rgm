@@ -7,7 +7,7 @@
     name: "{{ packages }}"
     state: present
   vars:
-    package:
+    packages:
     - elasticsearch-oss
     - metricbeat
     - kibana-oss
