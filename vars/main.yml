@@ -2,14 +2,17 @@
 # vars file for ansible-role-rgm
 
 rgm_services:
-- gedd
-- httpd
-- mariadb
-- influxdb
-- elasticsearch
-- nagios
 - chronyd
 - rsyslog
 - snmpd
 - snmptrapd
+- elasticsearch
+- mariadb
+- metricbeat
+- influxdb
+- nagflux
+- grafana-server
+- gedd
 - snmptt
+- nagios
+- httpd

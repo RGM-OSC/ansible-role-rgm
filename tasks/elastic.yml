@@ -1,0 +1,34 @@
+---
+
+### installs Elastic stack components
+- name: install RGM packages (it may take some time...)
+  yum:
+    update_cache: no
+    name: "{{ packages }}"
+    state: present
+  vars:
+    package:
+    - elasticsearch-oss
+    - metricbeat
+    - kibana-oss
+
+
+### configure metricsbeat
+
+- name: configure metricbeat - reload period
+  lineinfile:
+    path: /etc/metricbeat/metricbeat.yml
+    regexp: '^#?reload.period: '
+    line: 'reload.period: 10s'
+
+- name: configure metricbeat - kibana API
+  lineinfile:
+    path: /etc/metricbeat/metricbeat.yml
+    regexp: '^#?host: "localhost:5601"'
+    line: "host: \"{{ ansible_default_ipv4.address }}:5601\""
+
+- name: configure metricbeat - elasticsearch output
+  lineinfile:
+    path: /etc/metricbeat/metricbeat.yml
+    regexp: '^#?host: "localhost:9200"'
+    line: "host: \"{{ ansible_default_ipv4.address }}:9200\""

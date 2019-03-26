@@ -1,0 +1,55 @@
+---
+
+- name: "grafana - disable auths "
+  ini_file:
+    path: /etc/grafana/grafana.ini
+    section: "{{ item }}"
+    option: enabled
+    value: false
+  with_items:
+  - auth.github
+  - auth.google
+  - auth.generic_oauth
+  - auth.grafana_com
+  - auth.proxy
+  - auth.basic
+  - auth.ldap
+
+- name: "grafana - configure paths section - {{ item.key }}"
+  ini_file:
+    path: /etc/grafana/grafana.ini
+    section: 'paths'
+    option: "{{ item.key }}"
+    value: "{{ item.value }}"
+  loop: "{{ lookup('dict'), grafana_paths }}"
+
+- name: "grafana - configure server section - {{ item.key }}"
+  ini_file:
+    path: /etc/grafana/grafana.ini
+    section: 'server'
+    option: "{{ item.key }}"
+    value: "{{ item.value }}"
+  loop: "{{ lookup('dict'), grafana_server }}"
+
+- name: "grafana - configure users section"
+  ini_file:
+    path: /etc/grafana/grafana.ini
+    section: 'users'
+    option: 'default_theme'
+    value: 'light'
+
+- name: "grafana - configure auth section - {{ item.key }}"
+  ini_file:
+    path: /etc/grafana/grafana.ini
+    section: 'auth'
+    option: "{{ item.key }}"
+    value: "{{ item.value }}"
+  loop: "{{ lookup('dict'), grafana_auth }}"
+
+- name: "grafana - configure grafana_auth.anonymous section - {{ item.key }}"
+  ini_file:
+    path: /etc/grafana/grafana.ini
+    section: 'grafana_auth.anonymous'
+    option: "{{ item.key }}"
+    value: "{{ item.value }}"
+  loop: "{{ lookup('dict'), grafana_auth_anonymous }}"

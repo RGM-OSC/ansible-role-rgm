@@ -39,6 +39,8 @@
     state: present
   vars:
     packages:
+    - bash-completion
+    - vim
     - sudo
     - net-snmp
     - snmptt
@@ -96,9 +98,6 @@
   - chrony
 
 
-
-
-
 ### php base configuration
 - name: configure apache/php
   include_tasks: http.yml
@@ -106,6 +105,29 @@
   - httpd
   - php
 
+
+### configure elastic/influxdb
+- name: configure elastic stack
+  include_tasks: elastic.yml
+  tags:
+  - elastic
+  - metricbeat
+
+- name: configure influxdb
+  include_tasks: influx.yml
+  tags:
+  - influxdb
+  - nagflux
+  - histou
+  - grafana
+
+- name: kernel hardening (sysctl)
+  copy:
+    src: sysctl_ansii.conf
+    dest: /etc/sysctl.d/ansii-fr.conf
+    owner: root
+    group: root
+    mode: 0644
 
 ### firewalld configuration
 - name: configure firewalld

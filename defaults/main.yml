@@ -20,3 +20,23 @@ ntp_servers:
 - '1.pool.ntp.org'
 - '2.pool.ntp.org'
 - '3.pool.ntp.org'
+
+
+grafana_paths:
+  logs: '/var/log/grafana'
+  plugins: '/var/lib/grafana/plugins'
+
+grafana_server:
+  protocol: 'http'
+  http_addr: '127.0.0.1'
+  http_port: '3000'
+  domain: 'localhost'
+  root_url: 'http://localhost/grafana/'
+
+grafana_auth:
+  disable_login_form: true
+  disable_signout_menu: true
+
+grafana_auth_anonymous:
+  enabled: true
+  org_role: 'Viewer'
