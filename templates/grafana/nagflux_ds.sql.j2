@@ -1,0 +1,52 @@
+-- {{ ansible_managed }}
+-- This script creates the nagflux datasource into Grafana DB
+-- if it doesn't already exists.
+-- This is /normally/ automatically applied throught Ansible
+-- So you should'd have to manually play it.
+--
+-- 2019-03-27 - Eric Belhomme <ebelhomme@fr.scc.com>
+
+INSERT INTO data_source (
+	org_id,
+	version,
+	type,
+	name,
+	access,
+	url,
+	password,
+	user,
+	database,
+	basic_auth,
+	basic_auth_user,
+	basic_auth_password,
+	is_default,
+	json_data,
+	created,
+	updated,
+	with_credentials,
+	secure_json_data,
+	read_only
+)
+SELECT
+	1,
+    7,
+    'influxdb',
+    'nagflux',
+    'proxy',
+    'http://localhost:8086',
+    '{{ mariadb_pwd }}',
+    '{{ mariadb_user }}',
+    'nagflux',
+    0,
+    '{{ mariadb_user }}',
+    '{{ mariadb_pwd }}',
+    1,
+    '[]}',
+    '2019-04-01 00:00:00',
+    '2019-04-01 00:00:00',
+    0,
+    '{}',
+    0
+FROM DUAL WHERE NOT EXISTS (
+	SELECT id FROM `data_source` WHERE type = 'influxdb' AND name = 'nagflux' AND access = 'proxy'
+);
