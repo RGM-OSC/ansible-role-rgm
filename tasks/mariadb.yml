@@ -15,6 +15,25 @@
     enabled: yes
     state: started
 
+- name: "ensure {{ db_grafana }} database exists"
+  mysql_db:
+    name: "{{ db_grafana }}"
+    state: present
+  register: mysql_db_grafana_created
+
+- name: "grant RGM user to {{ db_grafana }} database"
+  mysql_user:
+    host: localhost
+    name: "{{ mariadb_user }}"
+    password: "{{ mariadb_pwd }}"
+    priv: "{{ db_grafana }}.*:ALL"
+    append_privs: yes
+    check_implicit_admin: yes
+    login_user: root
+    state: present
+  when: mysql_db_grafana_created
+
+
 - name: check is MariaDB root user is password protected
   command: mysql --host=localhost --user=root -e '\q'
   register: mariadb_status
@@ -26,6 +45,7 @@
     host: localhost
     password: "{{ mariadb_ro_pwd }}"
     priv: 'mysql.*:SELECT'
+    append_privs: yes
     check_implicit_admin: yes
     login_user: root
     state: present
