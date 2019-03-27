@@ -21,3 +21,33 @@
   service:
     name: gedd
     state: reloaded
+
+- name: service_restart_chrony
+  service:
+    name: chronyd
+    state: restarted
+
+- name: service_restart_elasticsearch
+  service:
+    name: elasticsearch
+    state: restarted
+
+- name: service_restart_metricbeat
+  service:
+    name: metricbeat
+    state: restarted
+
+- name: service_restart_influxdb
+  service:
+    name: influxdb
+    state: restarted
+
+- name: service_restart_nagflux
+  service:
+    name: nagflux
+    state: restarted
+
+- name: service_restart_grafana-server
+  service:
+    name: grafana-server
+    state: restarted
