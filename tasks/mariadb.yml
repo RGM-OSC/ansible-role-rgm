@@ -1,13 +1,14 @@
+--- 
 
+# This is redundant as all RPM packages are already installed from main tasks
+# but we secure it in case the role might be called directly from its tags
 - name: ensure mariadb is installed
   yum:
+    update_cache: no
     name: "{{ packages }}"
     state: present
   vars:
-    packages:
-    - mariadb-server
-    - mariadb
-    - python2-PyMySQL
+    packages: "{{ packages_mariadb }}"
 
 - name: ensure MariaDB is up & running
   service:
@@ -32,7 +33,6 @@
     login_user: root
     state: present
   when: mysql_db_grafana_created
-
 
 - name: check is MariaDB root user is password protected
   command: mysql --host=localhost --user=root -e '\q'

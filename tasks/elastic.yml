@@ -1,17 +1,14 @@
 ---
 
-### installs Elastic stack components
-- name: install RGM packages (it may take some time...)
+# This is redundant as all RPM packages are already installed from main tasks
+# but we secure it in case the role might be called directly from its tags
+- name: ensure Elastic Stack is installed
   yum:
     update_cache: no
     name: "{{ packages }}"
     state: present
   vars:
-    packages:
-    - elasticsearch-oss
-    - metricbeat
-    - kibana-oss
-
+    packages: "{{ packages_elastic }}"
 
 ### configure metricsbeat
 

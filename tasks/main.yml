@@ -38,39 +38,7 @@
     name: "{{ packages }}"
     state: present
   vars:
-    packages:
-    - bash-completion
-    - vim
-    - sudo
-    - net-snmp
-    - snmptt
-    - chrony
-    - influxdb
-    - grafana
-    - httpd
-    - mod_auth_rgm
-    - mod_perl
-    - mod_ssl
-    - mod_fcgid
-    - php
-    - php-mysqlnd
-    - php-ldap
-    - php-process
-    - php-xml
-    - php-snmp
-    - mk-livestatus
-    - nagflux
-    - histou
-    - nagios
-    - nagios-plugins
-    - nagvis
-    - nagiosbp
-    - notifier
-    - ged
-    - ged-mysql
-    - thruk
-    - lilac
-    - rgmweb
+    packages: "{{ packages_system + packages_mariadb + packages_apache + packages_elastic + packages_influx_grafana + packages_rgm }}"
 
   retries: 10
   delay: 2

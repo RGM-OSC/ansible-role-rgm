@@ -1,5 +1,15 @@
 ---
 
+# This is redundant as all RPM packages are already installed from main tasks
+# but we secure it in case the role might be called directly from its tags
+- name: ensure Apache/php is installed
+  yum:
+    update_cache: no
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages: "{{ packages_apache }}"
+
 ## add apache user to rgm group
 
 - name: "add {{ rgm_group }} to apache user"
