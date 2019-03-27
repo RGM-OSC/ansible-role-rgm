@@ -1,3 +1,6 @@
+# {{ ansible_managed }}
+# Apache configuration for Kibana
+
 #todo: replace IP with target ip or FQDN
 
 ProxyPreserveHost On
@@ -15,8 +18,8 @@ ProxyPreserveHost On
         AuthrgmPageLogin /login.php
         AuthrgmSessionCookies On
         Require valid-user
-        ProxyPass http://10.112.11.38:5601/app/kibana retry=0
-        ProxyPassReverse http://10.112.11.38:5601/app/kibana
+        ProxyPass http://{{ ansible_default_ipv4.address }}:5601/app/kibana retry=0
+        ProxyPassReverse http://{{ ansible_default_ipv4.address }}:5601/app/kibana
 </Location>
 
 <Location /bundles>
@@ -33,8 +36,8 @@ ProxyPreserveHost On
         AuthrgmPageLogin /login.php
         AuthrgmSessionCookies On
         Require valid-user
-        ProxyPass http://10.112.11.38:5601/bundles
-        ProxyPassReverse http://10.112.11.38:5601/bundles
+        ProxyPass http://{{ ansible_default_ipv4.address }}:5601/bundles
+        ProxyPassReverse http://{{ ansible_default_ipv4.address }}:5601/bundles
 </Location>
 
 <Location /plugins>
@@ -51,8 +54,8 @@ ProxyPreserveHost On
         AuthrgmPageLogin /login.php
         AuthrgmSessionCookies On
         Require valid-user
-        ProxyPass http://10.112.11.38:5601/plugins
-        ProxyPassReverse http://10.112.11.38:5601/plugins
+        ProxyPass http://{{ ansible_default_ipv4.address }}:5601/plugins
+        ProxyPassReverse http://{{ ansible_default_ipv4.address }}:5601/plugins
 </Location>
 
 <Location /api>
@@ -69,8 +72,8 @@ ProxyPreserveHost On
         AuthrgmPageLogin /login.php
         AuthrgmSessionCookies On
         Require valid-user
-        ProxyPass http://10.112.11.38:5601/api
-        ProxyPassReverse http://10.112.11.38:5601/api
+        ProxyPass http://{{ ansible_default_ipv4.address }}:5601/api
+        ProxyPassReverse http://{{ ansible_default_ipv4.address }}:5601/api
 </Location>
 
 <Location /ui>
@@ -87,8 +90,8 @@ ProxyPreserveHost On
         AuthrgmPageLogin /login.php
         AuthrgmSessionCookies On
         Require valid-user
-        ProxyPass http://10.112.11.38:5601/ui
-        ProxyPassReverse http://10.112.11.38:5601/ui
+        ProxyPass http://{{ ansible_default_ipv4.address }}:5601/ui
+        ProxyPassReverse http://{{ ansible_default_ipv4.address }}:5601/ui
 </Location>
 
 <Location /app>
@@ -105,8 +108,8 @@ ProxyPreserveHost On
         AuthrgmPageLogin /login.php
         AuthrgmSessionCookies On
         Require valid-user
-        ProxyPass http://10.112.11.38:5601/app
-        ProxyPassReverse http://10.112.11.38:5601/app
+        ProxyPass http://{{ ansible_default_ipv4.address }}:5601/app
+        ProxyPassReverse http://{{ ansible_default_ipv4.address }}:5601/app
 </Location>
 
 <Location /socket.io>
@@ -123,8 +126,8 @@ ProxyPreserveHost On
         AuthrgmPageLogin /login.php
         AuthrgmSessionCookies On
         Require valid-user
-        ProxyPass http://10.112.11.38:5601/socket.io
-        ProxyPassReverse http://10.112.11.38:5601/socket.io
+        ProxyPass http://{{ ansible_default_ipv4.address }}:5601/socket.io
+        ProxyPassReverse http://{{ ansible_default_ipv4.address }}:5601/socket.io
 </Location>
 
 <Location /elasticsearch>
@@ -141,6 +144,6 @@ ProxyPreserveHost On
         AuthrgmPageLogin /login.php
         AuthrgmSessionCookies On
         Require valid-user
-        ProxyPass http://10.112.11.38:5601/elasticsearch
-        ProxyPassReverse http://10.112.11.38:5601/elasticsearch
+        ProxyPass http://{{ ansible_default_ipv4.address }}:5601/elasticsearch
+        ProxyPassReverse http://{{ ansible_default_ipv4.address }}:5601/elasticsearch
 </Location>
