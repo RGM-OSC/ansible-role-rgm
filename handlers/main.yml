@@ -47,7 +47,7 @@
     name: nagflux
     state: restarted
 
-- name: service_restart_grafana-server
+- name: service_restart_grafana
   service:
     name: grafana-server
     state: restarted
