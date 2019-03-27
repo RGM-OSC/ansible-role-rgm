@@ -1,55 +1,78 @@
 ---
 
-- name: "grafana - disable auths "
+# This is redundant as all RPM packages are already installed from main tasks
+# but we secure it in case the role might be called directly from its tags
+- name: ensure Grafana & Co packages are present
+  yum:
+    update_cache: no
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages: "{{ packages_influx_grafana }}"
+  
+- name: "configure grafana.ini file"
   ini_file:
     path: /etc/grafana/grafana.ini
-    section: "{{ item }}"
-    option: enabled
-    value: false
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
   with_items:
-  - auth.github
-  - auth.google
-  - auth.generic_oauth
-  - auth.grafana_com
-  - auth.proxy
-  - auth.basic
-  - auth.ldap
+  - { section: 'paths',             option: 'logs',                 value: '/var/log/grafana' }
+  - { section: 'paths',             option: 'plugins',              value: '/var/lib/grafana/plugins' }
+  - { section: 'server',            option: 'protocol',             value: 'http' }
+  - { section: 'server',            option: 'http_addr',            value: "{{ grafana_http_addr }}" }
+  - { section: 'server',            option: 'http_port',            value: "{{ grafana_http_port }}" }
+  - { section: 'server',            option: 'domain',               value: "{{ grafana_domain }}" }
+  - { section: 'server',            option: 'root_url',             value: "http://{{ grafana_domain }}{{ grafana_root_url }}/" }
+  - { section: 'database',          option: 'type',                 value: 'mysql' }
+  - { section: 'database',          option: 'host',                 value: '127.0.0.1:3306' }
+  - { section: 'database',          option: 'name',                 value: "{{ db_grafana }}" }
+  - { section: 'database',          option: 'user',                 value: "{{ mariadb_user }}" }
+  - { section: 'database',          option: 'password',             value: "{{ mariadb_pwd }}" }
+  - { section: 'auth',              option: 'disable_login_form',   value: 'true' }
+  - { section: 'auth',              option: 'disable_signout_menu', value: 'true' }
+  - { section: 'auth.anonymous',    option: 'enabled',              value: 'true' }
+  - { section: 'auth.anonymous',    option: 'org_role',             value: 'Viewer' }
+  - { section: 'auth.github',       option: 'enabled',              value: 'false' }
+  - { section: 'auth.google',       option: 'enabled',              value: 'false' }
+  - { section: 'auth.generic_oauth',option: 'enabled',              value: 'false' }
+  - { section: 'auth.grafana_com',  option: 'enabled',              value: 'false' }
+  - { section: 'auth.proxy',        option: 'enabled',              value: 'false' }
+  - { section: 'auth.basic',        option: 'enabled',              value: 'false' }
+  - { section: 'auth.ldap',         option: 'enabled',              value: 'false' }
+  - { section: 'users',             option: 'default_theme',        value: 'light' }
+  notify: service_restart_grafana
+  register: grafana_ini_changed
 
-- name: "grafana - configure paths section"
-  ini_file:
-    path: /etc/grafana/grafana.ini
-    section: 'paths'
-    option: "{{ item.key }}"
-    value: "{{ item.value }}"
-  with_dict: "{{ grafana_paths }}"
+# necessary to force DB creation on mariadb server
+- name: force restart grafana if config changed
+  systemd:
+    name: grafana-server
+    enabled: yes
+    state: restarted
+  when: grafana_ini_changed.changed
 
-- name: "grafana - configure server section"
-  ini_file:
-    path: /etc/grafana/grafana.ini
-    section: 'server'
-    option: "{{ item.key }}"
-    value: "{{ item.value }}"
-  with_dict: "{{ grafana_server }}"
+- name: "create histoujs symlink on Grafana public dir"
+  file:
+    path: /usr/share/grafana/public/dashboards/histou.js
+    src: /srv/rgm/histou/histou.js
+    state: link
+    mode: 0644
 
-- name: "grafana - configure users section"
-  ini_file:
-    path: /etc/grafana/grafana.ini
-    section: 'users'
-    option: 'default_theme'
-    value: 'light'
+- name: put SQL script on grafana
+  template:
+    src: grafana/nagflux_ds.sql.j2
+    dest: /etc/grafana/nagflux_ds.sql
+    owner: root
+    group: root
+    mode: 0640
+  register: nagflux_ds_updated
 
-- name: "grafana - configure auth section"
-  ini_file:
-    path: /etc/grafana/grafana.ini
-    section: 'auth'
-    option: "{{ item.key }}"
-    value: "{{ item.value }}"
-  with_dict: "{{ grafana_auth }}"
-
-- name: "grafana - configure grafana_auth.anonymous section"
-  ini_file:
-    path: /etc/grafana/grafana.ini
-    section: 'grafana_auth.anonymous'
-    option: "{{ item.key }}"
-    value: "{{ item.value }}"
-  with_dict: "{{ grafana_auth_anonymous }}"
+# As this will be run on each playbook execution, the SQL request
+# must be idempotent
+- name: "inject nagflux datasource into grafana database"
+  shell: "mysql --user={{ mariadb_user }} --password={{ mariadb_pwd }} {{ db_grafana }} < /etc/grafana/nagflux_ds.sql"
+  args:
+    executable: /bin/bash
+  when: nagflux_ds_updated
+  notify: service_restart_grafana
