@@ -3,6 +3,7 @@
 
 rgm_root_path: /srv/rgm
 
+# system users/groups
 rgm_group: rgm
 rgmweb_user: apache
 
@@ -13,6 +14,7 @@ mariadb_pwd: '0rd0-c0m1735-b47h0n143'
 mariadb_ro_user: 'rgmro'
 mariadb_ro_pwd: 'XgfLlyTmMeNntE9WrTE3ToQhy7ATZmDC'
 
+# database names
 db_rgmweb: 'rgmweb'
 db_grafana: 'grafana'
 
@@ -22,8 +24,60 @@ ntp_servers:
 - '2.pool.ntp.org'
 - '3.pool.ntp.org'
 
-
+### Grafana variables
 grafana_http_addr: '127.0.0.1'
 grafana_http_port: '3000'
 grafana_domain: 'localhost'
 grafana_root_url: '/grafana'
+
+### RPM packages ###
+packages_system:
+- bash-completion
+- vim
+- sudo
+- net-snmp
+- snmptt
+- chrony
+
+packages_mariadb:
+- mariadb-server
+- mariadb
+- python2-PyMySQL
+
+packages_apache:
+- httpd
+- mod_auth_rgm
+- mod_perl
+- mod_ssl
+- mod_fcgid
+- php
+- php-mysqlnd
+- php-ldap
+- php-process
+- php-xml
+- php-snmp
+
+packages_elastic:
+- elasticsearch-oss
+- metricbeat
+- kibana-oss
+
+packages_influx_grafana:
+- influxdb
+- nagflux
+- histou
+- grafana
+
+packages_rgm:
+- python-dateutil
+- mk-livestatus
+- nagios
+- nagios-plugins
+- nagvis
+- nagiosbp
+- notifier
+- ged
+- ged-mysql
+- thruk
+- lilac
+- rgmweb
