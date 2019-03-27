@@ -14,6 +14,7 @@ mariadb_ro_user: 'rgmro'
 mariadb_ro_pwd: 'XgfLlyTmMeNntE9WrTE3ToQhy7ATZmDC'
 
 db_rgmweb: 'rgmweb'
+db_grafana: 'grafana'
 
 ntp_servers:
 - '0.pool.ntp.org'
@@ -22,21 +23,7 @@ ntp_servers:
 - '3.pool.ntp.org'
 
 
-grafana_paths:
-  logs: '/var/log/grafana'
-  plugins: '/var/lib/grafana/plugins'
-
-grafana_server:
-  protocol: 'http'
-  http_addr: '127.0.0.1'
-  http_port: '3000'
-  domain: 'localhost'
-  root_url: 'http://localhost/grafana/'
-
-grafana_auth:
-  disable_login_form: true
-  disable_signout_menu: true
-
-grafana_auth_anonymous:
-  enabled: true
-  org_role: 'Viewer'
+grafana_http_addr: '127.0.0.1'
+grafana_http_port: '3000'
+grafana_domain: 'localhost'
+grafana_root_url: '/grafana'
