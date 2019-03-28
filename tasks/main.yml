@@ -2,7 +2,7 @@
 # tasks file for ansible-role-rgm
 
 # As nagios 4 is present in EPEL repo, disable nagios from EPEL
-- name: "exclude nagios from {{ item }}"
+- name: exclude nagios from EPEL repo
   ini_file:
     path: /etc/yum.repos.d/epel.repo
     section: "{{ item }}"

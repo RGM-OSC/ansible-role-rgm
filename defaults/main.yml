@@ -74,6 +74,7 @@ packages_rgm:
 - mk-livestatus
 - nagios
 - nagios-plugins
+- nagios-plugins-rgm
 - nagvis
 - nagiosbp
 - notifier
