@@ -58,6 +58,7 @@ packages_apache:
 - php-snmp
 
 packages_elastic:
+- java-11-openjdk-headless
 - elasticsearch-oss
 - metricbeat
 - kibana-oss
