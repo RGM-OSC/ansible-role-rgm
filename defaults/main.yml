@@ -38,6 +38,7 @@ packages_system:
 - net-snmp
 - snmptt
 - chrony
+- net-tools
 
 packages_mariadb:
 - mariadb-server
@@ -83,3 +84,4 @@ packages_rgm:
 - thruk
 - lilac
 - rgmweb
+- rgmapi
