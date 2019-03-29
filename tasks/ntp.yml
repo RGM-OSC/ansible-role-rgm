@@ -1,5 +1,6 @@
 ---
 # Chrony daemon configuration
+# vim: bs=2 sw=2 expandtab:
 
 - name: ensure Chronyd is running
   systemd:

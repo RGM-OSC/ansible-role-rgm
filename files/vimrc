@@ -1,0 +1,11 @@
+" Ansible Managed file - RGM installation
+set nocompatible
+set noexpandtab
+set wildmenu
+set bs=2
+set ts=2
+set shiftwidth=2
+set bg=dark
+set ru
+set modeline
+syntax on

@@ -1,5 +1,6 @@
 ---
 # vars file for ansible-role-rgm
+# vim: bs=2 sw=2 expandtab:
 
 rgm_services:
 - chronyd

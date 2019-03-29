@@ -1,4 +1,6 @@
 ---
+# Tasks for Grafana/Histou RGM setup
+# vim: bs=2 sw=2 expandtab:
 
 # This is redundant as all RPM packages are already installed from main tasks
 # but we secure it in case the role might be called directly from its tags

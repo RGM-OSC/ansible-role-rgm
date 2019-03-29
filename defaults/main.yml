@@ -1,5 +1,6 @@
 ---
 # defaults file for ansible-role-rgm
+# vim: bs=2 sw=2 expandtab:
 
 rgm_root_path: /srv/rgm
 

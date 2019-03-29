@@ -1,5 +1,6 @@
 ---
-# tasks file for ansible-role-rgm
+# main tasks file for ansible-role-rgm
+# vim: bs=2 sw=2 expandtab:
 
 # As nagios 4 is present in EPEL repo, disable nagios from EPEL
 - name: exclude nagios from EPEL repo
@@ -44,6 +45,14 @@
   delay: 2
   register: yum_result
   until: yum_result.rc == 0
+
+- name: set vimrc file for root user
+  copy:
+    src: vimrc
+    dest: /root/.vimrc
+    owner: root
+    group: root
+    mode: 0640
 
 ### sudoers base configuration
 - name: set sudoers config file
