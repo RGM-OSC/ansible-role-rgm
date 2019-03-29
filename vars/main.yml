@@ -4,6 +4,7 @@
 
 rgm_services:
 - chronyd
+- firewalld
 - rsyslog
 - snmpd
 - snmptrapd

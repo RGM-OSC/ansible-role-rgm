@@ -116,12 +116,11 @@
     service: "{{ item }}"
     permanent: yes
     state: enabled
-    immediate: yes
   with_items:
   - ssh
   - http
   - https
-
+  notify: service_restart_firewalld
 
 ### enable and start RGM services
 - name: enable RGM daemons

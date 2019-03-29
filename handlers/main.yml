@@ -12,6 +12,11 @@
     name: httpd
     state: reloaded
 
+- name: service_restart_firewalld
+  service:
+    name: firewalld
+    state: restarted
+
 - name: service_reload_nagios
   service:
     name: nagios
