@@ -116,6 +116,7 @@
     service: "{{ item }}"
     permanent: yes
     state: enabled
+    immediate: yes
   with_items:
   - ssh
   - http
