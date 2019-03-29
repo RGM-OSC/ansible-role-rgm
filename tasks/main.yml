@@ -74,22 +74,26 @@
   - php
 
 
-### configure elastic/influxdb
+### configure Elastic Stack
 - name: configure elastic stack
   include_tasks: elastic.yml
   tags:
   - elastic
   - metricbeat
 
-- name: configure influxdb
-  include_tasks: influx.yml
+### Actually influxdb and nagflux are correctly pre-configured
+### out-of-the-box from their respective RPM package...
+### only Grafana needs some customization as the RPM package
+### comes untouched from upstream provided (Grafana Labs)
+- name: configure influxdb/nagflux/grafana/histou
+  include_tasks: grafana.yml
   tags:
   - influxdb
   - nagflux
   - histou
   - grafana
 
-- name: kernel hardening (sysctl)
+- name: kernel hardening (sysctl) following ANSII recomendations
   copy:
     src: sysctl_ansii.conf
     dest: /etc/sysctl.d/ansii-fr.conf

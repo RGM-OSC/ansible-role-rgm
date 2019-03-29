@@ -20,41 +20,17 @@
 
 ## php configuration
 
-- shell: ls -l /etc/localtime |awk -F "zoneinfo/" '{print $2}'
-  args:
-    executable: /bin/bash
-  register: local_tz
-
-#- name: set local time zone fact
-#  set_fact:
-#    localtime: local_tz.stdout
-
-- name: set Europe/Paris TZ for php
-  lineinfile:
+- name: "configure php.ini file"
+  ini_file:
     path: /etc/php.ini
-    regexp: '^;*\s*date.timezone *=.*'
-    line: "date.timezone = Europe/Paris"
-  notify: service_reload_http
-
-- name: set memory limit for php
-  lineinfile:
-    path: /etc/php.ini
-    regexp: '^;*\s*memory_limit *=.*'
-    line: "memory_limit = 256M"
-  notify: service_reload_http
-
-- name: set max_execution_time for php
-  lineinfile:
-    path: /etc/php.ini
-    regexp: '^;*\s*max_execution_time *=.*'
-    line: "max_execution_time = 300"
-  notify: service_reload_http
-
-- name: set error_reporting for php
-  lineinfile:
-    path: /etc/php.ini
-    regexp: '^;*\s*error_reporting *=.*'
-    line: "error_reporting = E_ERROR"
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+  - { section: 'Date', option: 'date.timezone',      value: 'Europe/Paris' }
+  - { section: 'PHP',  option: 'memory_limit',       value: '256M' }
+  - { section: 'PHP',  option: 'max_execution_time', value: '300' }
+  - { section: 'PHP',  option: 'error_reporting',    value: 'E_ERROR' }
   notify: service_reload_http
 
 ## apache configuration
