@@ -122,6 +122,38 @@
   - https
   notify: service_restart_firewalld
 
+
+### export Nagios config
+- name: get a valid RGMAPI token
+  uri:
+    url: 'https://localhost/rgmapi/getApiKey?&username=admin&password=admin'
+    method: GET
+    body_format: json
+
+
+### lilac export nagios config
+
+- name: get a valid RGMAPI token
+  uri:
+    url: 'https://localhost/rgmapi/getApiKey?&username=admin&password=admin'
+    method: GET
+    body_format: json
+    validate_certs: no
+    status_code: 200
+  register: auth_rgmapi
+
+- name: export Lilac configuration
+  uri:
+    url: "https://localhost/rgmapi/exportConfiguration?&username=admin&apiKey={{ auth_rgmapi.json.RGMAPI_KEY }}"
+    method: POST
+    body_format: json
+    body: '{ "jobName": "Nagios Export" }'
+    validate_certs: no
+    status_code: 200
+  when: auth_rgmapi is succeeded
+  notify: service_reload_nagios
+
+
 ### enable and start RGM services
 - name: enable RGM daemons
   systemd:
