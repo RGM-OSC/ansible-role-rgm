@@ -8,7 +8,6 @@ rgm_group: rgm
 rgmweb_user: apache
 
 # internal MariaDB user used by RGM applications
-mariadb_root_password: ''
 mariadb_user: 'rgminternal'
 mariadb_pwd: '0rd0-c0m1735-b47h0n143'
 mariadb_ro_user: 'rgmro'
