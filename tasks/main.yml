@@ -124,6 +124,9 @@
 
 ### lilac export nagios config
 
+- name: update hostname on lilac config for RGM host entry
+  shell: echo "UPDATE nagios_host SET name = '$(hostname)' WHERE id = 1;" | mysql lilac
+
 - name: get a valid RGMAPI token
   uri:
     url: 'https://localhost/rgmapi/getApiKey?&username=admin&password=admin'
