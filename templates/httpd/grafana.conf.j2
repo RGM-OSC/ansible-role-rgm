@@ -21,7 +21,7 @@ ProxyPreserveHost On
     ProxyPassReverse http://{{ grafana_http_addr }}:{{ grafana_http_port }}
     ProxyPassReverseCookiePath {{ grafana_root_url }} {{ grafana_root_url }}
     ProxyPassReverseCookiePath {{ grafana_root_url }} {{ grafana_root_url }}
-    # RewriteEngine On
+    RewriteEngine On
     # RewriteRule .* - [E=PROXY_USER:%{LA-U:REMOTE_USER},NS]
     RequestHeader set X-WEBAUTH-USER "admin"
     # RequestHeader set X-WEBAUTH-USER "%{PROXY_USER}e"
