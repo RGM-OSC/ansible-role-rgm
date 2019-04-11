@@ -61,6 +61,7 @@ packages_apache:
 packages_elastic:
 - java-11-openjdk-headless
 - elasticsearch-oss
+- elasticsearch-curator
 - metricbeat
 - kibana-oss
 
@@ -85,3 +86,28 @@ packages_rgm:
 - lilac
 - rgmweb
 - rgmapi
+
+packages_python36:
+- python36
+- python36-crypto
+- python36-cryptography
+- python36-pyasn1
+- python36-PyMySQL
+- python36-cffi
+- python36-chardet
+- python36-dateutil
+- python36-decorator
+- python36-gobject-base
+- python36-idna
+- python36-jinja2
+- python36-kitchen
+- python36-libs
+- python36-markupsafe
+- python36-paramiko
+- python36-ply
+- python36-pycparser
+- python36-pycurl
+- python36-requests
+- python36-setuptools
+- python36-six
+- python36-urllib3

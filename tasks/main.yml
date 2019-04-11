@@ -111,7 +111,7 @@
     mode: 0644
 
 ### firewalld configuration
-- name: configure firewalld
+- name: configure firewalld services
   firewalld:
     service: "{{ item }}"
     permanent: yes
@@ -120,6 +120,15 @@
   - ssh
   - http
   - https
+  notify: service_restart_firewalld
+
+- name: configure firewalld ports
+  firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    state: enabled
+  with_items:
+  - '9200/tcp'
   notify: service_restart_firewalld
 
 ### lilac export nagios config

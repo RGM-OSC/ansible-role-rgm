@@ -1,0 +1,36 @@
+---
+# {{ ansible_managed }}
+# vim: expandtab ts=2 sw=2:
+
+actions:
+  1:
+    action: close
+    description: >-
+      close metricbeat-* indexes older than 2 days
+    options:
+      delete_aliases: False
+    filters:
+    - filtertype: pattern
+      kind: prefix
+      value: 'metricbeat-'
+    - filtertype: age
+      direction: older
+      source: name
+      timestring: '%Y.%m.%d'
+      unit: days
+      unit_count: 2
+
+  2:
+    action: delete_indices
+    description: >-
+      permanently delete metricbeat-* indices older than 15 days
+    filters:
+    - filtertype: pattern
+      kind: prefix
+      value: 'metricbeat-'
+    - filtertype: age
+      direction: older
+      source: name
+      timestring: '%Y.%m.%d'
+      unit: days
+      unit_count: 30

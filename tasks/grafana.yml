@@ -94,6 +94,7 @@
     name: "{{ item }}"
     state: present
   with_items:
+  - raintank-worldping-app
   - grafana-simple-json-datasource
   - fetzerch-sunandmoon-datasource
   - grafana-worldmap-panel

@@ -1,0 +1,8 @@
+# {{ ansible_managed }}
+# Apache configuration for Elasticsearch
+
+ProxyPreserveHost On
+<Location /elasticsearch>
+        ProxyPass http://127.0.0.1:9200/
+        ProxyPassReverse http://127.0.0.1:9200/
+</Location>
