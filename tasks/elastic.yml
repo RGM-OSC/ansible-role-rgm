@@ -57,10 +57,10 @@
     regexp: "{{ item.regex }}"
     line: "{{ item.line }}"
   with_items:
-  - { regex: '^#?server.port',              line: 'server.port: 5601' }
-  - { regex: '^#?server.host',              line: 'server.host: "localhost"' }
-  - { regex: '^#?server.basePath',          line: 'server.basePath: "/kibana"' }
-  - { regex: '^#?server.rewriteBasePath',   line: 'server.rewriteBasePath: true' }
+  - { regex: '^(#\s*)?server.port',              line: 'server.port: 5601' }
+  - { regex: '^(#\s*)?server.host',              line: 'server.host: "localhost"' }
+  - { regex: '^(#\s*)?server.basePath',          line: 'server.basePath: "/kibana"' }
+  - { regex: '^(#\s*)?server.rewriteBasePath',   line: 'server.rewriteBasePath: true' }
   tags: kibana
 
 
@@ -72,8 +72,8 @@
     regexp: "{{ item.regex }}"
     line: "{{ item.line }}"
   with_items:
-  - { regex: '^#?reload.period: ',          line: 'reload.period: 10s' }
-  - { regex: '^#?host: "localhost:5601"',   line: "host: \"{{ ansible_default_ipv4.address }}:5601\""}
-  - { regex: '^#?host: "localhost:9200"',   line: "host: \"{{ ansible_default_ipv4.address }}:9200\"" }
+  - { regex: '^(#\s*)?reload.period: ',          line: 'reload.period: 10s' }
+  - { regex: '^(#\s*)?host: "localhost:5601"',   line: "host: \"{{ ansible_default_ipv4.address }}:5601\""}
+  - { regex: '^(#\s*)?host: "localhost:9200"',   line: "host: \"{{ ansible_default_ipv4.address }}:9200\"" }
   tags: metricbeat
 
