@@ -11,6 +11,7 @@
     state: present
   vars:
     packages: "{{ packages_mariadb }}"
+  tags: packages
 
 - name: ensure MariaDB is up & running
   service:

@@ -34,6 +34,7 @@ grafana_http_addr: '127.0.0.1'
 grafana_http_port: '3000'
 grafana_domain: 'localhost'
 grafana_root_url: '/grafana'
+grafana_install_plugins: False
 
 ### RPM packages ###
 packages_system:

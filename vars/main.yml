@@ -19,3 +19,34 @@ rgm_services:
 - nagios
 - httpd
 - kibana
+
+grafana_plugins:
+- raintank-worldping-app
+- grafana-simple-json-datasource
+- fetzerch-sunandmoon-datasource
+- grafana-worldmap-panel
+- grafana-clock-panel
+- grafana-piechart-panel
+- satellogic-3d-globe-panel
+- ryantxu-ajax-panel
+- michaeldmoore-annunciator-panel
+- farski-blendstat-panel
+- yesoreyeram-boomtable-panel
+- briangann-gauge-panel
+- briangann-datatable-panel
+- jdbranham-diagram-panel
+- natel-discrete-panel
+- larona-epict-panel
+- agenty-flowcharting-panel
+- mtanda-histogram-panel
+- natel-influx-admin-panel
+- michaeldmoore-multistat-panel
+- digiapulssi-organisations-panel
+- bessler-pictureit-panel
+- natel-plotly-panel
+- grafana-polystat-panel
+- corpglory-progresslist-panel
+- snuids-radar-panel
+- scadavis-synoptic-panel
+- marcuscalidus-svg-panel
+- gretamosa-topology-panel

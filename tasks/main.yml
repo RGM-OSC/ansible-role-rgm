@@ -14,11 +14,13 @@
   - epel-debuginfo
   - epel-source
   register: update_epel
+  tags: packages
 
 - name: force yum clean & make cache
   yum:
     update_cache: yes
   when: update_epel
+  tags: packages
 
 ### selinux
 # todo: configure RGM to work smoothly *with* selinux enabled
@@ -40,11 +42,11 @@
     state: present
   vars:
     packages: "{{ packages_system + packages_mariadb + packages_apache + packages_elastic + packages_influx_grafana + packages_rgm }}"
-
   retries: 10
   delay: 2
   register: yum_result
   until: yum_result.rc == 0
+  tags: packages
 
 - name: set vimrc file for root user
   copy:
