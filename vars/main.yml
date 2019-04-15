@@ -18,3 +18,4 @@ rgm_services:
 - snmptt
 - nagios
 - httpd
+- kibana

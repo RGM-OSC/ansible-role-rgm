@@ -19,13 +19,31 @@
 
  ### Configure Elasticsearch
 
+- name: create elastic backup repo directory
+  file:
+    path: /srv/rgm/elastic
+    owner: elasticsearch
+    group: elasticsearch
+    mode: 0755
+    state: directory
+  
 - name: configure Elasticsearch config file
   lineinfile:
     path: /etc/elasticsearch/elasticsearch.yml
-    regexp: '^(#\s*)?network.host:'
-    line: "network.host: ['127.0.0.1']"
+    regexp: "{{ item.regex }}"
+    line: "{{ item.line }}"
+  with_items:
+  - { regex: '^(#\s*)?network.host: ',  line: "network.host: ['127.0.0.1']" }
+  - { regex: '^(#\s*)?path.repo: ',     line: 'path.repo: "/srv/rgm/elastic"' }
   notify: service_restart_elasticsearch
   tags: elastic
+
+- name: create an elasticsearch local backup reposotory
+#curl -XPUT 'http://127.0.0.1:9200/_snapshot/backup' -H 'Content-Type: application/json' -d '{ "type": "fs", "settings": {"location": "/srv/rgm/elastic/backups","compress": true}}'
+
+# backup kibana:
+  # curator_cli  snapshot --repository backup --name ".kibana_empty" --filter_list '{"filtertype": "pattern", "kind": "prefix", "value": ".kibana", "exclude": "False"}'
+
 
 - name: copy curator config files
   template:
@@ -72,8 +90,8 @@
     regexp: "{{ item.regex }}"
     line: "{{ item.line }}"
   with_items:
-  - { regex: '^(#\s*)?reload.period: ',          line: 'reload.period: 10s' }
-  - { regex: '^(#\s*)?host: "localhost:5601"',   line: "host: \"{{ ansible_default_ipv4.address }}:5601\""}
-  - { regex: '^(#\s*)?host: "localhost:9200"',   line: "host: \"{{ ansible_default_ipv4.address }}:9200\"" }
+  - { regex: '^(#\s*)?reload.period: ',     line: 'reload.period: 10s' }
+  - { regex: '^(#\s*)?host:\s+".*:5601"',   line: "host: \"127.0.0.1:5601\""}
+  - { regex: '^(#\s*)?host:\s+".*:9200"',   line: "host: \"127.0.0.1:9200\"" }
   tags: metricbeat
 

@@ -12,6 +12,19 @@
   vars:
     packages: "{{ packages_influx_grafana }}"
   tags: grafana
+
+- name: patch grafana icon with RGM icon
+  copy:
+    src: grafana_icon.svg
+    dest: /usr/share/grafana/public/img/grafana_icon.svg
+    owner: root
+    group: root
+    mode: 0644
+
+- name: apply patches to align Grafana theme on RGM theme
+  command:
+  register: grafana_patch
+  changed_when: grafana_patch.stdout == 'CHANGED'
   
 - name: "configure grafana.ini file"
   ini_file:

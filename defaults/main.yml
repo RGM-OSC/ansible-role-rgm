@@ -44,6 +44,15 @@ packages_system:
 - snmptt
 - chrony
 - net-tools
+- htop
+- iftop
+- iotop
+- iostat
+- telnet
+- sysstat
+- strace
+- nmap
+- tcpdump
 
 packages_mariadb:
 - mariadb-server

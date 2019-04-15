@@ -3,6 +3,12 @@
 
 ProxyPreserveHost On
 <Location /elasticsearch>
+
+        RedirectMatch 403 (_shutdown|_cluster|_search|settings)
+
         ProxyPass http://127.0.0.1:9200
         ProxyPassReverse http://127.0.0.1:9200
+
 </Location>
+
+
