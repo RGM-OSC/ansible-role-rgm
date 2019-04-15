@@ -13,17 +13,20 @@
     packages: "{{ packages_influx_grafana }}"
   tags: grafana
 
-- name: patch grafana icon with RGM icon
+- name: copy grafana patches
   copy:
-    src: grafana_icon.svg
-    dest: /usr/share/grafana/public/img/grafana_icon.svg
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
     owner: root
     group: root
     mode: 0644
+  with_items:
+  - { src: grafana_icon.svg,  dest: /usr/share/grafana/public/img/grafana_icon.svg }
+  - { src: grafana_rgm.sh,    dest: /etc/grafana/grafana_rgm.sh }
   tags: grafana
 
 - name: apply patches to align Grafana theme on RGM theme
-  script: files/grafana_rgm.sh
+  script: /etc/grafana/grafana_rgm.sh
   args:
     executable: /bin/bash
   register: grafana_patch
@@ -103,8 +106,11 @@
   args:
     executable: /bin/bash
   when: grafana_ds_updated
+  register: grafana_ds_sqlproc
+  changed_when: grafana_ds_sqlproc.stdout == 'CHANGED'
   notify: service_restart_grafana
   tags: grafana
+  
 
 - name: install grafana plugins
   grafana_plugin:
