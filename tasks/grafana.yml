@@ -19,10 +19,10 @@
     dest: "{{ item.dest }}"
     owner: root
     group: root
-    mode: 0644
+    mode: "{{ item.mode }}"
   with_items:
-  - { src: grafana_icon.svg,  dest: /usr/share/grafana/public/img/grafana_icon.svg }
-  - { src: grafana_rgm.sh,    dest: /etc/grafana/grafana_rgm.sh }
+  - { mode: '0644', src: grafana_icon.svg,  dest: /usr/share/grafana/public/img/grafana_icon.svg }
+  - { mode: '0744', src: grafana_rgm.sh,    dest: /etc/grafana/grafana_rgm.sh }
   tags: grafana
 
 - name: apply patches to align Grafana theme on RGM theme

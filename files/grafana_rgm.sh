@@ -50,16 +50,20 @@ for file in $(grep 52545c * | cut -d':' -f1 | sort -u); do
 done
 
 for file in $(grep graph-legend-value * | cut -d':' -f1 | sort -u); do
-	sed -i 's/graph-legend-value{display:inline;cursor:pointer;white-space:nowrap;font-size:85%;text-align:left}/graph-legend-value{display:inline;cursor:pointer;white-space:nowrap;font-size:85%;text-align:left;color:#767980}/g' $file;
-    CHANGE=$(( $CHANGE +1 ))
+    if [ "$(grep -c 'graph-legend-value{display:inline;cursor:pointer;white-space:nowrap;font-size:85%;text-align:left}' $file)" != "0" ]; then
+    	sed -i 's/graph-legend-value{display:inline;cursor:pointer;white-space:nowrap;font-size:85%;text-align:left}/graph-legend-value{display:inline;cursor:pointer;white-space:nowrap;font-size:85%;text-align:left;color:#767980}/g' $file;
+        CHANGE=$(( $CHANGE +1 ))
+    fi
 done
 
 # Patch SVG icons with RGM theme
 if [ "$(grep -c 'icons_dark_theme' grafana.light.8ec106c095469ac98ef1.css)" != "0" ]; then
     sed -i 's/icons_dark_theme/icons_light_theme/g' grafana.light.8ec106c095469ac98ef1.css
+    CHANGE=$(( $CHANGE +1 ))
 fi
 if [ "$(grep -c '.icon-gf{color:#e9edf2;' grafana.light.8ec106c095469ac98ef1.css)" != "0" ]; then
     sed -i 's/.icon-gf{color:#e9edf2;/.icon-gf{/g' grafana.light.8ec106c095469ac98ef1.css
+    CHANGE=$(( $CHANGE +1 ))
 fi
 
 if [ $CHANGE -gt 0 ]; then
