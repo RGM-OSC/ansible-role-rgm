@@ -20,11 +20,15 @@
     owner: root
     group: root
     mode: 0644
+  tags: grafana
 
 - name: apply patches to align Grafana theme on RGM theme
-  command:
+  script: files/grafana_rgm.sh
+  args:
+    executable: /bin/bash
   register: grafana_patch
   changed_when: grafana_patch.stdout == 'CHANGED'
+  tags: grafana
   
 - name: "configure grafana.ini file"
   ini_file:
@@ -84,21 +88,21 @@
 
 - name: put SQL script on grafana
   template:
-    src: grafana/nagflux_ds.sql.j2
-    dest: /etc/grafana/nagflux_ds.sql
+    src: grafana/grafana_ds.sql.j2
+    dest: /etc/grafana/grafana_ds.sql
     owner: root
     group: root
     mode: 0640
-  register: nagflux_ds_updated
+  register: grafana_ds_updated
   tags: grafana
 
 # As this will be run on each playbook execution, the SQL request
 # must be idempotent
-- name: "inject nagflux datasource into grafana database"
-  shell: "mysql --user={{ mariadb_user }} --password={{ mariadb_pwd }} {{ db_grafana }} < /etc/grafana/nagflux_ds.sql"
+- name: "inject datasources into grafana database"
+  shell: "mysql --user={{ mariadb_user }} --password={{ mariadb_pwd }} {{ db_grafana }} < /etc/grafana/grafana_ds.sql"
   args:
     executable: /bin/bash
-  when: nagflux_ds_updated
+  when: grafana_ds_updated
   notify: service_restart_grafana
   tags: grafana
 

@@ -1,6 +1,6 @@
 -- {{ ansible_managed }}
--- This script creates the nagflux datasource into Grafana DB
--- if it doesn't already exists.
+-- This script creates the nagflux and elasticsearch datasources into
+-- Grafana DB if it doesn't already exists.
 -- This is /normally/ automatically applied throught Ansible
 -- So you should'd have to manually play it.
 --
@@ -29,3 +29,26 @@ SELECT
 	'{}',
 	0
 FROM DUAL WHERE NOT EXISTS (SELECT id FROM `data_source` WHERE id=1);
+
+INSERT INTO `data_source`
+SELECT
+	2,
+	1,
+	4,
+	'elasticsearch',
+	'Elasticsearch',
+	'http://localhost:9200',
+	NULL,
+	NULL,
+	'metricbeat-*',
+	0,
+	NULL,
+	NULL,
+	0,
+	'{"esVersion":60,"keepCookies":[],"maxConcurrentShardRequests":256,"timeField":"@timestamp"}',
+	'2019-04-01 00:00:00',
+	'2019-04-01 00:00:00',
+	0,
+	'{}',
+	0
+FROM DUAL WHERE NOT EXISTS (SELECT id FROM `data_source` WHERE id=2);

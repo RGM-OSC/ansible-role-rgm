@@ -26,6 +26,7 @@
     group: elasticsearch
     mode: 0755
     state: directory
+    recurse: yes
   
 - name: configure Elasticsearch config file
   lineinfile:
@@ -38,7 +39,7 @@
   notify: service_restart_elasticsearch
   tags: elastic
 
-- name: create an elasticsearch local backup reposotory
+#- name: create an elasticsearch local backup reposotory
 #curl -XPUT 'http://127.0.0.1:9200/_snapshot/backup' -H 'Content-Type: application/json' -d '{ "type": "fs", "settings": {"location": "/srv/rgm/elastic/backups","compress": true}}'
 
 # backup kibana:

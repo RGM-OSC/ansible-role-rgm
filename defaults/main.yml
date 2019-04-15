@@ -47,7 +47,6 @@ packages_system:
 - htop
 - iftop
 - iotop
-- iostat
 - telnet
 - sysstat
 - strace
