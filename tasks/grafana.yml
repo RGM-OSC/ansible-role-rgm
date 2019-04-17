@@ -30,7 +30,8 @@
   args:
     executable: /bin/bash
   register: grafana_patch
-  changed_when: grafana_patch.stdout == 'CHANGED'
+  failed_when: grafana_patch.rc == 255
+  changed_when: grafana_patch.rc > 0
   tags: grafana
   
 - name: "configure grafana.ini file"
@@ -72,15 +73,6 @@
   register: grafana_ini_changed
   tags: grafana
 
-# necessary to force DB creation on mariadb server
-- name: force restart grafana if config changed
-  systemd:
-    name: grafana-server
-    enabled: yes
-    state: restarted
-  when: grafana_ini_changed.changed
-  tags: grafana
-
 - name: "create histoujs symlink on Grafana public dir"
   file:
     path: /usr/share/grafana/public/dashboards/histou.js
@@ -88,16 +80,6 @@
     state: link
     mode: 0644
   tags: grafana
-
-#- name: put SQL script on grafana
-#  template:
-#    src: grafana/grafana_ds.sql.j2
-#    dest: /etc/grafana/grafana_ds.sql
-#    owner: root
-#    group: root
-#    mode: 0640
-#  register: grafana_ds_updated
-#  tags: grafana
 
 - name: set grafana datasources
   template:
@@ -107,18 +89,6 @@
     group: grafana
     mode: 0640
   tags: grafana
-
-# As this will be run on each playbook execution, the SQL request
-# must be idempotent
-#- name: "inject datasources into grafana database"
-#  shell: "mysql --user={{ mariadb_user }} --password={{ mariadb_pwd }} {{ db_grafana }} < /etc/grafana/grafana_ds.sql"
-#  args:
-#    executable: /bin/bash
-#  when: grafana_ds_updated
-#  register: grafana_ds_sqlproc
-#  changed_when: grafana_ds_sqlproc.stdout == 'CHANGED'
-#  notify: service_restart_grafana
-#  tags: grafana
 
 - name: install grafana plugins
   grafana_plugin:

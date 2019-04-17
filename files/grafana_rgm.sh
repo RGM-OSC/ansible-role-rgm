@@ -4,8 +4,8 @@
 GRAFANA_BUILD=/usr/share/grafana/public/build
 
 if [ ! -d $GRAFANA_BUILD ]; then
-    echo "FAIL"
-    exit 2
+    echo "FAILED"
+    exit 255
 fi
 
 cd $GRAFANA_BUILD
@@ -66,9 +66,5 @@ if [ "$(grep -c '.icon-gf{color:#e9edf2;' grafana.light.8ec106c095469ac98ef1.css
     CHANGE=$(( $CHANGE +1 ))
 fi
 
-if [ $CHANGE -gt 0 ]; then
-    echo "CHANGED"
-else
-    echo "OK"
-fi
-exit 0
+echo "$CHANGE changes"
+exit $CHANGE
