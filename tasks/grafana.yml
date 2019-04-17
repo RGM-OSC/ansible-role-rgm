@@ -89,27 +89,36 @@
     mode: 0644
   tags: grafana
 
-- name: put SQL script on grafana
+#- name: put SQL script on grafana
+#  template:
+#    src: grafana/grafana_ds.sql.j2
+#    dest: /etc/grafana/grafana_ds.sql
+#    owner: root
+#    group: root
+#    mode: 0640
+#  register: grafana_ds_updated
+#  tags: grafana
+
+- name: set grafana datasources
   template:
-    src: grafana/grafana_ds.sql.j2
-    dest: /etc/grafana/grafana_ds.sql
+    src: grafana/rgm_ds.yml.j2
+    dest: /etc/grafana/provisioning/datasources/rgm_ds.yaml
     owner: root
-    group: root
+    group: grafana
     mode: 0640
-  register: grafana_ds_updated
   tags: grafana
 
 # As this will be run on each playbook execution, the SQL request
 # must be idempotent
-- name: "inject datasources into grafana database"
-  shell: "mysql --user={{ mariadb_user }} --password={{ mariadb_pwd }} {{ db_grafana }} < /etc/grafana/grafana_ds.sql"
-  args:
-    executable: /bin/bash
-  when: grafana_ds_updated
-  register: grafana_ds_sqlproc
-  changed_when: grafana_ds_sqlproc.stdout == 'CHANGED'
-  notify: service_restart_grafana
-  tags: grafana
+#- name: "inject datasources into grafana database"
+#  shell: "mysql --user={{ mariadb_user }} --password={{ mariadb_pwd }} {{ db_grafana }} < /etc/grafana/grafana_ds.sql"
+#  args:
+#    executable: /bin/bash
+#  when: grafana_ds_updated
+#  register: grafana_ds_sqlproc
+#  changed_when: grafana_ds_sqlproc.stdout == 'CHANGED'
+#  notify: service_restart_grafana
+#  tags: grafana
 
 - name: install grafana plugins
   grafana_plugin:
