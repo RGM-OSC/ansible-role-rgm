@@ -18,6 +18,11 @@ for file in $(grep Roboto * | cut -d':' -f1 | sort -u); do
     sed -i 's/Roboto/Fira Sans/g' $file
 done
 
+for file in $(grep 52545c * | cut -d':' -f1 | sort -u); do
+    sed -i 's/#52545c/#337ab7/g' $file
+    CHANGE=$(( $CHANGE +1 ))
+done
+
 for file in $(ls -1 *.css); do
     if [ "$(grep -c 'padding:6px 10px;color: #f7f8fa;font-weight:500;' $file)" != "0" ]; then
         sed -i 's/padding:6px 10px;color: #f7f8fa;font-weight:500;/padding:6px 10px;color: #767980;font-weight:500;/g' $file
@@ -42,11 +47,6 @@ for file in $(ls -1 grafana.light.*.css); do
         sed -i 's/btn-inverse{color:#f8f8f8;/btn-inverse{color:#767980;/g' $file
         CHANGE=$(( $CHANGE +1 ))
     fi
-done
-
-for file in $(grep 52545c * | cut -d':' -f1 | sort -u); do
-    sed -i 's/#52545c/#337ab7/g' $file
-    CHANGE=$(( $CHANGE +1 ))
 done
 
 for file in $(grep graph-legend-value * | cut -d':' -f1 | sort -u); do
