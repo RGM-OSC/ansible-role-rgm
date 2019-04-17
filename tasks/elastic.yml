@@ -65,6 +65,7 @@
     owner: root
     group: root
     mode: 0644
+  notify: service_reload_crond
   tags: elastic
 
 

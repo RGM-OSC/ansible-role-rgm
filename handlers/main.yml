@@ -32,6 +32,11 @@
     name: chronyd
     state: restarted
 
+- name: service_reload_crond
+  service:
+    name: crond
+    state: reloaded
+
 - name: service_restart_elasticsearch
   service:
     name: elasticsearch
