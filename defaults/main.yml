@@ -86,6 +86,7 @@ packages_influx_grafana:
 - nagflux
 - histou
 - grafana
+- nodejs
 
 packages_rgm:
 - python-dateutil

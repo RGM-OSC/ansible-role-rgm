@@ -21,7 +21,6 @@ rgm_services:
 - kibana
 
 grafana_plugins:
-- raintank-worldping-app
 - grafana-simple-json-datasource
 - fetzerch-sunandmoon-datasource
 - grafana-worldmap-panel

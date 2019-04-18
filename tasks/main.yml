@@ -39,7 +39,7 @@
   yum:
     update_cache: no
     name: "{{ packages }}"
-    state: present
+    state: latest
   vars:
     packages: "{{ packages_system + packages_mariadb + packages_apache + packages_elastic + packages_influx_grafana + packages_rgm }}"
   retries: 10
@@ -181,3 +181,14 @@
     enabled: yes
     state: started
   with_items: "{{ rgm_services }}"
+
+- name: insert rgmupdate function in bashrc file
+  blockinfile:
+    path: /root/.bashrc
+    block: |
+      function rgmupdate () {
+        SAVPATH=$(pwd)
+        cd ~/ansible-rgm
+        git pull && ansible-galaxy install -f -p roles -r roles/requirements.yml && ansible-playbook rgm-installer.yml
+        cd $SAVPATH
+      }
