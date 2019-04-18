@@ -1,6 +1,12 @@
 # {{ ansible_managed }}
 # Apache configuration for Grafana
 
+# LogLevel alert rewrite:trace6
+# LoadModule log_forensic_module /usr/lib64/httpd/modules/mod_log_forensic.so
+# <IfModule log_forensic_module>
+# ForensicLog /var/log/httpd/forensic_log
+# </IfModule>
+
 ProxyPreserveHost On
 <Location /grafana>
     AuthType Basic
@@ -15,15 +21,16 @@ ProxyPreserveHost On
     AuthrgmMySQLTableSIDCondition "`sessions`.`session_id`=$session_id AND `sessions`.`user_id`=$user_id AND `users`.`user_id`=$user_id AND `users`.`user_name`=$user_name AND (`users`.`group_id`=$group_id AND `groupright`.`group_id`=$group_id AND `groupright`.`tab_7`='1' OR `users`.`user_limitation`='1')"
     AuthrgmPageLogin /login.php
     AuthrgmSessionCookies On
-    Require valid-user 
-    Require ip 127.0.0.1 {{ ansible_default_ipv4.address }}
+
+    Require valid-user
+    # Require ip 127.0.0.1 {{ ansible_default_ipv4.address }}
+
+    RewriteEngine On
+    RewriteRule .* - [E=PROXY_USER:%{LA-U:REMOTE_USER},NS]
+    RequestHeader set X-WEBAUTH-USER "%{PROXY_USER}e"
+    RequestHeader unset Authorization
+
     ProxyPass http://{{ grafana_http_addr }}:{{ grafana_http_port }} retry=0 disablereuse=On
     ProxyPassReverse http://{{ grafana_http_addr }}:{{ grafana_http_port }}
     ProxyPassReverseCookiePath {{ grafana_root_url }} {{ grafana_root_url }}
-    ProxyPassReverseCookiePath {{ grafana_root_url }} {{ grafana_root_url }}
-    RewriteEngine On
-    # RewriteRule .* - [E=PROXY_USER:%{LA-U:REMOTE_USER},NS]
-    RequestHeader set X-WEBAUTH-USER "admin"
-    # RequestHeader set X-WEBAUTH-USER "%{PROXY_USER}e"
-    # RequestHeader unset Authorization
 </Location>

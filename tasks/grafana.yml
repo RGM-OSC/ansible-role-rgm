@@ -48,7 +48,6 @@
   - { section: 'server',            option: 'http_port',            value: "{{ grafana_http_port }}" }
   - { section: 'server',            option: 'domain',               value: "{{ grafana_domain }}" }
   - { section: 'server',            option: 'root_url',             value: "http://{{ grafana_domain }}{{ grafana_root_url }}/" }
-  - { section: 'security',          option: 'admin_user',           value: 'admin' }
   - { section: 'analytics',         option: 'reporting_enabled',    value: 'false' }
   - { section: 'analytics',         option: 'check_for_updates',    value: 'false' }
   - { section: 'database',          option: 'type',                 value: 'mysql' }
@@ -60,7 +59,7 @@
   - { section: 'users',             option: 'default_theme',        value: 'light' }
   - { section: 'auth',              option: 'disable_login_form',   value: 'true' }
   - { section: 'auth',              option: 'disable_signout_menu', value: 'true' }
-  - { section: 'auth.anonymous',    option: 'enabled',              value: 'true' }
+  - { section: 'auth.anonymous',    option: 'enabled',              value: 'false' }
   - { section: 'auth.anonymous',    option: 'org_role',             value: 'Viewer' }
   - { section: 'auth.github',       option: 'enabled',              value: 'false' }
   - { section: 'auth.google',       option: 'enabled',              value: 'false' }
@@ -68,7 +67,7 @@
   - { section: 'auth.grafana_com',  option: 'enabled',              value: 'false' }
   - { section: 'auth.proxy',        option: 'enabled',              value: 'true' }
   - { section: 'auth.proxy',        option: 'header_name',          value: 'X-WEBAUTH-USER' }
-  - { section: 'auth.proxy',        option: 'header_property',      value: 'user_name' }
+  - { section: 'auth.proxy',        option: 'header_property',      value: 'username' }
   - { section: 'auth.proxy',        option: 'auto_sign_up',         value: 'false' }
   - { section: 'auth.basic',        option: 'enabled',              value: 'false' }
   - { section: 'auth.ldap',         option: 'enabled',              value: 'false' }
