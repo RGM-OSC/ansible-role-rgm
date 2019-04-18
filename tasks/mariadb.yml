@@ -22,6 +22,7 @@
 - name: check if MariaDB root user is password protected
   command: mysql --no-defaults --host=localhost --user=root -e '\q'
   register: mariadb_status
+  changed_when: mariadb_status.rc == 1
   failed_when: mariadb_status.rc == 2
 
 - block:
@@ -51,6 +52,7 @@
 - name: ensure we can connect to mariadb
   command: mysql --host=localhost --user=root -e '\q'
   register: mariadb_status
+  changed_when: mariadb_status.rc == 1
   failed_when: mariadb_status.rc == 2
 
 - fail:
