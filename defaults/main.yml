@@ -17,6 +17,7 @@ mariadb_ro_pwd: 'XgfLlyTmMeNntE9WrTE3ToQhy7ATZmDC'
 # database names
 db_rgmweb: 'rgmweb'
 db_grafana: 'grafana'
+db_nagvis: 'nagvis'
 
 ntp_servers:
 - '0.pool.ntp.org'
@@ -51,6 +52,7 @@ packages_system:
 - telnet
 - sysstat
 - strace
+- lsof
 - nmap
 - tcpdump
 

@@ -112,6 +112,21 @@
     group: root
     mode: 0644
 
+### NagVis configuration
+- name: configure NagVis
+  ini_file:
+    path: /srv/rgm/nagvis/etc/nagvis.ini.php
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+  - { section: 'auth_mysql', option: 'dbhost', value: '127.0.0.1' }
+  - { section: 'auth_mysql', option: 'dbport', value: '3306' }
+  - { section: 'auth_mysql', option: 'dbname', value: "{{ db_nagvis }}" }
+  - { section: 'auth_mysql', option: 'dbuser', value: "{{ mariadb_user }}" }
+  - { section: 'auth_mysql', option: 'dbpass', value: "{{ mariadb_pwd }}" }
+  #- { section: '',             option: '',                 value: '' }
+
 ### firewalld configuration
 - name: configure firewalld services
   firewalld:

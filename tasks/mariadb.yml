@@ -76,6 +76,22 @@
     state: present
   when: mysql_db_grafana_created
 
+- name: "ensure {{ db_nagvis }} database exists"
+  mysql_db:
+    name: "{{ db_nagvis }}"
+    state: present
+  register: mysql_db_nagvis_created
+
+- name: "grant RGM user to {{ db_nagvis }} database"
+  mysql_user:
+    host: localhost
+    name: "{{ mariadb_user }}"
+    password: "{{ mariadb_pwd }}"
+    priv: "{{ db_nagvis }}.*:ALL"
+    append_privs: yes
+    login_user: root
+    state: present
+  when: mysql_db_nagvis_created
 
 - name: create mariadb internal RO account
   mysql_user:

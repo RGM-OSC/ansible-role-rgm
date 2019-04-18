@@ -48,6 +48,10 @@
   - { section: 'server',            option: 'http_port',            value: "{{ grafana_http_port }}" }
   - { section: 'server',            option: 'domain',               value: "{{ grafana_domain }}" }
   - { section: 'server',            option: 'root_url',             value: "http://{{ grafana_domain }}{{ grafana_root_url }}/" }
+  - { section: 'security',          option: 'admin_user',           value: "{{ mariadb_user }}" }
+  - { section: 'security',          option: 'admin_password',       value: "{{ mariadb_pwd }}" }
+  - { section: 'analytics',         option: 'reporting_enabled',    value: 'false' }
+  - { section: 'analytics',         option: 'check_for_updates',    value: 'false' }
   - { section: 'database',          option: 'type',                 value: 'mysql' }
   - { section: 'database',          option: 'host',                 value: '127.0.0.1:3306' }
   - { section: 'database',          option: 'name',                 value: "{{ db_grafana }}" }

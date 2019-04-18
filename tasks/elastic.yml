@@ -23,10 +23,11 @@
   file:
     path: /srv/rgm/elastic
     owner: elasticsearch
-    group: elasticsearch
-    mode: 0755
+    group: rgm
+    mode: 0750
     state: directory
     recurse: yes
+  tags: elastic
   
 - name: configure Elasticsearch config file
   lineinfile:
@@ -81,6 +82,7 @@
   - { regex: '^(#\s*)?server.host',              line: 'server.host: "localhost"' }
   - { regex: '^(#\s*)?server.basePath',          line: 'server.basePath: "/kibana"' }
   - { regex: '^(#\s*)?server.rewriteBasePath',   line: 'server.rewriteBasePath: true' }
+  notify: service_restart_kibana
   tags: kibana
 
 
@@ -95,5 +97,6 @@
   - { regex: '^(#\s*)?reload.period: ',     line: 'reload.period: 10s' }
   - { regex: '^(#\s*)?host:\s+".*:5601"',   line: "host: \"127.0.0.1:5601\""}
   - { regex: '^(#\s*)?host:\s+".*:9200"',   line: "host: \"127.0.0.1:9200\"" }
+  notify: service_restart_metricbeat
   tags: metricbeat
 

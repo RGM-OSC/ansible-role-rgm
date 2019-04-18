@@ -42,6 +42,11 @@
     name: elasticsearch
     state: restarted
 
+- name: service_restart_kibana
+  service:
+    name: kibana
+    state: restarted
+
 - name: service_restart_metricbeat
   service:
     name: metricbeat
