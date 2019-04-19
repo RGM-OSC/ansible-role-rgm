@@ -1,0 +1,58 @@
+<?php
+/*
+#########################################
+#
+# Copyright (C) 2019 RGM Team
+# DEV NAME : MA, EB
+# VERSION : 1.0
+#
+# LICENCE :
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+#########################################
+*/
+
+
+echo 'MySQL DB schema initialization';
+ini_set('display_errors', 'On');
+error_reporting(E_ALL);
+
+require('{{ rgm_root_path }}/nagvis/share/server/core/defines/global.php');
+require('{{ rgm_root_path }}/nagvis/share/server/core/defines/matches.php');
+
+require('{{ rgm_root_path }}/nagvis/share/frontend/nagvis-js/defines/nagvis-js.php');
+
+require('{{ rgm_root_path }}/nagvis/share/server/core/classes/CoreExceptions.php');
+require('{{ rgm_root_path }}/nagvis/share/server/core/functions/autoload.php');
+
+require('{{ rgm_root_path }}/nagvis/share/server/core/classes/GlobalFileCache.php');
+require('{{ rgm_root_path }}/nagvis/share/server/core/classes/GlobalMainCfg.php');
+require('{{ rgm_root_path }}/nagvis/share/server/core/classes/CoreUserCfg.php');
+
+require '{{ rgm_root_path }}/nagvis/share/server/core/classes/GlobalCore.php';
+//require '{{ rgm_root_path }}/nagvis/share/server/core/classes/CoreExceptions.php';
+require '{{ rgm_root_path }}/nagvis/share/server/core/classes/GlobalLanguage.php';
+require '{{ rgm_root_path }}/nagvis/share/server/core/functions/core.php';
+require '{{ rgm_root_path }}/nagvis/etc/nagvis.ini.php';
+
+require '{{ rgm_root_path }}/nagvis/share/server/core/classes/CoreMySQLHandler.php';
+require '{{ rgm_root_path }}/nagvis/share/server/core/classes/CoreAuthModule.php';
+require '{{ rgm_root_path }}/nagvis/share/server/core/classes/CoreAuthModMySQL.php';
+
+try {
+    $r = new CoreAuthModMySQL();
+} catch (Exception $e) {
+    echo 'Something wrong occured: ',  $e->getMessage(), "\n";
+    exit(2);
+}
+
+echo "OK\n";
+exit(0);
+?>

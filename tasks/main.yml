@@ -115,7 +115,7 @@
 ### NagVis configuration
 - name: configure NagVis
   ini_file:
-    path: /srv/rgm/nagvis/etc/nagvis.ini.php
+    path: "{{ rgm_root_path }}/nagvis/etc/nagvis.ini.php"
     section: "{{ item.section }}"
     option: "{{ item.option }}"
     value: "{{ item.value }}"
@@ -125,7 +125,20 @@
   - { section: 'auth_mysql', option: 'dbname', value: "{{ db_nagvis }}" }
   - { section: 'auth_mysql', option: 'dbuser', value: "{{ mariadb_user }}" }
   - { section: 'auth_mysql', option: 'dbpass', value: "{{ mariadb_pwd }}" }
-  #- { section: '',             option: '',                 value: '' }
+
+- name: put nagvis mysql db schema init script
+  template:
+    src: nagvis/ini_sql.php.j2
+    dest: "{{ rgm_root_path }}/nagvis/share/frontend/nagvis-js/init_sql.php"
+    owner: root
+    group: root
+    mode: 0600
+
+- name: force nagvis mysql schema initialization
+  command: "php {{ rgm_root_path }}/nagvis/share/frontend/nagvis-js/init_sql.php"
+  register: nagvis_init_sql
+  changed_when: nagvis_init_sql > 0
+  failed_when: nagvis_init_sql > 1
 
 ### firewalld configuration
 - name: configure firewalld services
@@ -137,15 +150,6 @@
   - ssh
   - http
   - https
-  notify: service_restart_firewalld
-
-- name: configure firewalld ports
-  firewalld:
-    port: "{{ item }}"
-    permanent: yes
-    state: enabled
-  with_items:
-  - '9200/tcp'
   notify: service_restart_firewalld
 
 ### lilac export nagios config
