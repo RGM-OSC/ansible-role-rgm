@@ -136,9 +136,11 @@
 
 - name: force nagvis mysql schema initialization
   command: "php {{ rgm_root_path }}/nagvis/share/frontend/nagvis-js/init_sql.php"
+  args:
+    chdir: "{{ rgm_root_path }}/nagvis/share/frontend/nagvis-js"
   register: nagvis_init_sql
-  changed_when: nagvis_init_sql > 0
-  failed_when: nagvis_init_sql > 1
+  changed_when: nagvis_init_sql.rc > 0
+  failed_when: nagvis_init_sql.rc > 1
 
 ### firewalld configuration
 - name: configure firewalld services
@@ -185,14 +187,3 @@
     enabled: yes
     state: started
   with_items: "{{ rgm_services }}"
-
-#- name: insert rgmupdate function in bashrc file
-#  blockinfile:
-#    path: /root/.bashrc
-#    block: |
-#      function rgmupdate () {
-#        SAVPATH=$(pwd)
-#        cd ~/ansible-rgm
-#        git pull && ansible-galaxy install -f -p roles -r roles/requirements.yml && ansible-playbook rgm-installer.yml
-#        cd $SAVPATH
-#      }
