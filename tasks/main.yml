@@ -19,7 +19,7 @@
 - name: force yum clean & make cache
   yum:
     update_cache: yes
-  when: update_epel
+  when: update_epel.changed
   tags: packages
 
 ### selinux
@@ -37,7 +37,7 @@
 ### installs RGM packages & dependencies
 - name: install RGM packages (it may take some time...)
   yum:
-    update_cache: no
+    update_cache: "{{ not(update_epel.changed) }}"
     name: "{{ packages }}"
     state: latest
   vars:
@@ -128,7 +128,7 @@
 
 - name: put nagvis mysql db schema init script
   template:
-    src: nagvis/ini_sql.php.j2
+    src: nagvis/init_sql.php.j2
     dest: "{{ rgm_root_path }}/nagvis/share/frontend/nagvis-js/init_sql.php"
     owner: root
     group: root
@@ -186,13 +186,13 @@
     state: started
   with_items: "{{ rgm_services }}"
 
-- name: insert rgmupdate function in bashrc file
-  blockinfile:
-    path: /root/.bashrc
-    block: |
-      function rgmupdate () {
-        SAVPATH=$(pwd)
-        cd ~/ansible-rgm
-        git pull && ansible-galaxy install -f -p roles -r roles/requirements.yml && ansible-playbook rgm-installer.yml
-        cd $SAVPATH
-      }
+#- name: insert rgmupdate function in bashrc file
+#  blockinfile:
+#    path: /root/.bashrc
+#    block: |
+#      function rgmupdate () {
+#        SAVPATH=$(pwd)
+#        cd ~/ansible-rgm
+#        git pull && ansible-galaxy install -f -p roles -r roles/requirements.yml && ansible-playbook rgm-installer.yml
+#        cd $SAVPATH
+#      }
