@@ -18,7 +18,7 @@ ProxyPreserveHost On
     AuthrgmMySQLDB {{ db_rgmweb }}
     AuthrgmMySQLTableSID sessions,users,groupright
     AuthrgmMySQLFieldUID sessions.user_id
-    AuthrgmMySQLTableSIDCondition "`sessions`.`session_id`=$session_id AND `sessions`.`user_id`=$user_id AND `users`.`user_id`=$user_id AND `users`.`user_name`=$user_name AND (`users`.`group_id`=$group_id AND `groupright`.`group_id`=$group_id AND `groupright`.`tab_7`='1' OR `users`.`user_limitation`='1')"
+    AuthrgmMySQLTableSIDCondition "`sessions`.`session_id`=$session_id AND `sessions`.`user_id`=$user_id AND `users`.`user_id`=$user_id AND `users`.`user_name`=$user_name AND (`users`.`group_id`=$group_id AND `groupright`.`group_id`=$group_id AND (`groupright`.`tab_7`='1' OR `groupright`.`tab_3`='1') OR `users`.`user_limitation`='1')"
     AuthrgmPageLogin /login.php
     AuthrgmSessionCookies On
 
