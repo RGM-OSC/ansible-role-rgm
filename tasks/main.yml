@@ -142,6 +142,14 @@
   changed_when: nagvis_init_sql.rc > 0
   failed_when: nagvis_init_sql.rc > 1
 
+- name: Reset cache file credential
+  file:
+    path : "{{ item }}"
+    owner: apache
+    group: apache
+    mode: 0644
+  with_fileglob: "{{ rgm_root_path }}/nagvis/var/nagvis-conf-*-cache"
+
 ### firewalld configuration
 - name: configure firewalld services
   firewalld:
