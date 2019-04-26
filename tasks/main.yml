@@ -114,7 +114,7 @@
 
 ### SSH keys
 - name: create nagios SSH key
-  command: ssh-keygen -t rsa -b 2048 -C "RGM Nagios ssh key on {{ ansible_hostname }}"
+  command: ssh-keygen -t rsa -b 2048 -C "RGM Nagios ssh key on {{ ansible_hostname }}" -f /home/nagios/.ssh/id_rsa -N '' -q
   args:
     chdir: /home/nagios
     creates: /home/nagios/.ssh/id_rsa
@@ -161,18 +161,6 @@
 #    mode: 0644
 #  with_fileglob: "{{ rgm_root_path }}/nagvis/var/nagvis-conf-*-cache"
 
-### firewalld configuration
-- name: configure firewalld services
-  firewalld:
-    service: "{{ item }}"
-    permanent: yes
-    state: enabled
-  with_items:
-  - ssh
-  - http
-  - https
-  notify: service_restart_firewalld
-
 ### lilac export nagios config
 
 - name: update hostname on lilac config for RGM host entry
@@ -198,6 +186,17 @@
   when: auth_rgmapi is succeeded
   notify: service_reload_nagios
 
+### firewalld configuration
+- name: configure firewalld services
+  firewalld:
+    service: "{{ item }}"
+    permanent: yes
+    state: enabled
+  with_items:
+  - ssh
+  - http
+  - https
+  notify: service_restart_firewalld
 
 ### enable and start RGM services
 - name: enable RGM daemons
