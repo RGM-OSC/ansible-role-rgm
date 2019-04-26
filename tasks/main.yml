@@ -112,6 +112,15 @@
     group: root
     mode: 0644
 
+### SSH keys
+- name: create nagios SSH key
+  command: ssh-keygen -t rsa -b 2048 -C "RGM Nagios ssh key on {{ ansible_hostname }}"
+  args:
+    chdir: /home/nagios
+    creates: /home/nagios/.ssh/id_rsa
+  become: yes
+  become_user: nagios
+
 ### NagVis configuration
 - name: configure NagVis
   ini_file:
@@ -131,24 +140,26 @@
     src: nagvis/init_sql.php.j2
     dest: "{{ rgm_root_path }}/nagvis/share/frontend/nagvis-js/init_sql.php"
     owner: root
-    group: root
-    mode: 0600
+    group: apache
+    mode: 0640
 
 - name: force nagvis mysql schema initialization
   command: "php {{ rgm_root_path }}/nagvis/share/frontend/nagvis-js/init_sql.php"
   args:
     chdir: "{{ rgm_root_path }}/nagvis/share/frontend/nagvis-js"
+  become: yes
+  become_user: apache
   register: nagvis_init_sql
   changed_when: nagvis_init_sql.rc > 0
   failed_when: nagvis_init_sql.rc > 1
 
-- name: Reset cache file credential
-  file:
-    path : "{{ item }}"
-    owner: apache
-    group: apache
-    mode: 0644
-  with_fileglob: "{{ rgm_root_path }}/nagvis/var/nagvis-conf-*-cache"
+#- name: Reset cache file credential
+#  file:
+#    path : "{{ item }}"
+#    owner: apache
+#    group: apache
+#    mode: 0644
+#  with_fileglob: "{{ rgm_root_path }}/nagvis/var/nagvis-conf-*-cache"
 
 ### firewalld configuration
 - name: configure firewalld services

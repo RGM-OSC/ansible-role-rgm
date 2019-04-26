@@ -55,6 +55,8 @@ packages_system:
 - lsof
 - nmap
 - tcpdump
+- dos2unix
+- mlocate
 
 packages_mariadb:
 - mariadb-server
