@@ -115,7 +115,7 @@ If (($PSVersionTable.PSVersion).Major -le 4) {
 ######  MetricBeat configuration part #######
 
 # Collect current IP address
-$IPaddress = (Test-Connection ::1 -Cou 1).IPV4Address.IPAddressToString
+$IPaddress = Get-WmiObject -class Win32_NetworkAdapterConfiguration -Filter "IpEnabled = 'True' " | Where-Object {$_.DefaultIPGateway -ne $null} | Select-Object -ExpandProperty IPaddress | Select-Object -First 1
 
 # load current Configuration File -> TO DO -> load from RGM
 $ConfigurationFilePath = "C:\Program Files\MetricBeat\metricbeat.yml"
