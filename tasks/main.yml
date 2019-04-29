@@ -77,7 +77,13 @@
   - chrony
 
 
-### php base configuration
+### RGM distribution configuration
+- name: configure RGM distribution
+  include_tasks: distrib.yml
+  tags: distrib
+
+
+### http/php base configuration
 - name: configure apache/php
   include_tasks: http.yml
   tags:

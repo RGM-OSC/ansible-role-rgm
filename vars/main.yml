@@ -49,3 +49,12 @@ grafana_plugins:
 - scadavis-synoptic-panel
 - marcuscalidus-svg-panel
 - gretamosa-topology-panel
+
+beats_packages:
+- https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-oss-6.7.1-windows-x86_64.zip
+- https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-oss-6.7.1-windows-x86_64.zip
+- https://artifacts.elastic.co/downloads/beats/winlogbeat/winlogbeat-oss-6.7.1-windows-x86_64.zip
+- https://artifacts.elastic.co/downloads/beats/auditbeat/auditbeat-oss-6.7.1-windows-x86_64.zip
+- https://artifacts.elastic.co/downloads/beats/heartbeat/heartbeat-oss-6.7.1-windows-x86_64.zip
+- https://artifacts.elastic.co/downloads/beats/packetbeat/packetbeat-oss-6.7.1-windows-x86_64.zip
+  

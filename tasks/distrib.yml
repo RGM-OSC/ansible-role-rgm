@@ -1,0 +1,58 @@
+---
+# Tasks for distribution RGM setup
+# vim: bs=2 sw=2 expandtab:
+
+- name: create distrib directory tree
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ rgmweb_user }}"
+    group: "{{ rgm_group }}"
+    mode: 0755
+  with_items:
+  - "{{ rgm_root_path }}/distrib"
+  - "{{ rgm_root_path }}/distrib/install"
+  - "{{ rgm_root_path }}/distrib/packages"
+  - "{{ rgm_root_path }}/distrib/conf"
+  - "{{ rgm_root_path }}/distrib/conf/metricbeat"
+  tags: distrib
+
+- name: copy one-liner installers
+  template:
+    src: "distrib/install-beats.ps1"
+    dest: "{{ rgm_root_path }}/distrib/install/install-beats.ps1"
+    owner: "{{ rgmweb_user }}"
+    group: "{{ rgm_group }}"
+    mode: 0444
+  tags: distrib
+
+- name: copy default config files
+  template:
+    src: "distrib/conf/{{ item }}.j2"
+    dest: "{{ rgm_root_path }}/distrib/conf/{{ item }}"
+    owner: "{{ rgmweb_user }}"
+    group: "{{ rgm_group }}"
+    mode: 0444
+  with_items:
+  - metricbeat.yml
+  tags: distrib
+
+- name: download packages from upstreams
+  get_url:
+    url: "{{ item }}"
+    dest: "{{ rgm_root_path }}/distrib/packages/{{ item | basename }} "
+    owner: "{{ rgmweb_user }}"
+    group: "{{ rgm_group }}"
+    mode: 0440
+  with_items: "{{ beats_packages }}"
+  tags: distrib
+
+- name: set 'latest' symlinks
+  file:
+    src: "{{ rgm_root_path }}/distrib/packages/{{ item | basename }} "
+    dest: "{{ rgm_root_path }}/distrib/packages/{{ item | regex_replace('^.*\\/(?P<prefix>\\w+-oss-).*(?P<suffix>-win.+)$', '\\g<prefix>latest\\g<suffix>') }}"
+    state: link
+    force: yes
+  with_items: "{{ beats_packages }}"
+  tags: distrib
+
