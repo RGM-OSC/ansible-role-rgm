@@ -167,6 +167,17 @@
 #    mode: 0644
 #  with_fileglob: "{{ rgm_root_path }}/nagvis/var/nagvis-conf-*-cache"
 
+
+### nagflux specific
+
+- name: create nagios spool dir for nagvis
+  file:
+    path: /srv/rgm/nagflux/var/spool-nagios
+    owner: nagios
+    group: rgm
+    mode: 0770
+    state: directory
+
 ### lilac export nagios config
 
 - name: update hostname on lilac config for RGM host entry
