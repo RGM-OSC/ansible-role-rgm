@@ -14,7 +14,6 @@
   - "{{ rgm_root_path }}/distrib/install"
   - "{{ rgm_root_path }}/distrib/packages"
   - "{{ rgm_root_path }}/distrib/conf"
-  - "{{ rgm_root_path }}/distrib/conf/metricbeat"
   tags: distrib
 
 - name: copy one-liner installers
@@ -56,3 +55,11 @@
   with_items: "{{ beats_packages }}"
   tags: distrib
 
+- name: install install html index page
+  template:
+    src: distrib/index.html.j2
+    dest: "{{ rgm_root_path }}/distrib/install/index.html"
+    owner: "{{ rgmweb_user }}"
+    group: "{{ rgm_group }}"
+    mode: 0444
+  tags: distrib

@@ -37,6 +37,9 @@ grafana_domain: 'localhost'
 grafana_root_url: '/grafana'
 grafana_install_plugins: False
 
+# Windows Beats installation base patch
+winbeats_base_path: 'C:\Program Files'
+
 ### RPM packages ###
 packages_system:
 - bash-completion
