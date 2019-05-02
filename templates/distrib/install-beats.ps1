@@ -15,6 +15,7 @@ If (($PSVersionTable.PSVersion).Major -le 3){
 
 $MetricBeatFileDownloadLink = "https://{{ ansible_default_ipv4.address }}/distrib/packages/metricbeat-oss-latest-windows-x86_64.zip"
 $MetricBeatConfFileLink = "https://{{ ansible_default_ipv4.address }}/distrib/conf/metricbeat.yml"
+$MetricBeatBasePath="{{ winbeats_base_path }}"
 # {{ ansible_default_ipv4.address }}
 ######  Download Part #######
 
@@ -60,13 +61,13 @@ If (($PSVersionTable.PSVersion).Major -le 4) {
 
 
 ######  Destination Folder Part #######
-# Create folder C:\Program Files\MetricBeat if not existe
-if ((Test-Path "{{ winbeats_base_path }}\MetricBeat") -eq $false) {
+# Create folder $MetricBeatBasePath\MetricBeat if not existe
+if ((Test-Path "$MetricBeatBasePath\MetricBeat") -eq $false) {
 	try {
-		New-Item -Path "{{ winbeats_base_path }}\MetricBeat" -Type "directory"
+		New-Item -Path "$MetricBeatBasePath\MetricBeat" -Type "directory"
 	}
 	catch {
-		Write-Host "The folder {{ winbeats_base_path }}\MetricBeat can't be created"
+		Write-Host "The folder $MetricBeatBasePath\MetricBeat can't be created"
 		# Add cleaning steps or test before download
 		exit 1
 	}
@@ -80,7 +81,7 @@ if (get-service metricbeat -ErrorAction SilentlyContinue){Stop-Service metricbea
 # Copie of download/unzipped folder to Program file. Option force used to force remplacement files
 $TempfolderContent = Get-ChildItem $DestinationUnZIPFolder
 # TO DO  -> Check if force option not to much and could replace conffiles...
-Copy-Item -Path "$($TempfolderContent.FullName)\*" -Destination "{{ winbeats_base_path }}\MetricBeat" -Recurse -Force
+Copy-Item -Path "$($TempfolderContent.FullName)\*" -Destination "$MetricBeatBasePath\MetricBeat" -Recurse -Force
 
 ######  MetricBeat configuration part #######
 
@@ -88,7 +89,7 @@ Copy-Item -Path "$($TempfolderContent.FullName)\*" -Destination "{{ winbeats_bas
 $IPaddress = Get-WmiObject -class Win32_NetworkAdapterConfiguration -Filter "IpEnabled = 'True' " | Where-Object {$_.DefaultIPGateway -ne $null} | Select-Object -ExpandProperty IPaddress | Select-Object -First 1
 
 # Get RGM-ready config file from RGM server distrib repository 
-$ConfigurationFilePath = "{{ winbeats_base_path }}\MetricBeat\metricbeat.yml"
+$ConfigurationFilePath = "$MetricBeatBasePath\MetricBeat\metricbeat.yml"
 
 # dynamically insert host IP address as a beat "fields" into config
 Invoke-WebRequest -Uri $MetricBeatConfFileLink -OutFile $ConfigurationFilePath -Verbose
@@ -111,7 +112,7 @@ If (($PSVersionTable.PSVersion).Major -le 4) {
 	# install the new version of the service
 	$serviceName="metricbeat"
 	$displayName="metricbeat"
-	$path='"{{ winbeats_base_path }}\MetricBeat\metricbeat.exe" -c "{{ winbeats_base_path }}\MetricBeat\metricbeat.yml" -path.home "{{ winbeats_base_path }}\MetricBeat" -path.data "C:\ProgramData\metricbeat" -path.logs "C:\ProgramData\metricbeat\logs"'
+	$path='"$MetricBeatBasePath\MetricBeat\metricbeat.exe" -c "$MetricBeatBasePath\MetricBeat\metricbeat.yml" -path.home "$MetricBeatBasePath\MetricBeat" -path.data "C:\ProgramData\metricbeat" -path.logs "C:\ProgramData\metricbeat\logs"'
 	$startMode = "Automatic"
 	$interactWithDesktop= $false
 	$params = $serviceName, $displayName, $path, 16, 1, $startMode, $interactWithDesktop, $null, $null, $null, $null, $null           
@@ -123,7 +124,7 @@ If (($PSVersionTable.PSVersion).Major -le 4) {
 
 }Else{
 	# Powershell V5 and most recent, ability to use the integrated install service script
-	. '{{ winbeats_base_path }}\MetricBeat\install-service-metricbeat.ps1'
+	. '$MetricBeatBasePath\MetricBeat\install-service-metricbeat.ps1'
 }
 
 # start the service
