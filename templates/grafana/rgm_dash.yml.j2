@@ -8,4 +8,4 @@ providers:
   disableDeletion: false
   updateIntervalSeconds: 120 #how often Grafana will scan for changed dashboards
   options:
-    path: /srv/rgm/grafana/dashboards
+    path: "{{ grafana_rgm_dashboards }}"
