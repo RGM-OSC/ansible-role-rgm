@@ -13,6 +13,14 @@
     packages: "{{ packages_influx_grafana }}"
   tags: grafana
 
+- name: creates Grafana RGM dashboards directory
+  file:
+    path: "{{ grafana_rgm_dashboards }}"
+    owner: grafana
+    group: "{{ rgm_group }}"
+    mode: 0755
+    state: directory
+
 - name: copy grafana patches
   copy:
     src: "{{ item.src }}"
@@ -21,8 +29,10 @@
     group: root
     mode: "{{ item.mode }}"
   with_items:
-  - { mode: '0644', src: grafana_icon.svg,  dest: /usr/share/grafana/public/img/grafana_icon.svg }
-  - { mode: '0744', src: grafana_rgm.sh,    dest: /etc/grafana/grafana_rgm.sh }
+  - { owner: 'root',    group: 'root', mode: '0644', src: grafana/grafana_icon.svg,          dest: /usr/share/grafana/public/img/grafana_icon.svg }
+  - { owner: 'root',    group: 'root', mode: '0744', src: grafana/grafana_rgm.sh,            dest: /etc/grafana/grafana_rgm.sh }
+  - { owner: 'grafana', group: 'rgm',  mode: '0644', src: grafana/system-metrics.json,       dest: "{{ grafana_rgm_dashboards }}/system-metrics.json" }
+  - { owner: 'grafana', group: 'rgm',  mode: '0644', src: grafana/multi-system-metrics.json, dest: "{{ grafana_rgm_dashboards }}/multi-system-metrics.json" }
   tags: grafana
 
 - name: apply patches to align Grafana theme on RGM theme
@@ -83,13 +93,16 @@
     mode: 0644
   tags: grafana
 
-- name: set grafana datasources
+- name: set grafana datasources and dashboards
   template:
-    src: grafana/rgm_ds.yml.j2
-    dest: /etc/grafana/provisioning/datasources/rgm_ds.yaml
+    src: "grafana/{{ item.src }}"
+    dest: "/etc/grafana/provisioning/{{ item.dest }}"
     owner: root
     group: grafana
     mode: 0640
+  with_items:
+  - { src: rgm_ds.yml.j2,   dest: datasources/rgm_ds.yaml }
+  - { src: rgm_dash.yml.j2, dest: dashboards/rgm_dash.yaml }
   tags: grafana
 
 - name: install grafana plugins

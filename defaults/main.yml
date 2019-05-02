@@ -36,6 +36,7 @@ grafana_http_port: '3000'
 grafana_domain: 'localhost'
 grafana_root_url: '/grafana'
 grafana_install_plugins: False
+grafana_rgm_dashboards: "{{ rgm_root_path }}/grafana/dashboards"
 
 # Windows Beats installation base patch
 winbeats_base_path: 'C:\Program Files'
