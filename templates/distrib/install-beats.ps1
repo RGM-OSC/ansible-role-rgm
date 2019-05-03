@@ -23,6 +23,7 @@ $MetricBeatFileName = ($MetricBeatFileDownloadLink -split ("/"))[-1]
 $MetricBeatFoldername = $MetricBeatFileName.Replace(".zip", "")
 
 ### SSL Bypass process
+if ("TrustAllCertsPolicy" -as [type]) {} else{
 add-type @"
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
@@ -34,8 +35,9 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
 	}
 }
 "@
-[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
 
+[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+}
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 Invoke-WebRequest -Uri $MetricBeatFileDownloadLink -OutFile .\$MetricBeatFileName -Verbose
@@ -128,7 +130,7 @@ If (($PSVersionTable.PSVersion).Major -le 4) {
 }
 
 # start the service
-start-service metricbeat
+start-service metricbeat -PassThru
 
 # Clean installation folder -> (TO DO -> funtion to be able to call it in case of failure)
 Remove-Item .\$MetricBeatFileName
