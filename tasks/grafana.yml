@@ -113,3 +113,21 @@
   when: grafana_install_plugins
   notify: service_restart_grafana
   tags: grafana
+
+- name: copy Grafana SQL procedures
+  copy:
+    src: grafana/grafana_stored_procedures.sql
+    dest: /etc/grafana/rgm_procedures.sql
+    owner: root
+    group: root
+    mode: 0644
+  register: granafa_sql_procs
+
+- name: insert SQL procedures on Grafana DB
+  shell: mysql grafana < /etc/grafana/rgm_procedures.sql
+  args:
+    executable: /bin/bash
+  register: granafa_sql_exec
+  changed_when: granafa_sql_exec.rc == 1
+  failed_when: granafa_sql_exec.rc == 2
+  when: granafa_sql_procs.changed

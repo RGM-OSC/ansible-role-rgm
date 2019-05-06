@@ -56,6 +56,14 @@
     group: root
     mode: 0640
 
+- name: set RGM motd
+  copy:
+    src: rgm_motd.sh
+    dest: /etc/profile.d/zzz_rgm.sh
+    owner: root
+    group: root
+    mode: 0755
+
 ### sudoers base configuration
 - name: set sudoers config file
   template:

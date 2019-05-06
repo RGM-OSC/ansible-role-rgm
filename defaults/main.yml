@@ -106,6 +106,7 @@ packages_rgm:
 - nagvis
 - nagiosbp
 - notifier
+- nrdp
 - ged
 - ged-mysql
 - thruk
