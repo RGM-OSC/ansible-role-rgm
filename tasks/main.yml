@@ -122,7 +122,7 @@
 - name: reload sysctl
   service:
     name: systemd-sysctl
-    state: reloaded
+    state: restart
   when: sysctl_ansii.changed
 
 - name: set swappiness (sysctl)
