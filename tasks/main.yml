@@ -117,6 +117,21 @@
     owner: root
     group: root
     mode: 0644
+  register: sysctl_ansii
+
+- name: reload sysctl
+  service:
+    name: systemd-sysctl
+    state: reloaded
+  when: sysctl_ansii.changed
+
+- name: set swappiness (sysctl)
+  sysctl:
+    name: vm.swappiness
+    value: "{{ sysctl_swappiness }}"
+    state: present
+    sysctl_file: "/etc/sysctl.d/98-swappiness.conf"
+    reload: yes
 
 ### SSH keys
 - name: create nagios SSH key
