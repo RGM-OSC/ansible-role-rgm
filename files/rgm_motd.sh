@@ -34,7 +34,7 @@ for item in $(df -hl -t xfs -t ext4 --output=pcent,target | tail -n+2); do
 	MNTPT=$(echo $item | awk '{print $2}')
 	COL='\e[32;1m' # green
 	BLD=
-	if [ $PCENT -gt 15 ]; then
+	if [ $PCENT -gt 80 ]; then
 		COL='\e[33;1m' # yellow
 		BLD=';1'
 	fi
