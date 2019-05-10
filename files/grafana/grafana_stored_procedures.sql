@@ -1,11 +1,14 @@
+-- Remove unique constraint on email column from user table as we could have different users sharing the same email address
+SET @exists = (SELECT COUNT(*) FROM information_schema.statistics WHERE `table_name` = 'user' AND `index_name` = 'UQE_user_email' AND `table_schema` = 'grafana');
+SET @sqlstmt := IF( @exists > 0, 'ALTER TABLE `grafana`.`user` DROP INDEX `UQE_user_email`', 'SELECT ''UQE_user_email exists''');
+PREPARE stmt FROM @sqlstmt;
+EXECUTE stmt;
+
+-- 
+-- stored procedures called by rgmweb triggers
+-- 
 USE grafana;
-
--- Remove unique constraint on email column from user table
-ALTER TABLE IF EXISTS `grafana`.`user` DROP INDEX `UQE_user_email`;
-
-
 DELIMITER $$
-
 --
 -- Grafana INSERT procedure ---------------------------------------------------
 --
