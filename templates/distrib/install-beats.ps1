@@ -126,7 +126,7 @@ If (($PSVersionTable.PSVersion).Major -le 4) {
 
 }Else{
 	# Powershell V5 and most recent, ability to use the integrated install service script
-	. '$MetricBeatBasePath\MetricBeat\install-service-metricbeat.ps1'
+	Powershell -executionpolicy bypass -file "$MetricBeatBasePath\MetricBeat\install-service-metricbeat.ps1"
 }
 
 # start the service
