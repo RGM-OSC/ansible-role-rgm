@@ -21,7 +21,7 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
 }
 "@
 [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
-Invoke-Expression ([System.Text.Encoding]::ASCII.GetString((Invoke-WebRequest https://{{ ansible_default_ipv4.address }}/distrib/install/install-beats.ps1).Content))
+Invoke-Expression ([System.Text.Encoding]::ASCII.GetString((Invoke-WebRequest https://{{ ansible_default_ipv4.address }}/distrib/install/install-beats.ps1 -UseBasicParsing).Content))
 ```
 
 If Powershell is 6.0 or higher
