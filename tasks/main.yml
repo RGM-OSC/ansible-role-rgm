@@ -88,6 +88,7 @@
     file:  ntp.yml
     apply:
       tags: ntp
+  tags: ntp
 
 
 ### RGM distribution configuration
@@ -96,6 +97,7 @@
     file: distrib.yml
     apply:
       tags: distrib
+  tags: distrib
 
 
 ### http/php base configuration
@@ -104,6 +106,7 @@
     file: http.yml
     apply:
       tags: http
+  tags: http
 
 ### configure Elastic Stack
 - name: configure elastic stack
@@ -111,6 +114,7 @@
     file: elastic.yml
     apply:
       tags: elastic
+  tags: elastic
 
 ### Actually influxdb and nagflux are correctly pre-configured
 ### out-of-the-box from their respective RPM package...
@@ -121,6 +125,7 @@
     file: grafana.yml
     apply:
       tags: grafana
+  tags: grafana
 
 - name: kernel hardening (sysctl) following ANSII recomendations
   copy:
