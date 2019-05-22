@@ -30,10 +30,15 @@
 
 ### MariaDB base configuration
 - name: configure mariadb
-  include_tasks: mariadb.yml
+  include_tasks:
+    file: mariadb.yml
+    apply:
+      tags: mariadb
   tags:
   - mariadb
-
+  - grafana
+  - nagvis
+  
 ### installs RGM packages & dependencies
 - name: install RGM packages (it may take some time...)
   yum:
@@ -79,44 +84,43 @@
 
 ### configure chronyd
 - name: configure chrony daemon
-  include_tasks: ntp.yml
-  tags:
-  - ntp
-  - chrony
+  include_tasks:
+    file:  ntp.yml
+    apply:
+      tags: ntp
 
 
 ### RGM distribution configuration
 - name: configure RGM distribution
-  include_tasks: distrib.yml
-  tags: distrib
+  include_tasks:
+    file: distrib.yml
+    apply:
+      tags: distrib
 
 
 ### http/php base configuration
 - name: configure apache/php
-  include_tasks: http.yml
-  tags:
-  - httpd
-  - php
-
+  include_tasks:
+    file: http.yml
+    apply:
+      tags: http
 
 ### configure Elastic Stack
 - name: configure elastic stack
-  include_tasks: elastic.yml
-  tags:
-  - elastic
-  - metricbeat
+  include_tasks:
+    file: elastic.yml
+    apply:
+      tags: elastic
 
 ### Actually influxdb and nagflux are correctly pre-configured
 ### out-of-the-box from their respective RPM package...
 ### only Grafana needs some customization as the RPM package
 ### comes untouched from upstream provided (Grafana Labs)
 - name: configure influxdb/nagflux/grafana/histou
-  include_tasks: grafana.yml
-  tags:
-  - influxdb
-  - nagflux
-  - histou
-  - grafana
+  include_tasks:
+    file: grafana.yml
+    apply:
+      tags: grafana
 
 - name: kernel hardening (sysctl) following ANSII recomendations
   copy:

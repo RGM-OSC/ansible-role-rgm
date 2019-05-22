@@ -18,6 +18,9 @@
     name: mariadb
     enabled: yes
     state: started
+  tags:
+  - mariadb
+  - grafana
 
 - name: check if MariaDB root user is password protected
   command: mysql --no-defaults --host=localhost --user=root -e '\q'
@@ -66,6 +69,7 @@
     name: "{{ db_grafana }}"
     state: present
   register: mysql_db_grafana_created
+  tags: grafana
 
 - name: "grant RGM user to {{ db_grafana }} database"
   mysql_user:
@@ -77,12 +81,14 @@
     login_user: root
     state: present
   when: mysql_db_grafana_created
+  tags: grafana
 
 - name: "ensure {{ db_nagvis }} database exists"
   mysql_db:
     name: "{{ db_nagvis }}"
     state: present
   register: mysql_db_nagvis_created
+  tags: nagvis
 
 - name: "grant RGM user to {{ db_nagvis }} database"
   mysql_user:
@@ -94,6 +100,7 @@
     login_user: root
     state: present
   when: mysql_db_nagvis_created
+  tags: nagvis
 
 - name: create mariadb internal RO account
   mysql_user:

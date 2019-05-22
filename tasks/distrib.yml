@@ -14,7 +14,6 @@
   - "{{ rgm_root_path }}/distrib/install"
   - "{{ rgm_root_path }}/distrib/packages"
   - "{{ rgm_root_path }}/distrib/conf"
-  tags: distrib
 
 - name: copy one-liner installers
   template:
@@ -23,7 +22,6 @@
     owner: "{{ rgmweb_user }}"
     group: "{{ rgm_group }}"
     mode: 0444
-  tags: distrib
 
 - name: copy default config files
   template:
@@ -34,7 +32,6 @@
     mode: 0444
   with_items:
   - metricbeat.yml
-  tags: distrib
 
 - name: download packages from upstreams
   get_url:
@@ -44,7 +41,6 @@
     group: "{{ rgm_group }}"
     mode: 0440
   with_items: "{{ beats_packages }}"
-  tags: distrib
 
 - name: set 'latest' symlinks
   file:
@@ -53,7 +49,6 @@
     state: link
     force: yes
   with_items: "{{ beats_packages }}"
-  tags: distrib
 
 - name: install install html index page
   template:
@@ -62,4 +57,3 @@
     owner: "{{ rgmweb_user }}"
     group: "{{ rgm_group }}"
     mode: 0444
-  tags: distrib

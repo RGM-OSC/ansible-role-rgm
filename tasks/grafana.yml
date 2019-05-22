@@ -11,8 +11,7 @@
     state: present
   vars:
     packages: "{{ packages_influx_grafana }}"
-  tags: grafana
-
+ 
 - name: creates Grafana RGM dashboards directory
   file:
     path: "{{ grafana_rgm_dashboards }}"
@@ -20,7 +19,6 @@
     group: "{{ rgm_group }}"
     mode: 0755
     state: directory
-  tags: grafana
 
 - name: copy grafana patches
   copy:
@@ -34,7 +32,6 @@
   - { owner: 'root',    group: 'root', mode: '0744', src: grafana/grafana_rgm.sh,            dest: /etc/grafana/grafana_rgm.sh }
   - { owner: 'grafana', group: 'rgm',  mode: '0644', src: grafana/system-metrics.json,       dest: "{{ grafana_rgm_dashboards }}/system-metrics.json" }
   - { owner: 'grafana', group: 'rgm',  mode: '0644', src: grafana/multi-system-metrics.json, dest: "{{ grafana_rgm_dashboards }}/multi-system-metrics.json" }
-  tags: grafana
 
 - name: apply patches to align Grafana theme on RGM theme
   script: /etc/grafana/grafana_rgm.sh
@@ -43,8 +40,7 @@
   register: grafana_patch
   failed_when: grafana_patch.rc == 255
   changed_when: grafana_patch.rc > 0
-  tags: grafana
-  
+
 - name: "configure grafana.ini file"
   ini_file:
     path: /etc/grafana/grafana.ini
@@ -84,7 +80,6 @@
   - { section: 'auth.ldap',         option: 'enabled',              value: 'false' }
   notify: service_restart_grafana
   register: grafana_ini_changed
-  tags: grafana
 
 - name: "create histoujs symlink on Grafana public dir"
   file:
@@ -92,7 +87,6 @@
     src: /srv/rgm/histou/histou.js
     state: link
     mode: 0644
-  tags: grafana
 
 - name: set grafana datasources and dashboards
   template:
@@ -104,22 +98,19 @@
   with_items:
   - { src: rgm_ds.yml.j2,   dest: datasources/rgm_ds.yaml }
   - { src: rgm_dash.yml.j2, dest: dashboards/rgm_dash.yaml }
-  tags: grafana
 
 - name: ensure grafana service is running
   systemd:
     name: grafana-server
     enabled: yes
     state: started
-  tags: grafana
-
+ 
 - name: restart grafana service if config changed
   systemd:
     name: grafana-server
     enabled: yes
     state: restarted
   when: grafana_ini_changed
-  tags: grafana
 
 - name: install grafana plugins
   grafana_plugin:
@@ -128,7 +119,6 @@
   with_items: "{{ grafana_plugins }}"
   when: grafana_install_plugins
   notify: service_restart_grafana
-  tags: grafana
 
 - name: copy Grafana SQL procedures
   copy:
@@ -138,7 +128,6 @@
     group: root
     mode: 0644
   register: granafa_sql_procs
-  tags: grafana
 
 - name: insert SQL procedures on Grafana DB
   shell: mysql grafana < /etc/grafana/rgm_procedures.sql
@@ -148,5 +137,3 @@
   changed_when: granafa_sql_exec.rc == 1
   failed_when: granafa_sql_exec.rc == 2
   when: granafa_sql_procs.changed
-  tags: grafana
-  

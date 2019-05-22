@@ -11,11 +11,6 @@
     state: present
   vars:
     packages: "{{ packages_elastic }}"
-  tags:
-  - elastic
-  - kibana
-  - metricbeat
-
 
  ### Configure Elasticsearch
 
@@ -27,8 +22,7 @@
     mode: 0750
     state: directory
     recurse: yes
-  tags: elastic
-  
+ 
 - name: configure Elasticsearch config file
   lineinfile:
     path: /etc/elasticsearch/elasticsearch.yml
@@ -38,7 +32,6 @@
   - { regex: '^(#\s*)?network.host: ',  line: "network.host: ['127.0.0.1']" }
   - { regex: '^(#\s*)?path.repo: ',     line: 'path.repo: "/srv/rgm/elastic"' }
   notify: service_restart_elasticsearch
-  tags: elastic
 
 #- name: create an elasticsearch local backup reposotory
 #curl -XPUT 'http://127.0.0.1:9200/_snapshot/backup' -H 'Content-Type: application/json' -d '{ "type": "fs", "settings": {"location": "/srv/rgm/elastic/backups","compress": true}}'
@@ -57,7 +50,6 @@
   with_items:
   - { src: 'elastic/curator_actions.yml.j2',    dst: '/etc/elasticsearch/actions.yml' }
   - { src: 'elastic/curator.yml.j2',            dst: '/etc/elasticsearch/curator.yml' }
-  tags: elastic
 
 - name: set cron job for curator
   copy:
@@ -67,7 +59,6 @@
     group: root
     mode: 0644
   notify: service_reload_crond
-  tags: elastic
 
 
 ### Configure kibana
@@ -83,7 +74,6 @@
   - { regex: '^(#\s*)?server.basePath',          line: 'server.basePath: "/kibana"' }
   - { regex: '^(#\s*)?server.rewriteBasePath',   line: 'server.rewriteBasePath: true' }
   notify: service_restart_kibana
-  tags: kibana
 
 
 ### configure metricsbeat
@@ -98,5 +88,7 @@
   - { regex: '^(#\s*)?host:\s+".*:5601"',   line: "host: \"127.0.0.1:5601\""}
   - { regex: '^(#\s*)?host:\s+".*:9200"',   line: "host: \"127.0.0.1:9200\"" }
   notify: service_restart_metricbeat
-  tags: metricbeat
+ 
 
+
+# curl -XPUT -H "Content-Type: application/json" http://localhost:9200/_all/_settings -d '{"index.blocks.read_only_allow_delete": null}'
