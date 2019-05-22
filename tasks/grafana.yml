@@ -105,6 +105,19 @@
   - { src: rgm_dash.yml.j2, dest: dashboards/rgm_dash.yaml }
   tags: grafana
 
+- name: ensure grafana service is running
+  systemd:
+    name: grafana-server
+    enabled: yes
+    state: started
+
+- name: restart grafana service if config changed
+  systemd:
+    name: grafana-server
+    enabled: yes
+    state: restarted
+  when: grafana_ini_changed
+
 - name: install grafana plugins
   grafana_plugin:
     name: "{{ item }}"
@@ -131,3 +144,4 @@
   changed_when: granafa_sql_exec.rc == 1
   failed_when: granafa_sql_exec.rc == 2
   when: granafa_sql_procs.changed
+  
