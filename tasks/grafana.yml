@@ -20,6 +20,7 @@
     group: "{{ rgm_group }}"
     mode: 0755
     state: directory
+  tags: grafana
 
 - name: copy grafana patches
   copy:
@@ -110,6 +111,7 @@
     name: grafana-server
     enabled: yes
     state: started
+  tags: grafana
 
 - name: restart grafana service if config changed
   systemd:
@@ -117,6 +119,7 @@
     enabled: yes
     state: restarted
   when: grafana_ini_changed
+  tags: grafana
 
 - name: install grafana plugins
   grafana_plugin:
@@ -135,6 +138,7 @@
     group: root
     mode: 0644
   register: granafa_sql_procs
+  tags: grafana
 
 - name: insert SQL procedures on Grafana DB
   shell: mysql grafana < /etc/grafana/rgm_procedures.sql
@@ -144,4 +148,5 @@
   changed_when: granafa_sql_exec.rc == 1
   failed_when: granafa_sql_exec.rc == 2
   when: granafa_sql_procs.changed
+  tags: grafana
   
