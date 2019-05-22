@@ -1,4 +1,6 @@
 #Requires -RunAsAdministrator
+[cmdletbinding()]
+Param()
 
 function Test-Administrator  
 {  
@@ -40,7 +42,9 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
 }
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-Invoke-WebRequest -Uri $MetricBeatFileDownloadLink -OutFile .\$MetricBeatFileName -Verbose
+#Donwload Metricbeat zip file mode (New-Object System.Net.WebClient).DownloadFile is very fastest than Invoke-WebRequest
+$DownloadPathName = (Get-Location).Path , $MetricBeatFileName -join "\"
+(New-Object System.Net.WebClient).DownloadFile($MetricBeatFileDownloadLink, $DownloadPathName)
 
 ######  Unzip Part #######
 
@@ -94,7 +98,7 @@ $IPaddress = Get-WmiObject -class Win32_NetworkAdapterConfiguration -Filter "IpE
 $ConfigurationFilePath = "$MetricBeatBasePath\MetricBeat\metricbeat.yml"
 
 # dynamically insert host IP address as a beat "fields" into config
-Invoke-WebRequest -Uri $MetricBeatConfFileLink -OutFile $ConfigurationFilePath -Verbose
+(New-Object System.Net.WebClient).DownloadFile($MetricBeatConfFileLink, $ConfigurationFilePath)
 $ConfigurationFileContent = Get-Content $ConfigurationFilePath
 $ConfigurationFileContent = $ConfigurationFileContent -replace ("%%IP%%",$IPaddress)
 Set-Content -Path $ConfigurationFilePath -Value $ConfigurationFileContent
@@ -114,7 +118,7 @@ If (($PSVersionTable.PSVersion).Major -le 4) {
 	# install the new version of the service
 	$serviceName="metricbeat"
 	$displayName="metricbeat"
-	$path='"$MetricBeatBasePath\MetricBeat\metricbeat.exe" -c "$MetricBeatBasePath\MetricBeat\metricbeat.yml" -path.home "$MetricBeatBasePath\MetricBeat" -path.data "C:\ProgramData\metricbeat" -path.logs "C:\ProgramData\metricbeat\logs"'
+	$path = """$MetricBeatBasePath\MetricBeat\metricbeat.exe"" -c ""$MetricBeatBasePath\MetricBeat\metricbeat.yml"" -path.home ""$MetricBeatBasePath\MetricBeat"" -path.data ""C:\ProgramData\metricbeat"" -path.logs ""C:\ProgramData\metricbeat\logs"""
 	$startMode = "Automatic"
 	$interactWithDesktop= $false
 	$params = $serviceName, $displayName, $path, 16, 1, $startMode, $interactWithDesktop, $null, $null, $null, $null, $null           
@@ -137,3 +141,4 @@ get-service metricbeat
 # Clean installation folder -> (TO DO -> funtion to be able to call it in case of failure)
 Remove-Item .\$MetricBeatFileName
 Remove-Item $DestinationUnZIPFolder -Recurse
+exit
