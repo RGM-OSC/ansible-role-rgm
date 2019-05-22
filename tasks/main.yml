@@ -208,7 +208,7 @@
 
 - name: get a valid RGMAPI token
   uri:
-    url: 'https://localhost/rgmapi/getApiKey?&username=admin&password=admin'
+    url: "https://localhost/rgmapi/getApiKey?&username={{ rgm_admin_user }}&password={{ rgm_admin_password }}"
     method: GET
     body_format: json
     validate_certs: no
@@ -217,7 +217,7 @@
 
 - name: export Lilac configuration
   uri:
-    url: "https://localhost/rgmapi/exportConfiguration?&username=admin&apiKey={{ auth_rgmapi.json.RGMAPI_KEY }}"
+    url: "https://localhost/rgmapi/exportConfiguration?&username={{ rgm_admin_user }}&apiKey={{ auth_rgmapi.json.RGMAPI_KEY }}"
     method: POST
     body_format: json
     body: '{ "jobName": "Nagios Export" }'
