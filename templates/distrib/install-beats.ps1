@@ -131,6 +131,8 @@ If (($PSVersionTable.PSVersion).Major -le 4) {
 
 # start the service
 start-service metricbeat -PassThru
+# on some case, the PassThru is not displayed. call the get-service to avec the exact service status
+get-service metricbeat
 
 # Clean installation folder -> (TO DO -> funtion to be able to call it in case of failure)
 Remove-Item .\$MetricBeatFileName
