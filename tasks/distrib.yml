@@ -17,11 +17,14 @@
 
 - name: copy one-liner installers
   template:
-    src: "distrib/install-beats.ps1"
-    dest: "{{ rgm_root_path }}/distrib/install/install-beats.ps1"
+    src: "distrib/{{ item }}"
+    dest: "{{ rgm_root_path }}/distrib/install/{{ item }}"
     owner: "{{ rgmweb_user }}"
     group: "{{ rgm_group }}"
     mode: 0444
+  with_items:
+  - Install-MeatricBeat.ps1
+  - Add-RGMHost.ps1
 
 - name: copy default config files
   template:
