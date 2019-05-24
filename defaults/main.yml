@@ -85,6 +85,7 @@ packages_apache:
 - php-process
 - php-xml
 - php-snmp
+- php-mcrypt
 
 packages_elastic:
 - java-11-openjdk-headless
