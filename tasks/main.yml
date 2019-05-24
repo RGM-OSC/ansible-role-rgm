@@ -17,8 +17,9 @@
   tags: packages
 
 - name: force yum clean & make cache
-  yum:
-    update_cache: yes
+  command: yum clean all
+  args:
+    warn: no
   when: update_epel.changed
   tags: packages
 
