@@ -80,7 +80,7 @@
     append_privs: yes
     login_user: root
     state: present
-  when: mysql_db_grafana_created
+  when: mysql_db_grafana_created.changed
   tags: grafana
 
 - name: "ensure {{ db_nagvis }} database exists"
@@ -99,7 +99,7 @@
     append_privs: yes
     login_user: root
     state: present
-  when: mysql_db_nagvis_created
+  when: mysql_db_nagvis_created.changed
   tags: nagvis
 
 - name: create mariadb internal RO account
