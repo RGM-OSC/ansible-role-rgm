@@ -7,10 +7,8 @@
 - name: ensure Grafana & Co packages are present
   yum:
     update_cache: no
-    name: "{{ packages }}"
+    name: "{{ packages_influx_grafana }}"
     state: present
-  vars:
-    packages: "{{ packages_influx_grafana }}"
  
 - name: creates Grafana RGM dashboards directory
   file:
@@ -110,14 +108,14 @@
     name: grafana-server
     enabled: yes
     state: restarted
-  when: grafana_ini_changed
+  when: grafana_ini_changed.changed
 
 - name: install grafana plugins
   grafana_plugin:
     name: "{{ item }}"
     state: present
   with_items: "{{ grafana_plugins }}"
-  when: grafana_install_plugins
+  when: grafana_install_plugins|bool
   notify: service_restart_grafana
 
 - name: copy Grafana SQL procedures

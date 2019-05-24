@@ -7,10 +7,8 @@
 - name: ensure Elastic Stack is installed
   yum:
     update_cache: no
-    name: "{{ packages }}"
+    name: "{{ packages_elastic }}"
     state: present
-  vars:
-    packages: "{{ packages_elastic }}"
 
  ### Configure Elasticsearch
 

@@ -7,10 +7,8 @@
 - name: ensure mariadb is installed
   yum:
     update_cache: no
-    name: "{{ packages }}"
+    name: "{{ packages_mariadb }}"
     state: present
-  vars:
-    packages: "{{ packages_mariadb }}"
   tags: packages
 
 - name: ensure MariaDB is up & running

@@ -7,10 +7,8 @@
 - name: ensure Apache/php is installed
   yum:
     update_cache: no
-    name: "{{ packages }}"
+    name: "{{ packages_apache }}"
     state: present
-  vars:
-    packages: "{{ packages_apache }}"
 
 ## add apache user to rgm group
 
