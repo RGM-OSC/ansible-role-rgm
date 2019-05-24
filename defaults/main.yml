@@ -45,7 +45,7 @@ grafana_rgm_dashboards: "{{ rgm_root_path }}/grafana/dashboards"
 winbeats_base_path: 'C:\Program Files'
 
 # Default swappiness for RGM
-sysctl_swappiness: 10
+sysctl_swappiness: '10'
 
 ### RPM packages ###
 packages_system:

@@ -52,6 +52,18 @@
   until: yum_result.rc == 0
   tags: packages
 
+- name: create Ansible tmp dirs for alternate users
+  file:
+    path: "/tmp/.ansible-{{ item }}/tmp"
+    state: directory
+    recurse: yes
+    owner: "{{ item }}"
+    group: "{{ rgm_group }}"
+    mode: 0700
+  with_items:
+  - "{{ rgmweb_user }}"
+  - nagios
+
 - name: set vimrc file for root user
   copy:
     src: vimrc
