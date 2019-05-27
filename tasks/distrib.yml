@@ -44,6 +44,10 @@
     group: "{{ rgm_group }}"
     mode: 0440
   with_items: "{{ beats_packages }}"
+  retries: 3
+  delay: 2
+  register: distrib_packages_downloaded
+  until: distrib_packages_downloaded.rc == 0
 
 - name: set 'latest' symlinks
   file:
