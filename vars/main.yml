@@ -20,12 +20,15 @@ rgm_services:
 - httpd
 - kibana
 
-grafana_plugins:
+grafana_plugins_core:
 - grafana-simple-json-datasource
-- fetzerch-sunandmoon-datasource
 - grafana-worldmap-panel
 - grafana-clock-panel
 - grafana-piechart-panel
+- grafana-polystat-panel
+
+grafana_plugins_contrib:
+- fetzerch-sunandmoon-datasource
 - satellogic-3d-globe-panel
 - ryantxu-ajax-panel
 - michaeldmoore-annunciator-panel
@@ -43,7 +46,6 @@ grafana_plugins:
 - digiapulssi-organisations-panel
 - bessler-pictureit-panel
 - natel-plotly-panel
-- grafana-polystat-panel
 - corpglory-progresslist-panel
 - snuids-radar-panel
 - scadavis-synoptic-panel

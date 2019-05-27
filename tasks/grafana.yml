@@ -110,12 +110,28 @@
     state: restarted
   when: grafana_ini_changed.changed
 
-- name: install grafana plugins
+- name: install grafana core plugins
   grafana_plugin:
     name: "{{ item }}"
     state: present
-  with_items: "{{ grafana_plugins }}"
-  when: grafana_install_plugins|bool
+  with_items: "{{ grafana_plugins_core }}"
+  retries: 3
+  delay: 2
+  register: grafana_plugins_core_installed
+  until: grafana_plugins_core_installed.rc == 0
+  when: grafana_install_plugins_core|bool
+  notify: service_restart_grafana
+
+- name: install grafana contrib plugins
+  grafana_plugin:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ grafana_plugins_contrib }}"
+  retries: 3
+  delay: 2
+  register: grafana_plugins_contrib_installed
+  until: grafana_plugins_contrib_installed.rc == 0
+  when: grafana_install_plugins_contrib|bool
   notify: service_restart_grafana
 
 - name: copy Grafana SQL procedures
