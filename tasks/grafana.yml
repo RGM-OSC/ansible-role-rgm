@@ -118,7 +118,7 @@
   retries: 3
   delay: 2
   register: grafana_plugins_core_installed
-  until: grafana_plugins_core_installed.rc == 0
+  until: not grafana_plugins_core_installed.failed|bool
   when: grafana_install_plugins_core|bool
   notify: service_restart_grafana
 
@@ -130,7 +130,7 @@
   retries: 3
   delay: 2
   register: grafana_plugins_contrib_installed
-  until: grafana_plugins_contrib_installed.rc == 0
+  until: not grafana_plugins_contrib_installed.failed|bool
   when: grafana_install_plugins_contrib|bool
   notify: service_restart_grafana
 
