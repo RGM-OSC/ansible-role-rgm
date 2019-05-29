@@ -1,0 +1,29 @@
+-- {{ ansible_managed }}
+-- vim: expandtab ts=4 sw=4:
+
+USE rgmweb;
+
+-- ol_tags injection
+INSERT INTO `ol_tags` (`id`, `name`) VALUES
+{% for oltag in oneliner_tags %}
+    ('{{ oltag.id }}', '{{ oltag.tag }}'){% if not loop.last %},
+{% endif %}
+{% endfor %};
+
+-- ol_items injection
+INSERT INTO `ol_items` (`id`, `name`, `filename`, `shell`, `command`) VALUES 
+{% set id_item = 1 %}{% for olitem in oneliner_items %}
+    ({{ id_item }}, '{{ olitem.item }}', '{{ olitem.md_file }}', '{{ olitem.shell }}', '{{ olitem.command }}'){% if not loop.last %},
+{% endif %}
+{% set id_item = id_item + 1 %}{% endfor %};
+
+-- ol_items_tags injection
+INSERT INTO `ol_items_tags` (`id_item`, `id_tags`) VALUES
+{% set id_item = 1 %}{% for olitem in oneliner_items %}
+{% for oltag in olitem.tags %}
+    ({{ id_item }}, {{ oltag }}){% if not loop.last %},
+{% endif %}{% endfor %}
+{% set id_item = id_item + 1 %}{% if not loop.last %},
+{% endif %}{% endfor %};
+
+

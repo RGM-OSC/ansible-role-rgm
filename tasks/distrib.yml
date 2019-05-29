@@ -2,65 +2,84 @@
 # Tasks for distribution RGM setup
 # vim: bs=2 sw=2 expandtab:
 
+- name: test
+  debug:
+    msg: "{{ item }}"
+  loop: "{{ oneliner_items.item }}"
+  loop_control:
+    label: "{{ item.payload_files }}"
+
+
 - name: create distrib directory tree
   file:
     path: "{{ item }}"
     state: directory
-    owner: "{{ rgmweb_user }}"
-    group: "{{ rgm_group }}"
+#    owner: "{{ rgmweb_user }}"
+#    group: "{{ rgm_group }}"
     mode: 0755
   with_items:
   - "{{ rgm_root_path }}/distrib"
   - "{{ rgm_root_path }}/distrib/install"
   - "{{ rgm_root_path }}/distrib/packages"
+  - "{{ rgm_root_path }}/distrib/markdown"
   - "{{ rgm_root_path }}/distrib/conf"
 
-- name: copy one-liner installers
+#- name: copy one-liner installers
+#  template:
+#    src: "distrib/{{ item }}"
+#    dest: "{{ rgm_root_path }}/distrib/install/{{ item }}"
+#    owner: "{{ rgmweb_user }}"
+#    group: "{{ rgm_group }}"
+#    mode: 0444
+#  with_items:
+#  - Install-MeatricBeat.ps1
+#  - Add-RGMHost.ps1
+#
+#- name: copy default config files
+#  template:
+#    src: "distrib/conf/{{ item }}.j2"
+#    dest: "{{ rgm_root_path }}/distrib/conf/{{ item }}"
+#    owner: "{{ rgmweb_user }}"
+#    group: "{{ rgm_group }}"
+#    mode: 0444
+#  with_items:
+#  - metricbeat.yml
+#
+#- name: download packages from upstreams
+#  get_url:
+#    url: "{{ item }}"
+#    dest: "{{ rgm_root_path }}/distrib/packages/{{ item | basename }} "
+#    owner: "{{ rgmweb_user }}"
+#    group: "{{ rgm_group }}"
+#    mode: 0440
+#  with_items: "{{ beats_packages }}"
+#  retries: 3
+#  delay: 2
+#  register: distrib_packages_downloaded
+#  until: not distrib_packages_downloaded.failed|bool
+#
+#- name: set 'latest' symlinks
+#  file:
+#    src: "{{ rgm_root_path }}/distrib/packages/{{ item | basename }} "
+#    dest: "{{ rgm_root_path }}/distrib/packages/{{ item | regex_replace('^.*\\/(?P<prefix>\\w+-oss-).*(?P<suffix>-win.+)$', '\\g<prefix>latest\\g<suffix>') }}"
+#    state: link
+#    force: yes
+#  with_items: "{{ beats_packages }}"
+
+#- name: install markdown pages
+#  template:
+#    src: "distrib/markdown/{{ item }}"
+#    dest: "{{ rgm_root_path }}/distrib/markdown/{{ item }}"
+#    owner: "{{ rgmweb_user }}"
+#    group: "{{ rgm_group }}"
+#    mode: 0444
+#  with_items:
+#  - 
+
+- name: generate one-liners SQL injection script
   template:
-    src: "distrib/{{ item }}"
-    dest: "{{ rgm_root_path }}/distrib/install/{{ item }}"
-    owner: "{{ rgmweb_user }}"
-    group: "{{ rgm_group }}"
-    mode: 0444
-  with_items:
-  - Install-MeatricBeat.ps1
-  - Add-RGMHost.ps1
-
-- name: copy default config files
-  template:
-    src: "distrib/conf/{{ item }}.j2"
-    dest: "{{ rgm_root_path }}/distrib/conf/{{ item }}"
-    owner: "{{ rgmweb_user }}"
-    group: "{{ rgm_group }}"
-    mode: 0444
-  with_items:
-  - metricbeat.yml
-
-- name: download packages from upstreams
-  get_url:
-    url: "{{ item }}"
-    dest: "{{ rgm_root_path }}/distrib/packages/{{ item | basename }} "
-    owner: "{{ rgmweb_user }}"
-    group: "{{ rgm_group }}"
-    mode: 0440
-  with_items: "{{ beats_packages }}"
-  retries: 3
-  delay: 2
-  register: distrib_packages_downloaded
-  until: not distrib_packages_downloaded.failed|bool
-
-- name: set 'latest' symlinks
-  file:
-    src: "{{ rgm_root_path }}/distrib/packages/{{ item | basename }} "
-    dest: "{{ rgm_root_path }}/distrib/packages/{{ item | regex_replace('^.*\\/(?P<prefix>\\w+-oss-).*(?P<suffix>-win.+)$', '\\g<prefix>latest\\g<suffix>') }}"
-    state: link
-    force: yes
-  with_items: "{{ beats_packages }}"
-
-- name: install install html index page
-  template:
-    src: distrib/index.html.j2
-    dest: "{{ rgm_root_path }}/distrib/install/index.html"
-    owner: "{{ rgmweb_user }}"
-    group: "{{ rgm_group }}"
-    mode: 0444
+    src: distrib/one-liners.sql.j2
+    dest: /tmp/one-liners.sql
+    owner: root
+    group: root
+    mode: 0640
