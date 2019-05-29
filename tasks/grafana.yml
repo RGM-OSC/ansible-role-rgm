@@ -102,13 +102,14 @@
     name: grafana-server
     enabled: yes
     state: started
+  register: grafana_first_start
  
 - name: restart grafana service if config changed
   systemd:
     name: grafana-server
     enabled: yes
     state: restarted
-  when: grafana_ini_changed.changed
+  when: grafana_ini_changed.changed and not grafana_first_start.changed
 
 - name: install grafana core plugins
   grafana_plugin:
