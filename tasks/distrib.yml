@@ -81,7 +81,17 @@
 - name: generate one-liners SQL injection script
   template:
     src: distrib/one-liners.sql.j2
-    dest: /tmp/one-liners.sql
+    dest: /var/lib/rgm/rgmweb/sql/one-liners.sql
     owner: root
     group: root
     mode: 0640
+  register: oneliner_sql
+
+- name: insert SQL procedures on Grafana DB
+  shell: mysql grafana < /var/lib/rgm/rgmweb/sql/one-liners.sql
+  args:
+    executable: /bin/bash
+  register: oneliner_sql_exec
+  changed_when: oneliner_sql_exec.rc == 1
+  failed_when: oneliner_sql_exec.rc == 2
+  when: oneliner_sql.changed
