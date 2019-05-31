@@ -16,7 +16,7 @@ If (($PSVersionTable.PSVersion).Major -le 3){
 }
 
 $MetricBeatFileDownloadLink = "https://{{ ansible_default_ipv4.address }}/distrib/packages/metricbeat-oss-latest-windows-x86_64.zip"
-$MetricBeatConfFileLink = "https://{{ ansible_default_ipv4.address }}/distrib/conf/metricbeat.yml"
+$MetricBeatConfFileLink = "https://{{ ansible_default_ipv4.address }}/distrib/conf/windows_metricbeat.yml"
 $MetricBeatBasePath="{{ winbeats_base_path }}"
 # {{ ansible_default_ipv4.address }}
 ######  Download Part #######

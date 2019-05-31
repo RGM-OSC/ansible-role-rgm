@@ -83,7 +83,7 @@ oneliner_items:
   - Install-MeatricBeat.ps1
   - Add-RGMHost.ps1
   config_files:
-  - metricbeat.yml
+  - windows_metricbeat.yml
   upstream_files:
   - https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-oss-6.7.1-windows-x86_64.zip
   - https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-oss-6.7.1-windows-x86_64.zip
@@ -98,7 +98,6 @@ oneliner_items:
   tags:
   - 1
   - 5
-  payload_files:
   config_files:
-  - metricbeat.yml
-  upstream_files:
+  - linux_metricbeat.yml
+  
