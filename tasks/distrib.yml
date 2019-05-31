@@ -87,8 +87,8 @@
     mode: 0640
   register: oneliner_sql
 
-- name: insert SQL procedures on Grafana DB
-  shell: mysql grafana < /var/lib/rgm/rgmweb/sql/one-liners.sql
+- name: insert SQL procedures on rgmweb DB
+  shell: mysql rgmweb < /var/lib/rgm/rgmweb/sql/one-liners.sql
   args:
     executable: /bin/bash
   register: oneliner_sql_exec

@@ -54,22 +54,14 @@ grafana_plugins_contrib:
 
 
 oneliner_tags:
-- id: 1
-  tag: linux
-- id: 2
-  tag: windows
-- id: 3
-  tag: metricbeat
-- id: 3
-  tag: heartbeat
-- id: 4
-  tag: winlogbeat
-- id: 5
-  tag: filebeat
-- id: 6
-  tag: auditbeat
-- id: 7
-  tag: packetbeat
+- { id: 1 , tag: linux }
+- { id: 2 , tag: windows }
+- { id: 3 , tag: metricbeat }
+- { id: 4 , tag: heartbeat }
+- { id: 5 , tag: winlogbeat }
+- { id: 6 , tag: filebeat }
+- { id: 7 , tag: auditbeat }
+- { id: 8 , tag: packetbeat }
 
 oneliner_items:
 - item: windows_metricbeat
