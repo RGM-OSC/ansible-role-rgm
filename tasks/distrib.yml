@@ -13,37 +13,55 @@
   - "{{ rgm_root_path }}/distrib"
   - "{{ rgm_root_path }}/distrib/install"
   - "{{ rgm_root_path }}/distrib/packages"
+  - "{{ rgm_root_path }}/distrib/markdown"
   - "{{ rgm_root_path }}/distrib/conf"
 
-- name: copy one-liner installers
+- name: copy one-liner payloads
   template:
-    src: "distrib/{{ item }}"
-    dest: "{{ rgm_root_path }}/distrib/install/{{ item }}"
+    src: "distrib/payload/{{ item.1 }}"
+    dest: "{{ rgm_root_path }}/distrib/install/{{ item.1 }}"
     owner: "{{ rgmweb_user }}"
     group: "{{ rgm_group }}"
     mode: 0444
-  with_items:
-  - Install-MeatricBeat.ps1
-  - Add-RGMHost.ps1
+  with_subelements:
+  - "{{ oneliner_items }}"
+  - payload_files
+  - skip_missing: true
 
 - name: copy default config files
   template:
-    src: "distrib/conf/{{ item }}.j2"
-    dest: "{{ rgm_root_path }}/distrib/conf/{{ item }}"
+    src: "distrib/conf/{{ item.1 }}.j2"
+    dest: "{{ rgm_root_path }}/distrib/conf/{{ item.1 }}"
     owner: "{{ rgmweb_user }}"
     group: "{{ rgm_group }}"
     mode: 0444
-  with_items:
-  - metricbeat.yml
+  with_subelements:
+  - "{{ oneliner_items }}"
+  - config_files
+  - skip_missing: true
+
+- name: install markdown pages
+  template:
+    src: "distrib/markdown/{{ item.md_file }}"
+    dest: "{{ rgm_root_path }}/distrib/markdown/{{ item.md_file }}"
+    owner: "{{ rgmweb_user }}"
+    group: "{{ rgm_group }}"
+    mode: 0444
+  loop: "{{ oneliner_items }}"
+  loop_control:
+    label: "{{ item.md_file }}"
 
 - name: download packages from upstreams
   get_url:
-    url: "{{ item }}"
-    dest: "{{ rgm_root_path }}/distrib/packages/{{ item | basename }} "
+    url: "{{ item.1 }}"
+    dest: "{{ rgm_root_path }}/distrib/packages/{{ item.1 | basename }}"
     owner: "{{ rgmweb_user }}"
     group: "{{ rgm_group }}"
     mode: 0440
-  with_items: "{{ beats_packages }}"
+  with_subelements:
+  - "{{ oneliner_items }}"
+  - upstream_files
+  - skip_missing: true
   retries: 3
   delay: 2
   register: distrib_packages_downloaded
@@ -51,16 +69,29 @@
 
 - name: set 'latest' symlinks
   file:
-    src: "{{ rgm_root_path }}/distrib/packages/{{ item | basename }} "
-    dest: "{{ rgm_root_path }}/distrib/packages/{{ item | regex_replace('^.*\\/(?P<prefix>\\w+-oss-).*(?P<suffix>-win.+)$', '\\g<prefix>latest\\g<suffix>') }}"
+    src: "{{ rgm_root_path }}/distrib/packages/{{ item.1 | basename }}"
+    dest: "{{ rgm_root_path }}/distrib/packages/{{ item.1 | regex_replace('^.*\\/(?P<prefix>\\w+-oss-).*(?P<suffix>-win.+)$', '\\g<prefix>latest\\g<suffix>') }}"
     state: link
     force: yes
-  with_items: "{{ beats_packages }}"
+  with_subelements:
+  - "{{ oneliner_items }}"
+  - upstream_files
+  - skip_missing: true
 
-- name: install install html index page
+- name: generate one-liners SQL injection script
   template:
-    src: distrib/index.html.j2
-    dest: "{{ rgm_root_path }}/distrib/install/index.html"
-    owner: "{{ rgmweb_user }}"
-    group: "{{ rgm_group }}"
-    mode: 0444
+    src: distrib/one-liners.sql.j2
+    dest: /var/lib/rgm/rgmweb/sql/one-liners.sql
+    owner: root
+    group: root
+    mode: 0640
+  register: oneliner_sql
+
+- name: insert SQL procedures on rgmweb DB
+  shell: mysql rgmweb < /var/lib/rgm/rgmweb/sql/one-liners.sql
+  args:
+    executable: /bin/bash
+  register: oneliner_sql_exec
+  changed_when: oneliner_sql_exec.rc == 1
+  failed_when: oneliner_sql_exec.rc == 2
+  when: oneliner_sql.changed

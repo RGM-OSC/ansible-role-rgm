@@ -52,11 +52,44 @@ grafana_plugins_contrib:
 - marcuscalidus-svg-panel
 - gretamosa-topology-panel
 
-beats_packages:
-- https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-oss-6.7.1-windows-x86_64.zip
-- https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-oss-6.7.1-windows-x86_64.zip
-- https://artifacts.elastic.co/downloads/beats/winlogbeat/winlogbeat-oss-6.7.1-windows-x86_64.zip
-- https://artifacts.elastic.co/downloads/beats/auditbeat/auditbeat-oss-6.7.1-windows-x86_64.zip
-- https://artifacts.elastic.co/downloads/beats/heartbeat/heartbeat-oss-6.7.1-windows-x86_64.zip
-- https://artifacts.elastic.co/downloads/beats/packetbeat/packetbeat-oss-6.7.1-windows-x86_64.zip
+
+oneliner_tags:
+- { id: 1 , tag: linux }
+- { id: 2 , tag: windows }
+- { id: 3 , tag: metricbeat }
+- { id: 4 , tag: heartbeat }
+- { id: 5 , tag: winlogbeat }
+- { id: 6 , tag: filebeat }
+- { id: 7 , tag: auditbeat }
+- { id: 8 , tag: packetbeat }
+
+oneliner_items:
+- item: windows_metricbeat
+  md_file: windows_metricbeat.md
+  shell: "Windows PowerShell"
+  command: "& $([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString(\"https://{{ ansible_default_ipv4.address }}/distrib/install/Add-RGMHost.ps1\"))) -username <admin user> -password <password>"
+  tags:
+  - 2
+  - 3
+  payload_files:
+  - Install-MeatricBeat.ps1
+  - Add-RGMHost.ps1
+  config_files:
+  - windows_metricbeat.yml
+  upstream_files:
+  - https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-oss-6.7.1-windows-x86_64.zip
+  - https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-oss-6.7.1-windows-x86_64.zip
+  - https://artifacts.elastic.co/downloads/beats/winlogbeat/winlogbeat-oss-6.7.1-windows-x86_64.zip
+  - https://artifacts.elastic.co/downloads/beats/auditbeat/auditbeat-oss-6.7.1-windows-x86_64.zip
+  - https://artifacts.elastic.co/downloads/beats/heartbeat/heartbeat-oss-6.7.1-windows-x86_64.zip
+  - https://artifacts.elastic.co/downloads/beats/packetbeat/packetbeat-oss-6.7.1-windows-x86_64.zip  
+- item: linux_metricbeat
+  md_file: linux_metricbeat.md
+  shell: "bash"
+  command: bash <(curl -k "https://{{ ansible_default_ipv4.address }}/distrib/install/linux-metricbeat.sh)"
+  tags:
+  - 1
+  - 5
+  config_files:
+  - linux_metricbeat.yml
   

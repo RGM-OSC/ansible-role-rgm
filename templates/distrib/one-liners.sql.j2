@@ -1,0 +1,39 @@
+-- {{ ansible_managed }}
+-- vim: expandtab ts=4 sw=4:
+
+USE rgmweb;
+
+-- tables cleanup
+DELETE FROM `ol_items_tags`;
+ALTER TABLE `ol_items_tags` AUTO_INCREMENT = 1;
+DELETE FROM `ol_items`;
+ALTER TABLE `ol_items` AUTO_INCREMENT = 1;
+DELETE FROM `ol_tags`;
+ALTER TABLE `ol_tags` AUTO_INCREMENT = 1;
+
+-- ol_tags injection
+LOCK TABLES `ol_tags` WRITE;
+INSERT INTO `ol_tags` (`id`, `name`) VALUES
+{% for oltag in oneliner_tags %}
+    ('{{ oltag.id }}', '{{ oltag.tag }}'){% if not loop.last %},
+{% endif %}
+{% endfor %};
+UNLOCK TABLES;
+
+-- ol_items injection
+LOCK TABLES `ol_items` WRITE;
+INSERT INTO `ol_items` (`id`, `name`, `filename`, `shell`, `command`) VALUES 
+{% set id_item = 1 %}{% for olitem in oneliner_items %}
+    ({{ id_item }}, '{{ olitem.item }}', '{{ olitem.md_file }}', '{{ olitem.shell }}', '{{ olitem.command }}'){% if not loop.last %},
+{% endif %}
+{% set id_item = id_item + 1 %}{% endfor %};
+UNLOCK TABLES;
+
+-- ol_items_tags injection
+INSERT INTO `ol_items_tags` (`id_item`, `id_tags`) VALUES
+{% set id_item = 1 %}{% for olitem in oneliner_items %}
+{% for oltag in olitem.tags %}
+    ({{ id_item }}, {{ oltag }}){% if not loop.last %},
+{% endif %}{% endfor %}
+{% set id_item = id_item + 1 %}{% if not loop.last %},
+{% endif %}{% endfor %};
