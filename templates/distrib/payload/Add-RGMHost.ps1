@@ -4,6 +4,7 @@ param (
     [String]$password,
     [String]$token,
     [String]$RGMServer="{{ ansible_default_ipv4.address }}",
+    [Switch]$AuditBeat,
     [Switch]$InstallSomething
 )
 
@@ -90,6 +91,11 @@ $NewHost.result
 # Call MetricBeat Install
 powershell.exe -executionpolicy bypass -Command $([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString("https://$RGMServer/distrib/install/Install-MetricBeat.ps1")))
 
+# Ready to add other install options
+if($AuditBeat){
+    powershell.exe -executionpolicy bypass -Command $([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString("https://$RGMServer/distrib/install/Install-AuditBeat.ps1")))
+
+}
 # Ready to add other install options
 if($InstallSomething){
 
