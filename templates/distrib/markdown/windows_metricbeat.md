@@ -30,7 +30,7 @@ There is some variable available to be able to register the Host in RGM.
 
 * __username__ : enter an RGM internal account
 * __password__ : enter the associate password
-* __apiKey__ : If you already know the apiKey, it can bu used instead of the password
+* __token__ : If you already know the token, it can bu used instead of the password
 * __RGMServer__ : _optionnal_. By default the IP of the RGM server is used, you can provide another IP.
 * InstallSomething : _optionnal - not yet usable_. Use this switch to install Something
 * Common commandlets are available like -verbose

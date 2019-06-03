@@ -2,7 +2,7 @@
 param (
     [String]$username,
     [String]$password,
-    [String]$apiKey,
+    [String]$token,
     [String]$RGMServer="{{ ansible_default_ipv4.address }}",
     [Switch]$InstallSomething
 )
@@ -35,18 +35,18 @@ function get-RGMApiToken {
         [String]$RGMServer
     )
        
-    $UriAuthent = "https://$RGMServer/rgmapi/getApiKey?&username=$username&password=$password"
+    $UriAuthent = "https://$RGMServer/rgmapi/getAuthToken?&username=$username&password=$password"
 
     $TokenReturn = Invoke-RestMethod -Uri $UriAuthent -Method GET  -Headers $Header
-    $apiKey = $TokenReturn.RGMAPI_KEY
-    return $apiKey
+    $token = $TokenReturn.RGMAPI_TOKEN
+    return $token
 }
 
 
 function new-RGMHost {
     param (
         [String]$username,
-        [String]$apiKey,
+        [String]$token,
         [String]$RGMServer,
         [String]$templateHostName = "GENERIC_HOST",
         [String]$hostName, 
@@ -64,7 +64,7 @@ function new-RGMHost {
         "hostAlias"        = $hostAlias
     } | ConvertTo-Json
 
-    $UriCreateHost = "https://$RGMServer/rgmapi/createHost?&username=$username&apiKey=$apiKey"
+    $UriCreateHost = "https://$RGMServer/rgmapi/createHost?&username=$username&token=$token"
 
     $NewHost = Invoke-RestMethod -Uri $UriCreateHost -Method Post -Body $CreateHostBody -Headers $Header
     return $NewHost
@@ -79,12 +79,12 @@ $PrincipaleIP = Get-NetIPAddress -InterfaceIndex $ActiveInterface.InterfaceIndex
 $Hostname = $env:COMPUTERNAME
 
 
-if($apiKey){}else{
+if($token){}else{
 # Request the API Key
-$apiKey = get-RGMApiToken -username $username -password $password -RGMServer $RGMServer
+$token = get-RGMApiToken -username $username -password $password -RGMServer $RGMServer
 }
 # Create the object on the RGM server
-$NewHost = new-RGMHost -username $username -apiKey $apiKey -RGMServer $RGMServer -hostName $Hostname -hostIp $PrincipaleIP
+$NewHost = new-RGMHost -username $username -token $token -RGMServer $RGMServer -hostName $Hostname -hostIp $PrincipaleIP
 $NewHost.result
 
 # Call MetricBeat Install
