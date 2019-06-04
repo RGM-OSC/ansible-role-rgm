@@ -72,7 +72,7 @@ oneliner_items:
   - 2
   - 3
   payload_files:
-  - Install-MeatricBeat.ps1
+  - Install-MetricBeat.ps1
   - Add-RGMHost.ps1
   config_files:
   - windows_metricbeat.yml
