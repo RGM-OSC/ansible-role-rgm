@@ -67,7 +67,7 @@ oneliner_items:
 - item: windows_metricbeat
   md_file: windows_metricbeat.md
   shell: "Windows PowerShell"
-  command: "& $([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString(\"https://{{ ansible_default_ipv4.address }}/distrib/install/Add-RGMHost.ps1\"))) -username \"admin user\"" -password \"password\""
+  command: "& $([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString(\"https://{{ ansible_default_ipv4.address }}/distrib/install/Add-RGMHost.ps1\"))) -username \"admin user\" -password \"password\""
   tags:
   - 2
   - 3
