@@ -66,3 +66,8 @@
   service:
     name: grafana-server
     state: restarted
+
+- name: service_restart_prometheus
+  service:
+    name: prometheus
+    state: restarted

@@ -39,12 +39,24 @@
   - mariadb
   - grafana
   - nagvis
-  
+
+### firewalld configuration
+- name: configure firewalld services
+  firewalld:
+    service: "{{ item }}"
+    permanent: yes
+    state: enabled
+  with_items:
+  - ssh
+  - http
+  - https
+  notify: service_restart_firewalld
+
 ### installs RGM packages & dependencies
 - name: install RGM packages (it may take some time...)
   yum:
     update_cache: "{{ not(update_epel.changed) }}"
-    name: "{{ packages_system + packages_mariadb + packages_apache + packages_elastic + packages_influx_grafana + packages_rgm }}"
+    name: "{{ packages_system + packages_mariadb + packages_apache + packages_elastic + packages_influx_grafana + packages_prometheus + packages_rgm }}"
     state: latest
   retries: 10
   delay: 2
@@ -119,6 +131,14 @@
       tags: http
   tags: http
 
+### configure Prometheus
+- name: configure prometheus
+  include_tasks:
+    file: prometheus.yml
+    apply:
+      tags: prometheus
+  tags: prometheus
+
 ### configure Elastic Stack
 - name: configure elastic stack
   include_tasks:
@@ -137,6 +157,8 @@
     apply:
       tags: grafana
   tags: grafana
+
+### various
 
 - name: kernel hardening (sysctl) following ANSII recomendations
   copy:
@@ -245,18 +267,6 @@
     status_code: 200
   when: auth_rgmapi is succeeded
   notify: service_reload_nagios
-
-### firewalld configuration
-- name: configure firewalld services
-  firewalld:
-    service: "{{ item }}"
-    permanent: yes
-    state: enabled
-  with_items:
-  - ssh
-  - http
-  - https
-  notify: service_restart_firewalld
 
 ### enable and start RGM services
 - name: enable RGM daemons

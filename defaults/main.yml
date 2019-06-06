@@ -10,6 +10,7 @@ rgm_root_path: /srv/rgm
 # system users/groups
 rgm_group: rgm
 rgmweb_user: apache
+prometheus_user: prometheus
 
 # internal MariaDB user used by RGM applications
 mariadb_user: 'rgminternal'
@@ -118,6 +119,14 @@ packages_rgm:
 - lilac
 - rgmweb
 - rgmapi
+
+packages_prometheus:
+- prometheus
+- prometheus-node_exporter
+- prometheus-pushgateway
+- prometheus-snmp_exporter
+- prometheus-blackbox_exporter
+- prometheus-ping_exporter
 
 packages_python36:
 - python36

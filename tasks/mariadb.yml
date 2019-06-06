@@ -47,6 +47,9 @@
       owner: root
       group: root
       mode: 0600
+    vars:
+      mariadbuser: 'root'
+      mariadbpasswd: "{{ mariadb_root_password }}"
 
   when: mariadb_status.rc == 0
 
@@ -105,7 +108,7 @@
     name: "{{ mariadb_ro_user }}"
     host: localhost
     password: "{{ mariadb_ro_pwd }}"
-    priv: 'mysql.*:SELECT'
+    priv: '*.*:PROCESS,SELECT'
     append_privs: yes
     login_user: root
     state: present
