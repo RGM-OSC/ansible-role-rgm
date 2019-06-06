@@ -49,7 +49,7 @@
       mode: 0600
     vars:
       mariadbuser: 'root'
-      mariadbpasswd: mariadb_root_password
+      mariadbpasswd: "{{ mariadb_root_password }}"
 
   when: mariadb_status.rc == 0
 

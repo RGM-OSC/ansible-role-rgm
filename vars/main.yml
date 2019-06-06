@@ -2,6 +2,9 @@
 # vars file for ansible-role-rgm
 # vim: bs=2 sw=2 expandtab:
 
+prometheus_mysql_cnf: /var/lib/prometheus/.my.cnf
+
+
 rgm_services:
 - chronyd
 - firewalld
