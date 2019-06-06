@@ -21,22 +21,5 @@
   register: prometheus_cfg_changed
 
 
-- name: set .my.cnf for prometheus user
-  template:
-    src: mariadb/my.cnf.j2
-    dest: "{{ prometheus_mysql_cnf }}"
-    owner: "{{ prometheus_user }}"
-    group: "{{ rgm_group }}"
-    mode: 0600
-  vars:
-    mariadbuser: "{{ mariadb_prometheus_user }}"
-    mariadbpasswd: "{{ mariadb_prometheus_pwd }}"
-
-- name: "configure mysqld_exporter service"
-  lineinfile:
-    path: /etc/sysconfig/promotheus/mysqld_exporter
-    regexp: '^(#\s*)?MYSQLD_EXPORTER_OPTS='
-    line: "MYSQLD_EXPORTER_OPTS='--config.my-cnf={{ prometheus_mysql_cnf }} --web.listen-address=127.0.0.1:9104'"
-
 
 # https://docs.influxdata.com/influxdb/v1.5/administration/server_monitoring/#influxdb-metrics-http-endpoint

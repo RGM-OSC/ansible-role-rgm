@@ -108,17 +108,7 @@
     name: "{{ mariadb_ro_user }}"
     host: localhost
     password: "{{ mariadb_ro_pwd }}"
-    priv: 'mysql.*:SELECT'
-    append_privs: yes
-    login_user: root
-    state: present
-
-- name: create prometheus internal user account
-  mysql_user:
-    name: "{{ mariadb_prometheus_user }}"
-    host: localhost
-    password: "{{ mariadb_prometheus_pwd }}"
-    priv: '*.*:PROCESS,REPLICATION CLIENT,SELECT'
+    priv: 'mysql.*:PROCESS,SELECT'
     append_privs: yes
     login_user: root
     state: present
