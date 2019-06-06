@@ -19,6 +19,7 @@ rgm_services:
 - nagios
 - httpd
 - kibana
+- prometheus
 
 grafana_plugins_core:
 - grafana-simple-json-datasource

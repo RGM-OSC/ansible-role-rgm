@@ -16,6 +16,8 @@ mariadb_user: 'rgminternal'
 mariadb_pwd: '0rd0-c0m1735-b47h0n143'
 mariadb_ro_user: 'rgmro'
 mariadb_ro_pwd: 'XgfLlyTmMeNntE9WrTE3ToQhy7ATZmDC'
+mariadb_prometheus_user: 'prometheus'
+mariadb_prometheus_pwd: 'aXzLTv_EH4XbOtOQENNQk2-Vlxz33vIN'
 
 # database names
 db_rgmweb: 'rgmweb'
@@ -118,6 +120,17 @@ packages_rgm:
 - lilac
 - rgmweb
 - rgmapi
+
+packages_prometheus:
+- prometheus
+- prometheus-apache_exporter
+- prometheus-elasticsearch_exporter
+- prometheus-mysqld_exporter
+- prometheus-node_exporter
+- prometheus-pushgateway
+- prometheus-snmp_exporter
+- prometheus-blackbox_exporter
+- prometheus-ping_exporter
 
 packages_python36:
 - python36

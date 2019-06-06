@@ -47,6 +47,9 @@
       owner: root
       group: root
       mode: 0600
+    vars:
+      mariadbuser: 'root'
+      mariadbpasswd: mariadb_root_password
 
   when: mariadb_status.rc == 0
 
@@ -106,6 +109,16 @@
     host: localhost
     password: "{{ mariadb_ro_pwd }}"
     priv: 'mysql.*:SELECT'
+    append_privs: yes
+    login_user: root
+    state: present
+
+- name: create prometheus internal user account
+  mysql_user:
+    name: "{{ mariadb_prometheus_user }}"
+    host: localhost
+    password: "{{ mariadb_prometheus_pwd }}"
+    priv: '*.*:PROCESS,REPLICATION CLIENT,SELECT'
     append_privs: yes
     login_user: root
     state: present

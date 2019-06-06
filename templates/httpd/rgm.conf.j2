@@ -5,4 +5,5 @@ ServerName {{ ansible_hostname }}
 
 RewriteEngine On
 RewriteCond %{HTTPS} !=on
+RewriteCond %{REQUEST_URI} !^/server-status
 RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L]
