@@ -108,7 +108,7 @@
     name: "{{ mariadb_ro_user }}"
     host: localhost
     password: "{{ mariadb_ro_pwd }}"
-    priv: 'mysql.*:PROCESS,SELECT'
+    priv: '*.*:PROCESS,SELECT'
     append_privs: yes
     login_user: root
     state: present

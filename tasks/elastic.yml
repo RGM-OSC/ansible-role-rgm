@@ -104,8 +104,8 @@
     line: "{{ item.line }}"
     insertafter: "{{ item.after }}"
   with_items:
-  - { regex: '^(\s*#\s*)?metricsets: ',     line: '  metricsets:', after: '- module: mysql' }
-  - { regex: '^(\s*#\s*)?- status',     line: '  - status', after: '^\s+metricsets:' }
+  - { regex: '^(\s*#)?\s*metricsets:',     line: '  metricsets:', after: '- module: mysql' }
+  - { regex: '^(\s*#)?\s*- status',     line: '  - status', after: '^\s+metricsets:' }
 
 - name: "configure DSN for mysql metricbeat"
   lineinfile:
