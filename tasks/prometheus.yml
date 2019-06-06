@@ -25,8 +25,8 @@
   template:
     src: mariadb/my.cnf.j2
     dest: "{{ prometheus_mysql_cnf }}"
-    owner: root
-    group: root
+    owner: "{{ prometheus_user }}"
+    group: "{{ rgm_group }}"
     mode: 0600
   vars:
     mariadbuser: "{{ mariadb_prometheus_user }}"

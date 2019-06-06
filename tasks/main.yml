@@ -131,6 +131,14 @@
       tags: http
   tags: http
 
+### configure Prometheus
+- name: configure prometheus
+  include_tasks:
+    file: prometheus.yml
+    apply:
+      tags: prometheus
+  tags: prometheus
+
 ### configure Elastic Stack
 - name: configure elastic stack
   include_tasks:
@@ -149,15 +157,6 @@
     apply:
       tags: grafana
   tags: grafana
-
-### configure Prometheus
-- name: configure prometheus
-  include_tasks:
-    file: prometheus.yml
-    apply:
-      tags: prometheus
-  tags: prometheus
-
 
 ### various
 

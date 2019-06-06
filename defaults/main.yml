@@ -10,6 +10,7 @@ rgm_root_path: /srv/rgm
 # system users/groups
 rgm_group: rgm
 rgmweb_user: apache
+prometheus_user: prometheus
 
 # internal MariaDB user used by RGM applications
 mariadb_user: 'rgminternal'
@@ -123,9 +124,6 @@ packages_rgm:
 
 packages_prometheus:
 - prometheus
-- prometheus-apache_exporter
-- prometheus-elasticsearch_exporter
-- prometheus-mysqld_exporter
 - prometheus-node_exporter
 - prometheus-pushgateway
 - prometheus-snmp_exporter

@@ -87,6 +87,25 @@
   - { regex: '^(#\s*)?host:\s+".*:9200"',   line: "host: \"127.0.0.1:9200\"" }
   notify: service_restart_metricbeat
  
+- name: enable prometheus module for metricbeat
+  command: "mv /etc/metricbeat/modules.d{{ item }}.disabled /etc/metricbeat/modules.d{{ item }}"
+  args:
+    creates: "/etc/metricbeat/modules.d{{ item }}"
+  with_items:
+  - prometheus.yml
+  - apache.yml
+  - kibana.yml
+  - mysql.yml
+
+- name: "configure DSN for mysql metricbeat"
+  lineinfile:
+    path: /etc/metricbeat/modules.d/mysql.yml
+    regexp: '^(\s*hosts: \[").*("\])$'
+    backrefs: yes
+    line: "\\1{{ mariadb_prometheus_user }}:{{ mariadb_prometheus_pwd }}@tcp(127.0.0.1:3306)\\2"
+
+
+
 
 
 # curl -XPUT -H "Content-Type: application/json" http://localhost:9200/_all/_settings -d '{"index.blocks.read_only_allow_delete": null}'
