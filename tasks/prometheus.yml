@@ -16,10 +16,18 @@
     line: "{{ item.line }}"
   with_items:
   - { regex: '^(#\s*)?PROMETHEUS_WEB_URL=', line: "PROMETHEUS_WEB_URL='--web.external-url=https://10.0.2.15/prometheus'" }
-  - { regex: '^(#\s*)?PROMETHEUS_LISTEN=',  line: "PROMETHEUS_LISTEN='--web.listen-address=0.0.0.0:9090'" }
+  - { regex: '^(#\s*)?PROMETHEUS_LISTEN=',  line: "PROMETHEUS_LISTEN='--web.listen-address=127.0.0.1:9090'" }
+  - { regex: '^(#\s*)?PROMETHEUS_STORAGE=',  line: "PROMETHEUS_STORAGE='--storage.tsdb.path=/var/lib/prometheus/data --storage.tsdb.retention.time=12h'" }
   notify: service_restart_prometheus
   register: prometheus_cfg_changed
 
+- name: set prometheus config file
+  template:
+    src: prometheus/prometheus.yml.j2
+    dest: /etc/prometheus/prometheus.yml
+    owner: root
+    group: prometheus
+    mode: 0640
 
 
 # https://docs.influxdata.com/influxdb/v1.5/administration/server_monitoring/#influxdb-metrics-http-endpoint
