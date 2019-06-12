@@ -61,6 +61,7 @@
   loop: "{{ oneliner_items }}"
   loop_control:
     label: "{{ item.markdown_help }}"
+  when: item.markdown_help != ""
 
 - name: download packages from upstreams
   get_url:

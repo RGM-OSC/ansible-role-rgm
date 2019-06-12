@@ -91,7 +91,7 @@ oneliner_items:
 - item: linux_metricbeat
   shell: "bash"
   markdown_instruction: linux_metricbeat_instructions.md
-  markdown_help: 
+  markdown_help: ''
   command: bash <(curl -k "https://{{ ansible_default_ipv4.address }}/distrib/install/linux-metricbeat.sh)"
   tags:
   - 1
