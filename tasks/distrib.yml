@@ -40,16 +40,27 @@
   - config_files
   - skip_missing: true
 
-- name: install markdown pages
+- name: install markdown instruction pages
   template:
-    src: "distrib/markdown/{{ item.md_file }}"
-    dest: "{{ rgm_root_path }}/distrib/markdown/{{ item.md_file }}"
+    src: "distrib/markdown/{{ item.markdown_instruction }}"
+    dest: "{{ rgm_root_path }}/distrib/markdown/{{ item.markdown_instruction }}"
     owner: "{{ rgmweb_user }}"
     group: "{{ rgm_group }}"
     mode: 0444
   loop: "{{ oneliner_items }}"
   loop_control:
-    label: "{{ item.md_file }}"
+    label: "{{ item.markdown_instruction }}"
+
+- name: install markdown help pages
+  template:
+    src: "distrib/markdown/{{ item.markdown_help }}"
+    dest: "{{ rgm_root_path }}/distrib/markdown/{{ item.markdown_help }}"
+    owner: "{{ rgmweb_user }}"
+    group: "{{ rgm_group }}"
+    mode: 0444
+  loop: "{{ oneliner_items }}"
+  loop_control:
+    label: "{{ item.markdown_help }}"
 
 - name: download packages from upstreams
   get_url:
