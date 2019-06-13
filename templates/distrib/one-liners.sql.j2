@@ -22,9 +22,9 @@ UNLOCK TABLES;
 
 -- ol_items injection
 LOCK TABLES `ol_items` WRITE;
-INSERT INTO `ol_items` (`id`, `name`, `filename`, `shell`, `command`) VALUES 
+INSERT INTO `ol_items` (`id`, `name`, `instruction_file`, `help_file`, `shell`, `command`) VALUES 
 {% set id_item = 1 %}{% for olitem in oneliner_items %}
-    ({{ id_item }}, '{{ olitem.item }}', '{{ olitem.md_file }}', '{{ olitem.shell }}', '{{ olitem.command }}'){% if not loop.last %},
+    ({{ id_item }}, '{{ olitem.item }}', '{{ olitem.markdown_instruction }}', '{{ olitem.markdown_help }}', '{{ olitem.shell }}', '{{ olitem.command }}'){% if not loop.last %},
 {% endif %}
 {% set id_item = id_item + 1 %}{% endfor %};
 UNLOCK TABLES;

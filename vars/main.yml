@@ -69,8 +69,9 @@ oneliner_tags:
 
 oneliner_items:
 - item: windows_metricbeat
-  md_file: windows_metricbeat.md
   shell: "Windows PowerShell"
+  markdown_instruction: windows_metricbeat_instructions.md
+  markdown_help: windows_metricbeat_advanced_help.md
   command: "& $([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString(\"https://{{ ansible_default_ipv4.address }}/distrib/install/Add-RGMHost.ps1\"))) -username \"admin user\" -password \"password\""
   tags:
   - 2
@@ -86,10 +87,11 @@ oneliner_items:
   - https://artifacts.elastic.co/downloads/beats/winlogbeat/winlogbeat-oss-6.7.1-windows-x86_64.zip
   - https://artifacts.elastic.co/downloads/beats/auditbeat/auditbeat-oss-6.7.1-windows-x86_64.zip
   - https://artifacts.elastic.co/downloads/beats/heartbeat/heartbeat-oss-6.7.1-windows-x86_64.zip
-  - https://artifacts.elastic.co/downloads/beats/packetbeat/packetbeat-oss-6.7.1-windows-x86_64.zip  
+  #- https://artifacts.elastic.co/downloads/beats/packetbeat/packetbeat-oss-6.7.1-windows-x86_64.zip  
 - item: linux_metricbeat
-  md_file: linux_metricbeat.md
   shell: "bash"
+  markdown_instruction: linux_metricbeat_instructions.md
+  markdown_help: ''
   command: bash <(curl -k "https://{{ ansible_default_ipv4.address }}/distrib/install/linux-metricbeat.sh)"
   tags:
   - 1
