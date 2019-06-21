@@ -1,9 +1,12 @@
 [cmdletbinding()]
 param (
-    [String]$username,
-    [String]$password,
-   # [String]$token,
-    [String]$RGMServer="{{ ansible_default_ipv4.address }}",
+    [Parameter(Mandatory=$true,ParameterSetName="Username")]
+    [String]$Username,
+    [Parameter(Mandatory=$true,ParameterSetName="Username")]
+    [String]$Password,
+    [Parameter(Mandatory=$true,ParameterSetName="OneTimeToken")]
+    [String]$OneTimeToken,
+    [String]$RGMServer = "{{ ansible_default_ipv4.address }}",
     [Switch]$NoMetricBeat,
     [Switch]$AuditBeat,
     [Switch]$InstallSomething
@@ -26,36 +29,40 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
 }
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-$Header = @{
-    "Content-Type" = "application/json"
+# Create header with token value if the token is passed in variable
+If ($OneTimeToken) {
+    $Header = @{
+        "Content-Type" = "application/json"
+        "token"        = $OneTimeToken
+    }
+}
+Else {
+    $Header = @{
+        "Content-Type" = "application/json"
+    }
 }
 
 function Get-RGMApiToken {
-#    param (
-#        [String]$username,
-#        [String]$password,
-#        [String]$RGMServer
-#    )
-       
-    $UriAuthent = "https://$RGMServer/rgmapi/getAuthToken?&username=$username&password=$password"
+
+    $UriAuthent = "https://$RGMServer/rgmapi/getAuthToken?&username=$Username&password=$Password"
 
     $TokenReturn = Invoke-RestMethod -Uri $UriAuthent -Method GET -Headers $Header
-    $script:token = $TokenReturn.RGMAPI_TOKEN
-#    return $token
+
+    # Update the current header with the current active token
+    $script:Header = @{
+        "Content-Type" = "application/json"
+        "token"        = $TokenReturn.RGMAPI_TOKEN
+    }
 }
 
 
 function Test-RGMApiToken {
-#   param (
-#    [String]$token,
- #   [String]$RGMServer
-  #  )
 
-    $UriTokenCheck = "https://$RGMServer/rgmapi/checkAuthToken?token=$token"
-    try{
-    $null = Invoke-RestMethod -Uri $UriTokenCheck -Method GET -Headers $Header
+    $UriTokenCheck = "https://$RGMServer/rgmapi/checkAuthToken"
+    try {
+        $null = Invoke-RestMethod -Uri $UriTokenCheck -Method GET -Headers $Header
     }
-    catch{
+    catch {
         return $false
     }
     return $true
@@ -63,32 +70,34 @@ function Test-RGMApiToken {
 
 function Invoke-RGMRestMethod {
     param (
-#        [String]$token,
- #       [String]$RGMServer,
         [String]$Uri,
         [String]$Methode,
         [String]$Body
     )
     if (!(Test-RGMApiToken)) {
-        Get-RGMApiToken
+        if ($password) {
+            Get-RGMApiToken
+        }
+        elseif ($OneTimeToken) {
+            Write-Host "The OnTimeToken is not valid`nEnd of script"
+            exit
+        }else{
+            Write-Host "There is an unexpected error (no password or no OneTimeToken provided)`nEnd of script"
+            exit
+        }
     }
 
-    $UriWithAuth = $Uri + "?&username=$username&token=$token"
     if ($Methode -eq "Get") {
-        return (Invoke-RestMethod -Uri $UriWithAuth -Method Get -Headers $Header)
+        return (Invoke-RestMethod -Uri $Uri -Method Get -Headers $Header)
     }
     else {
-        $token
-        return (Invoke-RestMethod -Uri $UriWithAuth -Method $Methode -Body $Body -Headers $Header)
+        return (Invoke-RestMethod -Uri $Uri -Method $Methode -Body $Body -Headers $Header)
     }
 }
 
 
 function New-RGMHost {
     param (
-#        [String]$username,
-#        [String]$token,
-#        [String]$RGMServer,
         [String]$templateHostName = "GENERIC_HOST",
         [String]$hostName, 
         [String]$hostIp, 
@@ -120,26 +129,22 @@ $PrincipaleIP = Get-NetIPAddress -InterfaceIndex $ActiveInterface.InterfaceIndex
 $Hostname = $env:COMPUTERNAME
 
 
-#if($token){}else{
-# Request the API Key
-#$token = get-RGMApiToken # -username $username -password $password -RGMServer $RGMServer
-#}
 # Create the object on the RGM server
-$NewHost = New-RGMHost -hostName $Hostname -hostIp $PrincipaleIP #-username $username -token $FreshToken -RGMServer $RGMServer 
+$NewHost = New-RGMHost -hostName $Hostname -hostIp $PrincipaleIP
 $NewHost.result
 
 # Call MetricBeat Install
-if($NoMetricBeat){}else{
+if ($NoMetricBeat) { }else {
     powershell.exe -executionpolicy bypass -Command $([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString("https://$RGMServer/distrib/install/Install-MetricBeat.ps1")))
 }
 
 # Ready to add other install options
-if($AuditBeat){
+if ($AuditBeat) {
     powershell.exe -executionpolicy bypass -Command $([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString("https://$RGMServer/distrib/install/Install-AuditBeat.ps1")))
 
 }
 # Ready to add other install options
-if($InstallSomething){
+if ($InstallSomething) {
 
 
 }
