@@ -40,18 +40,6 @@
   - grafana
   - nagvis
 
-### firewalld configuration
-- name: configure firewalld services
-  firewalld:
-    service: "{{ item }}"
-    permanent: yes
-    state: enabled
-  with_items:
-  - ssh
-  - http
-  - https
-  notify: service_restart_firewalld
-
 ### installs RGM packages & dependencies
 - name: install RGM packages (it may take some time...)
   yum:
@@ -63,6 +51,24 @@
   register: yum_result
   until: yum_result.rc == 0
   tags: packages
+
+### firewalld configuration
+- name: ensure firewalld is enabled and running
+  systemd:
+    name: firewalld
+    enabled: yes
+    state: started
+
+- name: configure firewalld services
+  firewalld:
+    service: "{{ item }}"
+    permanent: yes
+    state: enabled
+  with_items:
+  - ssh
+  - http
+  - https
+  notify: service_restart_firewalld
 
 - name: create Ansible tmp dirs for alternate users
   file:
