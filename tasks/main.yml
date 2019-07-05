@@ -224,7 +224,7 @@
     path: /etc/ssh/sshd_config
     regexp: "{{ item.regex }}"
     line: "{{ item.line }}"
-    insertafter: "^(#\s*)?UsePAM "
+    insertafter: '^(#\s*)?UsePAM '
   with_items:
   - { regex: '^(#\s*)?PermitEmptyPasswords',         line: "PermitEmptyPasswords no" }
   - { regex: '^(#\s*)?PermitRootLogin',              line: "PermitRootLogin without-password" }
