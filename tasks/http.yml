@@ -31,6 +31,7 @@
   - { section: 'PHP',  option: 'memory_limit',       value: '256M' }
   - { section: 'PHP',  option: 'max_execution_time', value: '300' }
   - { section: 'PHP',  option: 'error_reporting',    value: 'E_ERROR' }
+  - { section: 'PHP',  option: 'expose_php',         value: 'Off' }
   notify: service_reload_http
 
 ## apache configuration
@@ -42,6 +43,13 @@
     line: "DocumentRoot \"{{ rgm_root_path }}/rgmweb\""
   notify: service_reload_http
 
+- name: backup ssl.conf original (distrib) file
+  copy:
+    remote_src: yes
+    force: no
+    src: /etc/httpd/conf.d/ssl.conf
+    dest: /etc/httpd/conf.d/ssl.conf.distrib
+
 - name: Install RGM httpd config files
   template:
     src: "httpd/{{ item }}.conf.j2"
@@ -50,6 +58,8 @@
     group: root
     mode: 0644
   with_items:
+  - 00_hardening
+  - ssl
   - rgm
   - grafana
   - elasticsearch
