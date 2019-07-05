@@ -1,11 +1,22 @@
 " Ansible Managed file - RGM installation
+
+" disables Vi compatibility, so gets full Vim experience
 set nocompatible
+" do *not* expand tabs (eg. replacing tab escape char. by spaces)
 set noexpandtab
+" enable command completion in command mode
 set wildmenu
-set bs=2
-set ts=2
+
+set backspace=indent,eol,start
+set tabstop=2
 set shiftwidth=2
+
+set autoindent  
+set smartindent  
+set nowrap  
+
 set bg=dark
 set ru
 set modeline
+set pastetoggle=<F3>
 syntax on

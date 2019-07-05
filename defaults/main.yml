@@ -8,6 +8,8 @@ rgm_admin_password: 'admin'
 rgm_root_path: /srv/rgm
 
 # system users/groups
+rgm_user: rgm
+rgm_user_password: changeme
 rgm_group: rgm
 rgmweb_user: apache
 prometheus_user: prometheus
