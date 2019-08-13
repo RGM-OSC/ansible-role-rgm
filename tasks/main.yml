@@ -335,3 +335,6 @@
     enabled: yes
     state: started
   with_items: "{{ rgm_services }}"
+
+- name: update mlocate database
+  command: /usr/bin/updatedb -f "$nodevs"
