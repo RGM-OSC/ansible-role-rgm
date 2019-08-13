@@ -6,14 +6,14 @@ actions:
   1:
     action: close
     description: >-
-      close metricbeat-* indexes older than {{ curator.close_indices_delay }} days
+      close beats indices older than {{ curator.close_indices_delay }} days
     options:
       delete_aliases: False
       ignore_empty_list: True
     filters:
     - filtertype: pattern
-      kind: prefix
-      value: 'metricbeat-'
+      kind: regex
+      value: '^[a-z]+beat-.*'
     - filtertype: age
       direction: older
       source: name
@@ -24,13 +24,13 @@ actions:
   2:
     action: delete_indices
     description: >-
-      permanently delete metricbeat-* indices older than {{ curator.delete_indices_delay }} days
+      permanently delete beats indices older than {{ curator.delete_indices_delay }} days
     options:
       ignore_empty_list: True
     filters:
     - filtertype: pattern
-      kind: prefix
-      value: 'metricbeat-'
+      kind: regex
+      value: '^[a-z]+beat-.*'
     - filtertype: age
       direction: older
       source: name
