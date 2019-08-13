@@ -102,7 +102,7 @@
                 "type": "sum"
               }
             ],
-            "query": "metricset.module:system AND metricset.name:cpu AND beat.hostname:$hostname",
+            "query": "event.module:system AND metricset.name:cpu AND host.name:$hostname",
             "refId": "A",
             "timeField": "@timestamp"
           }
@@ -204,7 +204,7 @@
                 "type": "avg"
               }
             ],
-            "query": "metricset.module:system AND beat.hostname:$hostname",
+            "query": "event.module:system AND host.name:$hostname",
             "refId": "A",
             "timeField": "@timestamp"
           }
@@ -305,7 +305,7 @@
                 "type": "sum"
               }
             ],
-            "query": "metricset.module:system AND metricset.name:memory AND beat.hostname:$hostname",
+            "query": "event.module:system AND metricset.name:memory AND host.name:$hostname",
             "refId": "A",
             "timeField": "@timestamp"
           }
@@ -407,7 +407,7 @@
                 "type": "max"
               }
             ],
-            "query": "metricset.module:system AND metricset.name:filesystem AND beat.hostname:$hostname",
+            "query": "event.module:system AND metricset.name:filesystem AND host.name:$hostname",
             "refId": "A",
             "timeField": "@timestamp"
           }
@@ -511,7 +511,7 @@
                 "type": "avg"
               }
             ],
-            "query": "metricset.module:system AND metricset.name:cpu AND beat.hostname:$hostname",
+            "query": "event.module:system AND metricset.name:cpu AND host.name:$hostname",
             "refId": "A",
             "timeField": "@timestamp"
           }
@@ -612,7 +612,7 @@
                 "type": "max"
               }
             ],
-            "query": "metricset.module:system AND metricset.name:memory AND beat.hostname:$hostname",
+            "query": "event.module:system AND metricset.name:memory AND host.name:$hostname",
             "refId": "A",
             "timeField": "@timestamp"
           }
@@ -718,7 +718,7 @@
                 "type": "avg"
               }
             ],
-            "query": "metricset.module:system AND beat.hostname:$hostname",
+            "query": "event.module:system AND host.name:$hostname",
             "refId": "A",
             "timeField": "@timestamp"
           }
@@ -826,7 +826,7 @@
                 "type": "avg"
               }
             ],
-            "query": "metricset.module:system AND metricset.name:cpu AND beat.hostname:$hostname",
+            "query": "event.module:system AND metricset.name:cpu AND host.name:$hostname",
             "refId": "A",
             "timeField": "@timestamp"
           }
@@ -927,7 +927,7 @@
                 "type": "avg"
               }
             ],
-            "query": "metricset.module:system AND metricset.name:fsstat AND beat.hostname:$hostname",
+            "query": "event.module:system AND metricset.name:fsstat AND host.name:$hostname",
             "refId": "A",
             "timeField": "@timestamp"
           }
@@ -1024,7 +1024,7 @@
                 "type": "avg"
               }
             ],
-            "query": "metricset.module:system AND metricset.name:cpu AND beat.hostname:$hostname",
+            "query": "event.module:system AND metricset.name:cpu AND host.name:$hostname",
             "refId": "A",
             "timeField": "@timestamp"
           },
@@ -1053,7 +1053,7 @@
                 "type": "avg"
               }
             ],
-            "query": "metricset.module:system AND metricset.name:memory AND beat.hostname:$hostname",
+            "query": "event.module:system AND metricset.name:memory AND host.name:$hostname",
             "refId": "B",
             "timeField": "@timestamp"
           }
@@ -1196,7 +1196,7 @@
                 "type": "avg"
               }
             ],
-            "query": "metricset.module:system AND metricset.name:filesystem AND beat.hostname:$hostname",
+            "query": "event.module:system AND metricset.name:filesystem AND host.name:$hostname",
             "refId": "B",
             "timeField": "@timestamp"
           },
@@ -1250,7 +1250,7 @@
                 "type": "avg"
               }
             ],
-            "query": "metricset.module:system AND metricset.name:filesystem AND beat.hostname:$hostname",
+            "query": "event.module:system AND metricset.name:filesystem AND host.name:$hostname",
             "refId": "A",
             "timeField": "@timestamp"
           }
@@ -1376,7 +1376,7 @@
                 "type": "avg"
               }
             ],
-            "query": "metricset.module:system AND metricset.name:core AND beat.hostname:$hostname",
+            "query": "event.module:system AND metricset.name:core AND host.name:$hostname",
             "refId": "A",
             "timeField": "@timestamp"
           }
@@ -1487,7 +1487,7 @@
                 "type": "avg"
               }
             ],
-            "query": "metricset.module:system AND metricset.name:cpu AND beat.hostname:$hostname",
+            "query": "event.module:system AND metricset.name:cpu AND host.name:$hostname",
             "refId": "A",
             "timeField": "@timestamp"
           },
@@ -1515,7 +1515,7 @@
                 "type": "avg"
               }
             ],
-            "query": "metricset.module:system AND metricset.name:cpu AND beat.hostname:$hostname",
+            "query": "event.module:system AND metricset.name:cpu AND host.name:$hostname",
             "refId": "C",
             "timeField": "@timestamp"
           },
@@ -1543,7 +1543,7 @@
                 "type": "avg"
               }
             ],
-            "query": "metricset.module:system AND metricset.name:cpu AND beat.hostname:$hostname",
+            "query": "event.module:system AND metricset.name:cpu AND host.name:$hostname",
             "refId": "D",
             "timeField": "@timestamp"
           }
@@ -1673,7 +1673,7 @@
                 "type": "avg"
               }
             ],
-            "query": "metricset.module:system AND metricset.name:network AND beat.hostname:$hostname",
+            "query": "event.module:system AND metricset.name:network AND host.name:$hostname",
             "refId": "B",
             "timeField": "@timestamp"
           }
@@ -1803,7 +1803,7 @@
                 "type": "avg"
               }
             ],
-            "query": "metricset.module:system AND metricset.name:network AND beat.hostname:$hostname",
+            "query": "event.module:system AND metricset.name:network AND host.name:$hostname",
             "refId": "B",
             "timeField": "@timestamp"
           }
@@ -1933,7 +1933,7 @@
                 "type": "avg"
               }
             ],
-            "query": "metricset.module:system AND metricset.name:network AND beat.hostname:$hostname",
+            "query": "event.module:system AND metricset.name:network AND host.name:$hostname",
             "refId": "A",
             "timeField": "@timestamp"
           }
@@ -2063,7 +2063,7 @@
                 "type": "avg"
               }
             ],
-            "query": "metricset.module:system AND metricset.name:network AND beat.hostname:$hostname",
+            "query": "event.module:system AND metricset.name:network AND host.name:$hostname",
             "refId": "B",
             "timeField": "@timestamp"
           }
@@ -2193,7 +2193,7 @@
                 "type": "avg"
               }
             ],
-            "query": "metricset.module:system AND metricset.name:network AND beat.hostname:$hostname",
+            "query": "event.module:system AND metricset.name:network AND host.name:$hostname",
             "refId": "B",
             "timeField": "@timestamp"
           },
@@ -2234,7 +2234,7 @@
                 "type": "avg"
               }
             ],
-            "query": "metricset.module:system AND metricset.name:network AND beat.hostname:$hostname",
+            "query": "event.module:system AND metricset.name:network AND host.name:$hostname",
             "refId": "A",
             "timeField": "@timestamp"
           }
@@ -2364,7 +2364,7 @@
                 "type": "avg"
               }
             ],
-            "query": "metricset.module:system AND metricset.name:network AND beat.hostname:$hostname",
+            "query": "event.module:system AND metricset.name:network AND host.name:$hostname",
             "refId": "B",
             "timeField": "@timestamp"
           },
@@ -2405,7 +2405,7 @@
                 "type": "avg"
               }
             ],
-            "query": "metricset.module:system AND metricset.name:network AND beat.hostname:$hostname",
+            "query": "event.module:system AND metricset.name:network AND host.name:$hostname",
             "refId": "A",
             "timeField": "@timestamp"
           }
@@ -2488,7 +2488,7 @@
           "multi": true,
           "name": "hostname",
           "options": [],
-          "query": "{\"find\": \"terms\", \"field\": \"beat.hostname\"}",
+          "query": "{\"find\": \"terms\", \"field\": \"host.name\"}",
           "refresh": 2,
           "regex": "",
           "skipUrlSync": false,
