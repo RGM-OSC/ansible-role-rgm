@@ -260,11 +260,12 @@
     option: "{{ item.option }}"
     value: "{{ item.value }}"
   with_items:
-  - { section: 'auth_mysql', option: 'dbhost', value: '127.0.0.1' }
-  - { section: 'auth_mysql', option: 'dbport', value: '3306' }
-  - { section: 'auth_mysql', option: 'dbname', value: "{{ db_nagvis }}" }
-  - { section: 'auth_mysql', option: 'dbuser', value: "{{ mariadb_user }}" }
-  - { section: 'auth_mysql', option: 'dbpass', value: "{{ mariadb_pwd }}" }
+  - { section: 'backend_live_1', option: 'socket', value: 'unix:/srv/rgm/nagios/var/log/rw/live' }
+  - { section: 'auth_mysql',     option: 'dbhost', value: '127.0.0.1' }
+  - { section: 'auth_mysql',     option: 'dbport', value: '3306' }
+  - { section: 'auth_mysql',     option: 'dbname', value: "{{ db_nagvis }}" }
+  - { section: 'auth_mysql',     option: 'dbuser', value: "{{ mariadb_user }}" }
+  - { section: 'auth_mysql',     option: 'dbpass', value: "{{ mariadb_pwd }}" }
 
 - name: put nagvis mysql db schema init script
   template:
