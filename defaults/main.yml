@@ -11,6 +11,7 @@ rgm_root_path: /srv/rgm
 rgm_user: rgm
 rgm_user_password: changeme
 rgm_group: rgm
+rgma_user: rgmauser
 rgmweb_user: apache
 prometheus_user: prometheus
 
