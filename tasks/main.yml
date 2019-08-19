@@ -122,6 +122,7 @@
 - name: create RGM users
   user:
     name: "{{ item.user }}"
+    home: "{{ item.home }}"
     comment: "{{ item.comment }}"
     shell: /bin/bash
     group: "{{ item.group }}"
@@ -135,9 +136,17 @@
     update_password: on_create
     password: "{{ rgm_user_password | password_hash('sha512', lookup('password', '/dev/null length=16 chars=ascii_letters,digits,-,_,!,.,*')) }}"
   with_items:
-  - { user: "{{ rgm_user }}", comment: 'RGM user', group: "{{ rgm_group }}", groups: 'wheel' }
-  - { user: "{{ rgma_user }}", comment: 'RGMA user', group: "{{ rgm_group }}", groups: '' }
+  - { user: "{{ rgm_user }}", home: '/home/rgm', comment: 'RGM user', group: "{{ rgm_group }}", groups: 'wheel' }
+  - { user: "{{ rgma_user }}", home: "{{ rgm_root_path }}/rgma", comment: 'RGMA user', group: "{{ rgm_group }}", groups: '' }
 
+- name: create html subdir for rgma user
+  file:
+    path: "{{ rgm_root_path }}/rgma/html"
+    type: directory
+    owner: "{{ rgm_user }}"
+    group: "{{ rgm_group }}"
+    mode: 0775
+    
 ### configure chronyd
 - name: configure chrony daemon
   include_tasks:
