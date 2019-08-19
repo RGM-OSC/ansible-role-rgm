@@ -1,0 +1,10 @@
+# {{ ansible_managed }}
+# Apache configuration for RGM package distribution
+
+Alias /rgma "{{ rgm_root_path }}/rgma/html"
+
+
+<Directory "{{ rgm_root_path }}/rgma/html">
+        Options +Indexes
+        Require all granted
+</Directory>
