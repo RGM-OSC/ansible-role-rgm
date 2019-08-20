@@ -67,6 +67,7 @@
   - nrdp
   - rgmapi
   - distrib
+  - rgma
   notify: service_reload_http
 
 ## restart apache now as we'll use RGM API later on role
