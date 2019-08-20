@@ -142,7 +142,7 @@
 - name: create html subdir for rgma user
   file:
     path: "{{ rgm_root_path }}/rgma/html"
-    type: directory
+    state: directory
     owner: "{{ rgm_user }}"
     group: "{{ rgm_group }}"
     mode: 0775
