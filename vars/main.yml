@@ -88,8 +88,8 @@ oneliner_items:
   - https://artifacts.elastic.co/downloads/beats/auditbeat/auditbeat-oss-7.2.1-windows-x86_64.zip
   - https://artifacts.elastic.co/downloads/beats/heartbeat/heartbeat-oss-7.2.1-windows-x86_64.zip
   #- https://artifacts.elastic.co/downloads/beats/packetbeat/packetbeat-oss-7.2.1-windows-x86_64.zip 
-  regex_pattern: '^.*\\/(?P<prefix>\\w+-oss-).*(?P<suffix>-win.+)$'
-  regex_replace: '\\g<prefix>latest\\g<suffix>'
+  re_pattern: '^.*\/(?P<prefix>\w+-oss-).*(?P<suffix>-win.+)$'
+  re_replace: '\g<prefix>latest\g<suffix>'
 
 - item: linux_metricbeat
   shell: "bash"
@@ -103,5 +103,5 @@ oneliner_items:
   - linux_metricbeat.yml
   upstream_files:
   - https://community.repo.rgm-cloud.io/rgm/latest/updates/x86_64/Packages/metricbeat-oss-7.2.1-x86_64.rpm
-  regex_pattern: '^.*\\/(?P<prefix>\\w+-oss-).*(?P<suffix>-x86.+)$'
-  regex_replace: '\\g<prefix>latest\\g<suffix>'
+  re_pattern: '^.*\/(?P<prefix>\w+-oss-).*(?P<suffix>-x86.+)$'
+  re_replace: '\g<prefix>latest\g<suffix>'

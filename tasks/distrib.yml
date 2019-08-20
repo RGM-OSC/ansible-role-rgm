@@ -66,6 +66,7 @@
 - name: download packages from upstreams
   get_url:
     url: "{{ item.1 }}"
+    validate_certs: no
     dest: "{{ rgm_root_path }}/distrib/packages/{{ item.1 | basename }}"
     owner: "{{ rgmweb_user }}"
     group: "{{ rgm_group }}"
@@ -83,7 +84,7 @@
   file:
     src: "{{ rgm_root_path }}/distrib/packages/{{ item.1 | basename }}"
     #dest: "{{ rgm_root_path }}/distrib/packages/{{ item.1 | regex_replace('^.*\\/(?P<prefix>\\w+-oss-).*(?P<suffix>-win.+)$', '\\g<prefix>latest\\g<suffix>') }}"
-    dest: "{{ rgm_root_path }}/distrib/packages/{{ item.1 | regex_replace('{{ regex_pattern }}', '{{ regex_replace }}') }}"
+    dest: "{{ rgm_root_path }}/distrib/packages/{{ item.1 | regex_replace(item.0.re_pattern, item.0.re_replace) }}"
     state: link
     force: yes
   with_subelements:
