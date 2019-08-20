@@ -82,7 +82,8 @@
 - name: set 'latest' symlinks
   file:
     src: "{{ rgm_root_path }}/distrib/packages/{{ item.1 | basename }}"
-    dest: "{{ rgm_root_path }}/distrib/packages/{{ item.1 | regex_replace('^.*\\/(?P<prefix>\\w+-oss-).*(?P<suffix>-win.+)$', '\\g<prefix>latest\\g<suffix>') }}"
+    #dest: "{{ rgm_root_path }}/distrib/packages/{{ item.1 | regex_replace('^.*\\/(?P<prefix>\\w+-oss-).*(?P<suffix>-win.+)$', '\\g<prefix>latest\\g<suffix>') }}"
+    dest: "{{ rgm_root_path }}/distrib/packages/{{ item.1 | regex_replace('{{ regex_pattern }}', '{{ regex_replace }}') }}"
     state: link
     force: yes
   with_subelements:
