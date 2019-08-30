@@ -12,6 +12,7 @@ rgm_user: rgm
 rgm_user_password: changeme
 rgm_group: rgm
 rgma_user: rgmauser
+rgma_user_password: changeme
 rgmweb_user: apache
 prometheus_user: prometheus
 

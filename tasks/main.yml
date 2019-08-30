@@ -119,6 +119,16 @@
   group:
     name: "{{ rgm_group }}"
 
+- name: check if rgma user already exists
+  getent:
+    database: passwd
+    key: "{{ rgma_user }}"
+
+- name: create random password for rgma user
+  set_fact:
+    rgma_user_password: "{{ lookup('password', '/dev/null length=16 chars=ascii_letters,digits,-,_,!,.,*') }}"
+  when: not getent_passwd
+
 - name: create RGM users
   user:
     name: "{{ item.user }}"
@@ -134,10 +144,11 @@
     ssh_key_bits: 2048
     ssh_key_file: .ssh/id_rsa
     update_password: on_create
-    password: "{{ rgm_user_password | password_hash('sha512', lookup('password', '/dev/null length=16 chars=ascii_letters,digits,-,_,!,.,*')) }}"
+    #password: "{{ item.pwd | password_hash('sha512', lookup('password', '/dev/null length=16 chars=ascii_letters,digits,-,_,!,.,*')) }}"
+    password: "{{ password_hash('sha512', item.pwd) }}"
   with_items:
-  - { user: "{{ rgm_user }}", home: '/home/rgm', comment: 'RGM user', group: "{{ rgm_group }}", groups: 'wheel' }
-  - { user: "{{ rgma_user }}", home: "{{ rgm_root_path }}/rgma", comment: 'RGMA user', group: "{{ rgm_group }}", groups: '' }
+  - { user: "{{ rgm_user }}",  pwd: "{{ rgm_user_password }}",  home: '/home/rgm',                comment: 'RGM user',  group: "{{ rgm_group }}", groups: 'wheel' }
+  - { user: "{{ rgma_user }}", pwd: "{{ rgma_user_password }}", home: "{{ rgm_root_path }}/rgma", comment: 'RGMA user', group: "{{ rgm_group }}", groups: '' }
 
 - name: create html subdir for rgma user
   file:
@@ -320,6 +331,7 @@
 
 - name: update hostname on lilac config for RGM host entry
   shell: echo "UPDATE nagios_host SET name = '$(hostname)' WHERE id = 1;" | mysql lilac
+  tag: rgmexport
 
 - name: get a valid RGMAPI token
   uri:
@@ -329,6 +341,7 @@
     validate_certs: no
     status_code: 200
   register: auth_rgmapi
+  tag: rgmexport
 
 - name: export Lilac configuration
   uri:
@@ -340,6 +353,7 @@
     status_code: 200
   when: auth_rgmapi is succeeded
   notify: service_reload_nagios
+  tag: rgmexport
 
 ### enable and start RGM services
 - name: enable RGM daemons
