@@ -2,6 +2,35 @@
 # main tasks file for ansible-role-rgm
 # vim: bs=2 sw=2 expandtab:
 
+- block:
+
+  - name: configure outgoing proxy if required
+    lineinfile:
+      path: /etc/environment
+      regexp: "^{{ item.key }}=.*"
+      line: "{{ item.key }}=\"{{ item.line }}\""
+      insertafter: EOF
+      owner: root
+      group: root
+      mode: 0644
+      seuser: system_u
+      serole: object_r
+      setype: etc_t
+      selevel: s0
+    with_items:
+    - { key: 'http_proxy', value: "http://{{ proxy_host }}:{{ proxy_port }}/"}
+    - { key: 'https_proxy', value: "http://{{ proxy_host }}:{{ proxy_port }}/"}
+    - { key: 'no_proxy', value: "localhost,127.0.0.0/8"}
+
+  - name: configure proxy for yum
+    lineinfile:
+      path: /etc/yum.conf
+      regexp: '^proxy=.*'
+      line: "proxy=http://{{ proxy_host }}:{{ proxy_port }}"
+      insertafter: '^[main]$'
+
+  when: proxy_host is defined
+
 # As nagios 4 is present in EPEL repo, disable nagios from EPEL
 - name: exclude nagios from EPEL repo
   ini_file:
@@ -365,3 +394,11 @@
 
 - name: update mlocate database
   command: /usr/bin/updatedb -f "$nodevs"
+
+### 4any post-config
+- name: 4any post-configuration
+  include_tasks:
+    file: 4any.yml
+    apply:
+      tags: 4any
+  tags: 4any

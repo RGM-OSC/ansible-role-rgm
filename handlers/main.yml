@@ -71,3 +71,8 @@
   service:
     name: prometheus
     state: restarted
+
+- name: service_restart_xinetd
+  service:
+    name: prometheus
+    state: restarted

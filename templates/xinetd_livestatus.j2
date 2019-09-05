@@ -1,0 +1,18 @@
+# {{ ansible_managed }}
+service livestatus
+{
+    type        = UNLISTED
+    port        = {{ livestatus_port }}
+    socket_type = stream
+    protocol    = tcp
+    wait        = no
+    cps         = 10 3
+    instance    = 500
+    per_source  = 20
+    flags       = NODELAY
+    user        = rgm
+    server      = {{ rgm_root_path }}/mk-livestatus/bin/unixcat
+    server_args = {{ rgm_root_path }}/nagios/var/log/rw/live
+    only_from   = 127.0.0.1 {{ rgm_central_host }}
+    disable     = no
+}

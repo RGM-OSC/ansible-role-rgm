@@ -1,0 +1,36 @@
+---
+# tasks file for 4any
+# vim: bs=2 sw=2 expandtab:
+
+- name: ensure xinetd daemon is installed
+  yum:
+    name: xinetd
+    state: latest
+
+- name: ensure 4any variables specified
+  assert:
+    that:
+    - "rgm_central_host is defined"
+
+- name: set livestatus xinetd configuration
+  template:
+    src: xinetd_livestatus.j2
+    dest: /etc/xinetd.d/livestatus
+    owner: root
+    group: root
+    mode: 0644
+  notify: service_restart_xinetd
+
+- name: configure firewalld services
+  firewalld:
+    port: "{{ livestatus_port }}/tcp"
+    permanent: yes
+    state: enabled
+
+  notify: service_restart_firewalld
+
+- name: ensure xinetd daemon is enabled and running
+  systemd:
+    name: xinetd
+    enabled: yes
+    state: started
