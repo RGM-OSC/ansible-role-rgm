@@ -74,6 +74,9 @@ packages_system:
 - dos2unix
 - mlocate
 - firewalld
+- perl-version
+- perl-Monitoring-Plugin
+- perl-IO-Socket-INET6
 
 packages_mariadb:
 - mariadb-server
