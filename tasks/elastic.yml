@@ -20,7 +20,7 @@
     mode: 0750
     state: directory
     recurse: yes
- 
+
 - name: configure Elasticsearch config file
   lineinfile:
     path: /etc/elasticsearch/elasticsearch.yml
@@ -86,7 +86,7 @@
   - { regex: '^(#\s*)?host:\s+".*:5601"',   line: "host: \"127.0.0.1:5601\""}
   - { regex: '^(#\s*)?host:\s+".*:9200"',   line: "host: \"127.0.0.1:9200\"" }
   notify: service_restart_metricbeat
- 
+
 - name: enable prometheus module for metricbeat
   command: "mv /etc/metricbeat/modules.d/{{ item }}.disabled /etc/metricbeat/modules.d/{{ item }}"
   args:

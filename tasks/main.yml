@@ -176,7 +176,7 @@
     #password: "{{ item.pwd | password_hash('sha512', lookup('password', '/dev/null length=16 chars=ascii_letters,digits,-,_,!,.,*')) }}"
     password: "{{ password_hash('sha512', item.pwd) }}"
   with_items:
-  - { user: "{{ rgm_user }}",  pwd: "{{ rgm_user_password }}",  home: '/home/rgm',                comment: 'RGM user',  group: "{{ rgm_group }}", groups: 'wheel' }
+  - { user: "{{ rgm_user }}",  pwd: "{{ rgm_user_password }}",  home: '/home/rgm', comment: 'RGM user',  group: "{{ rgm_group }}", groups: 'wheel' }
   - { user: "{{ rgma_user }}", pwd: "{{ rgma_user_password }}", home: "{{ rgm_root_path }}/rgma", comment: 'RGMA user', group: "{{ rgm_group }}", groups: '' }
 
 - name: create html subdir for rgma user
@@ -186,7 +186,7 @@
     owner: "{{ rgm_user }}"
     group: "{{ rgm_group }}"
     mode: 0775
-    
+
 ### configure chronyd
 - name: configure chrony daemon
   include_tasks:
@@ -360,7 +360,7 @@
 
 - name: update hostname on lilac config for RGM host entry
   shell: echo "UPDATE nagios_host SET name = '$(hostname)' WHERE id = 1;" | mysql lilac
-  tag: rgmexport
+  tags: rgmexport
 
 - name: get a valid RGMAPI token
   uri:
@@ -370,7 +370,7 @@
     validate_certs: no
     status_code: 200
   register: auth_rgmapi
-  tag: rgmexport
+  tags: rgmexport
 
 - name: export Lilac configuration
   uri:
@@ -382,7 +382,7 @@
     status_code: 200
   when: auth_rgmapi is succeeded
   notify: service_reload_nagios
-  tag: rgmexport
+  tags: rgmexport
 
 ### enable and start RGM services
 - name: enable RGM daemons

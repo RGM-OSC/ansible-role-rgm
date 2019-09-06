@@ -1,4 +1,4 @@
---- 
+---
 # tasks for mariadb RGM setup
 # vim: bs=2 sw=2 expandtab:
 
@@ -59,7 +59,8 @@
   changed_when: mariadb_status.rc == 1
   failed_when: mariadb_status.rc == 2
 
-- fail:
+- name: fail if can't connect to MariaDB server using root credentials
+  fail:
     msg: |
       "Can't connect to MariaDB server using root credentials !"
       "Please check the /root/.my.cnf"

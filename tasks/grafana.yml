@@ -9,7 +9,7 @@
     update_cache: no
     name: "{{ packages_influx_grafana }}"
     state: present
- 
+
 - name: creates Grafana RGM dashboards directory
   file:
     path: "{{ grafana_rgm_dashboards }}"
@@ -103,7 +103,7 @@
     enabled: yes
     state: started
   register: grafana_first_start
- 
+
 - name: restart grafana service if config changed
   systemd:
     name: grafana-server

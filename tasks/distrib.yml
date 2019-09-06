@@ -61,7 +61,7 @@
   loop: "{{ oneliner_items }}"
   loop_control:
     label: "{{ item.markdown_help }}"
-  when: item.markdown_help != ""
+  when: item.markdown_help != ''
 
 - name: download packages from upstreams
   get_url:
@@ -100,12 +100,4 @@
     group: root
     mode: 0640
   register: oneliner_sql
-
-- name: insert SQL procedures on rgmweb DB
-  shell: mysql rgmweb < /var/lib/rgm/rgmweb/sql/one-liners.sql
-  args:
-    executable: /bin/bash
-  register: oneliner_sql_exec
-  changed_when: oneliner_sql_exec.rc == 1
-  failed_when: oneliner_sql_exec.rc == 2
-  when: oneliner_sql.changed
+  notify: insert SQL procedures on rgmweb DB
