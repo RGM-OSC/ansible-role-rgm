@@ -1,0 +1,91 @@
+---
+# tasks file for agent_deploy_linux
+# vim: bs=2 sw=2 expandtab:
+#
+# This task-file aims to deploy agents on RGM Linux monitored hosts
+
+- block:
+  - name: check if metricbeat package already installed on Debian family system
+    command: dpkg -i metricbeat
+    register: result_dpkg
+    changed_when: result_dpkg.rc = 1
+    failed_when: result_dpkg.rc > 1
+
+  - name: set package filename
+    set_fact:
+      package_name: 'metricbeat-oss-latest-amd64.deb'
+
+  when: ansible_distribution_file_variety == 'Debian'
+
+- block:
+  - name: check if metricbeat package already installed on RedHat family systems
+    command: rpm -qi metricbeat
+    register: result_rpm
+    changed_when: result_rpm.rc = 1
+    failed_when: result_rpm.rc > 1
+
+  - name: set package filename
+    set_fact:
+      package_name: 'metricbeat-oss-latest-amd64.deb'
+
+  when: ansible_distribution_file_variety == 'RedHat'
+
+# download & install package if requested
+- block:
+  - name: download binary package
+    get_url:
+      url: "https://{{ rgm_ip_addr }}/distrib/packages/{{ package_name }}"
+      dest: "/tmp/{{ package_name }}"
+      validate_certs: no
+
+  - name: install RedHat package
+    yum:
+      name: "/tmp/{{ package_name }}"
+    when: ansible_distribution_file_variety == 'RedHat'
+
+  - name: install Debian package
+    apt:
+      deb: "/tmp/{{ package_name }}"
+    when: ansible_distribution_file_variety == 'Debian'
+
+  - name: remove binary file
+    file:
+      path: "/tmp/{{ package_name }}"
+      state: absent
+
+  when: package_name is defined
+
+- name: push metricbeat configuration
+  template:
+    src: distrib/conf/linux_metricbeat.yml.j2
+    dest: "/etc/metricbeat/metricbeat.yml"
+    owner: root
+    group: root
+    mode: 0640
+  vars:
+    client_ip_addr: "{{ ansible_default_ipv4.address }}"
+    rgm_ip_addr: "{{ rgm_ip_addr }}"
+  notify: service_restart_metricbeat
+
+# for systemd hosts
+- name: enable metricbeat on systemd systems
+  systemd:
+    name: metricbeat
+    enabled: yes
+    state: started
+  when:
+  - ansible_distribution == 'Ubuntu' and ansible_distribution_major_version >= 18
+  - ansible_distribution == 'Debian' and ansible_distribution_major_version >= 9
+  - ansible_distribution == 'CentOS' and ansible_distribution_major_version >= 7
+  - ansible_distribution == 'RedHat' and ansible_distribution_major_version >= 7
+
+- name: enable metricbeat on sysvinit systems
+  sysvinit:
+    name: metricbeat
+    state: started
+    enabled: yes
+  when:
+  - ansible_distribution == 'Ubuntu' and ansible_distribution_major_version < 18
+  - ansible_distribution == 'Debian' and ansible_distribution_major_version < 9
+  - ansible_distribution == 'CentOS' and ansible_distribution_major_version < 7
+  - ansible_distribution == 'RedHat' and ansible_distribution_major_version < 7

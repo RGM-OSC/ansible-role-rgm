@@ -77,6 +77,11 @@
     name: prometheus
     state: restarted
 
+- name: win_service_restart_metricbeat
+  win_service:
+    name: metricbeat
+    state: restarted
+
 - name: insert SQL procedures on rgmweb DB
   shell: mysql rgmweb < /var/lib/rgm/rgmweb/sql/one-liners.sql
   args:

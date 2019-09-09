@@ -35,6 +35,9 @@
     owner: "{{ rgmweb_user }}"
     group: "{{ rgm_group }}"
     mode: 0444
+  vars:
+    client_ip_addr: "%%IP%%"
+    rgm_ip_addr: "{{ ansible_default_ipv4.address }}"
   with_subelements:
   - "{{ oneliner_items }}"
   - config_files

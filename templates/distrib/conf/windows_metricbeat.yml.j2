@@ -17,15 +17,15 @@ setup.template.settings:
 fields_under_root: true
 fields:
   # the IP address is inserted by the RGM installer one-liner
-  host.ip: %%IP%%
+  host.ip: {{ client_ip_addr }}
 
 # Kibana
 setup.kibana:
 
 # Elasticsearch output
 output.elasticsearch:
-  hosts: ["{{ ansible_default_ipv4.address }}:443"]
-
+  hosts: ["{{ rgm_ip_addr }}:443"]
+  
   # Optional protocol and basic auth credentials.
   ssl.verification_mode: 'none'
   protocol: "https"
