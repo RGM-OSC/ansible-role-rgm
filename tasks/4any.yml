@@ -7,11 +7,6 @@
     name: xinetd
     state: latest
 
-- name: ensure 4any variables specified
-  assert:
-    that:
-    - "rgm_central_host is defined"
-
 - name: set livestatus xinetd configuration
   template:
     src: xinetd_livestatus.j2
@@ -23,7 +18,7 @@
 
 - name: configure firewalld services
   firewalld:
-    port: "{{ livestatus_port }}/tcp"
+    port: "{{ xinetd_livestatus_port }}/tcp"
     permanent: yes
     state: enabled
 

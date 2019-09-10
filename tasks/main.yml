@@ -401,4 +401,5 @@
     file: 4any.yml
     apply:
       tags: 4any
+  when: rgm_central_host is defined
   tags: 4any
