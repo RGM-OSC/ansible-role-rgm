@@ -94,6 +94,7 @@
     permanent: yes
     state: enabled
   with_items:
+  - snmp
   - ssh
   - http
   - https
