@@ -2,6 +2,16 @@
 # tasks file for 4any
 # vim: bs=2 sw=2 expandtab:
 
+- name: retrieve haproxy IP address
+  command: grep -P '^[\d\.]+\s+haproxy$' /etc/hosts
+  register: haproxy_out
+  failed_when: haproxy_out.rc != 0
+  changed_when: haproxy_out.rc != 0
+
+- name: set haproxy IP address fact
+  set_fact:
+    haproxy_ipaddr: "{{ haproxy_out.stdout | regex_search('^[\\d\\.]+') }}"
+
 - name: ensure xinetd daemon is installed
   yum:
     name: xinetd

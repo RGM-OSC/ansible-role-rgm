@@ -74,7 +74,7 @@
 
 - name: service_restart_xinetd
   service:
-    name: prometheus
+    name: xinetd
     state: restarted
 
 - name: win_service_restart_metricbeat

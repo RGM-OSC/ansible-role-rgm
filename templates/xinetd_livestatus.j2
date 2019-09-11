@@ -2,17 +2,18 @@
 service livestatus
 {
     type        = UNLISTED
-    port        = {{ xinetd_livestatus_port }}
+    flags       = NODELAY
+    disable     = no
     socket_type = stream
     protocol    = tcp
+    port        = {{ xinetd_livestatus_port }}
     wait        = no
-    cps         = 10 3
-    instance    = 500
+    user        = {{ nagios_user }}
+    group       = {{ rgm_group }}
+    instances   = 60
     per_source  = 20
-    flags       = NODELAY
-    user        = rgm
-    server      = {{ rgm_root_path }}/mk-livestatus/bin/unixcat
-    server_args = {{ rgm_root_path }}/nagios/var/log/rw/live
-    only_from   = 127.0.0.1 {{ rgm_central_host }}
-    disable     = no
+    cps         = 10 3
+    server      = /srv/rgm/mk-livestatus/bin/unixcat
+    server_args = /srv/rgm/nagios/var/log/rw/live
+    only_from   = 127.0.0.1{% if haproxy_ipaddr is defined %} {{ haproxy_ipaddr }}{% endif %}{% if rgm_central_host is defined %} {{ rgm_central_host }}{% endif %}
 }

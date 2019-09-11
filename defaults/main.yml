@@ -14,6 +14,7 @@ rgm_group: rgm
 rgma_user: rgmauser
 rgma_user_password: changeme
 rgmweb_user: apache
+nagios_user: nagios
 prometheus_user: prometheus
 
 # internal MariaDB user used by RGM applications
@@ -80,6 +81,7 @@ packages_system:
 - perl-version
 - perl-Monitoring-Plugin
 - perl-IO-Socket-INET6
+- ruby
 
 packages_mariadb:
 - mariadb-server

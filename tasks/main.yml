@@ -81,6 +81,15 @@
   until: yum_result.rc == 0
   tags: packages
 
+### ensure ping capabilities are enabled
+- name: set capabilities
+  capabilities:
+    path: "{{ item.path }}"
+    capability: "{{ item.caps }}"
+    state: present
+  with_items:
+  - { path: '/usr/bin/ping', caps: 'cap_net_admin,cap_net_raw+p' }
+
 ### firewalld configuration
 - name: ensure firewalld is enabled and running
   systemd:
