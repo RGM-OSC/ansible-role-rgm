@@ -378,14 +378,14 @@
     state: directory
 
 ### lilac export nagios config
-- name: check if hostname on lilac db is correct
-  command: mysql --batch --skip-column-names mysql --execute="SELECT name FROM nagios_host WHERE id = 1;"
+- name: check if hostname on {{ db_lilac }} db is correct
+  command: "mysql --batch --skip-column-names {{ db_lilac }} --execute='SELECT name FROM nagios_host WHERE id = 1;'"
   register: lilac_rgm_host
   changed_when: lilac_rgm_host.stdout != ansible_hostname
 
 - block:
-  - name: update hostname on lilac config for RGM host entry
-    shell: echo "UPDATE nagios_host SET name = '$(hostname)' WHERE id = 1;" | mysql lilac
+  - name: update hostname on {{ db_lilac }} config for RGM host entry
+    shell: echo "UPDATE nagios_host SET name = '$(hostname)' WHERE id = 1;" | mysql {{ db_lilac }}
     tags: rgmexport
 
   - name: get a valid RGMAPI token
@@ -411,7 +411,7 @@
     tags: rgmexport
 
   when: lilac_rgm_host.changed
-  
+
 ### enable and start RGM services
 - name: enable RGM daemons
   systemd:
