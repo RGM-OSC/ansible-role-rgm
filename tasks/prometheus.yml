@@ -29,5 +29,14 @@
     group: prometheus
     mode: 0640
 
+- name: enable prometheus module for metricbeat
+  command: "mv /etc/metricbeat/modules.d/{{ item }}.disabled /etc/metricbeat/modules.d/{{ item }}"
+  args:
+    creates: "/etc/metricbeat/modules.d/{{ item }}"
+  with_items:
+  - prometheus.yml
+  - apache.yml
+  - kibana.yml
+  - mysql.yml
 
 # https://docs.influxdata.com/influxdb/v1.5/administration/server_monitoring/#influxdb-metrics-http-endpoint

@@ -87,15 +87,7 @@
   - { regex: '^(#\s*)?host:\s+".*:9200"',   line: "host: \"127.0.0.1:9200\"" }
   notify: service_restart_metricbeat
 
-- name: enable prometheus module for metricbeat
-  command: "mv /etc/metricbeat/modules.d/{{ item }}.disabled /etc/metricbeat/modules.d/{{ item }}"
-  args:
-    creates: "/etc/metricbeat/modules.d/{{ item }}"
-  with_items:
-  - prometheus.yml
-  - apache.yml
-  - kibana.yml
-  - mysql.yml
+
 
 - name: "configure metricsets mysql metricbeat"
   lineinfile:

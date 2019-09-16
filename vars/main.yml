@@ -82,11 +82,11 @@ oneliner_items:
   config_files:
   - windows_metricbeat.yml
   upstream_files:
-  - https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-oss-7.2.1-windows-x86_64.zip
-  - https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-oss-7.2.1-windows-x86_64.zip
-  - https://artifacts.elastic.co/downloads/beats/winlogbeat/winlogbeat-oss-7.2.1-windows-x86_64.zip
-  - https://artifacts.elastic.co/downloads/beats/auditbeat/auditbeat-oss-7.2.1-windows-x86_64.zip
-  - https://artifacts.elastic.co/downloads/beats/heartbeat/heartbeat-oss-7.2.1-windows-x86_64.zip
+  - https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-oss-7.3.1-windows-x86_64.zip
+  - https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-oss-7.3.1-windows-x86_64.zip
+  - https://artifacts.elastic.co/downloads/beats/winlogbeat/winlogbeat-oss-7.3.1-windows-x86_64.zip
+  - https://artifacts.elastic.co/downloads/beats/auditbeat/auditbeat-oss-7.3.1-windows-x86_64.zip
+  - https://artifacts.elastic.co/downloads/beats/heartbeat/heartbeat-oss-7.3.1-windows-x86_64.zip
   #- https://artifacts.elastic.co/downloads/beats/packetbeat/packetbeat-oss-7.2.1-windows-x86_64.zip 
   re_pattern: '^.*\/(?P<prefix>\w+-oss-).*(?P<suffix>-win.+)$'
   re_replace: '\g<prefix>latest\g<suffix>'
@@ -104,7 +104,7 @@ oneliner_items:
   config_files:
   - linux_metricbeat.yml
   upstream_files:
-  - https://community.repo.rgm-cloud.io/rgm/latest/updates/x86_64/Packages/metricbeat-oss-7.2.1-x86_64.rpm
-  - https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-oss-7.2.1-amd64.deb
+  - https://community.repo.rgm-cloud.io/rgm/latest/updates/x86_64/Packages/metricbeat-oss-7.3.1-x86_64.rpm
+  - https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-oss-7.3.1-amd64.deb
   re_pattern: '^.*\/(?P<prefix>\w+-oss-).*(?P<suffix>-(x86_|amd)64.+)$'
   re_replace: '\g<prefix>latest\g<suffix>'

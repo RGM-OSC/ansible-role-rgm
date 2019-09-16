@@ -234,14 +234,6 @@
       tags: http
   tags: http
 
-### configure Prometheus
-- name: configure prometheus
-  include_tasks:
-    file: prometheus.yml
-    apply:
-      tags: prometheus
-  tags: prometheus
-
 ### configure Elastic Stack
 - name: configure elastic stack
   include_tasks:
@@ -249,6 +241,14 @@
     apply:
       tags: elastic
   tags: elastic
+
+### configure Prometheus
+- name: configure prometheus
+  include_tasks:
+    file: prometheus.yml
+    apply:
+      tags: prometheus
+  when: enable_prometheus
 
 ### Actually influxdb and nagflux are correctly pre-configured
 ### out-of-the-box from their respective RPM package...
@@ -378,33 +378,40 @@
     state: directory
 
 ### lilac export nagios config
+- name: check if hostname on lilac db is correct
+  command: mysql --batch --skip-column-names mysql --execute="SELECT name FROM nagios_host WHERE id = 1;"
+  register: lilac_rgm_host
+  changed_when: lilac_rgm_host.stdout != ansible_hostname
 
-- name: update hostname on lilac config for RGM host entry
-  shell: echo "UPDATE nagios_host SET name = '$(hostname)' WHERE id = 1;" | mysql lilac
-  tags: rgmexport
+- block:
+  - name: update hostname on lilac config for RGM host entry
+    shell: echo "UPDATE nagios_host SET name = '$(hostname)' WHERE id = 1;" | mysql lilac
+    tags: rgmexport
 
-- name: get a valid RGMAPI token
-  uri:
-    url: "https://localhost/rgmapi/getAuthToken?&username={{ rgm_admin_user }}&password={{ rgm_admin_password }}"
-    method: GET
-    body_format: json
-    validate_certs: no
-    status_code: 200
-  register: auth_rgmapi
-  tags: rgmexport
+  - name: get a valid RGMAPI token
+    uri:
+      url: "https://localhost/rgmapi/getAuthToken?&username={{ rgm_admin_user }}&password={{ rgm_admin_password }}"
+      method: GET
+      body_format: json
+      validate_certs: no
+      status_code: 200
+    register: auth_rgmapi
+    tags: rgmexport
 
-- name: export Lilac configuration
-  uri:
-    url: "https://localhost/rgmapi/exportConfiguration?&token={{ auth_rgmapi.json.RGMAPI_TOKEN }}"
-    method: POST
-    body_format: json
-    body: '{ "jobName": "Nagios Export" }'
-    validate_certs: no
-    status_code: 200
-  when: auth_rgmapi is succeeded
-  notify: service_reload_nagios
-  tags: rgmexport
+  - name: export Lilac configuration
+    uri:
+      url: "https://localhost/rgmapi/exportConfiguration?&token={{ auth_rgmapi.json.RGMAPI_TOKEN }}"
+      method: POST
+      body_format: json
+      body: '{ "jobName": "Nagios Export" }'
+      validate_certs: no
+      status_code: 200
+    when: auth_rgmapi is succeeded
+    notify: service_reload_nagios
+    tags: rgmexport
 
+  when: lilac_rgm_host.changed
+  
 ### enable and start RGM services
 - name: enable RGM daemons
   systemd:
