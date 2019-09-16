@@ -87,7 +87,15 @@
   - { regex: '^(#\s*)?host:\s+".*:9200"',   line: "host: \"127.0.0.1:9200\"" }
   notify: service_restart_metricbeat
 
-
+- name: enable metricbeat modules
+  command: "mv /etc/metricbeat/modules.d/{{ item }}.disabled /etc/metricbeat/modules.d/{{ item }}"
+  args:
+    creates: "/etc/metricbeat/modules.d/{{ item }}"
+  with_items:
+  - apache.yml
+  - kibana.yml
+  - mysql.yml
+  notify: service_restart_metricbeat
 
 - name: "configure metricsets mysql metricbeat"
   lineinfile:
@@ -98,6 +106,7 @@
   with_items:
   - { regex: '^(\s*#)?\s*metricsets:',     line: '  metricsets:', after: '- module: mysql' }
   - { regex: '^(\s*#)?\s*- status',     line: '  - status', after: '^\s+metricsets:' }
+  notify: service_restart_metricbeat
 
 - name: "configure DSN for mysql metricbeat"
   lineinfile:
@@ -105,9 +114,7 @@
     regexp: '^(\s*hosts: \[").*("\])$'
     backrefs: yes
     line: "\\1{{ mariadb_ro_user }}:{{ mariadb_ro_pwd }}@tcp(127.0.0.1:3306)/\\2"
-
-
-
+  notify: service_restart_metricbeat
 
 
 # curl -XPUT -H "Content-Type: application/json" http://localhost:9200/_all/_settings -d '{"index.blocks.read_only_allow_delete": null}'

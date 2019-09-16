@@ -379,7 +379,8 @@
 
 ### lilac export nagios config
 - name: check if hostname on {{ db_lilac }} db is correct
-  command: "mysql --batch --skip-column-names {{ db_lilac }} --execute='SELECT name FROM nagios_host WHERE id = 1;'"
+  command: >
+    mysql --batch --skip-column-names {{ db_lilac }} --execute='SELECT name FROM nagios_host WHERE id = 1;'
   register: lilac_rgm_host
   changed_when: lilac_rgm_host.stdout != ansible_hostname
 

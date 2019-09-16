@@ -5,7 +5,7 @@
 
 - name: check if lilac schema is filled
   command: >
-    "mysql --batch --skip-column-names {{ db_lilac }} --execute='select value from lilac_configuration;'"
+    mysql --batch --skip-column-names {{ db_lilac }} --execute='select value from lilac_configuration;'
   register: lilac_schema
   changed_when: lilac_schema.stdout != "61"
   ignore_errors: yes
@@ -21,7 +21,7 @@
 
 - name: check if lilac procedures are installed
   command: >
-    "mysql --batch --skip-column-names mysql --execute=\"SELECT count(routine_name) FROM information_schema.routines WHERE routine_type = 'PROCEDURE' AND routine_schema = '{{ db_lilac }}';\""
+    mysql --batch --skip-column-names mysql --execute="SELECT count(routine_name) FROM information_schema.routines WHERE routine_type = 'PROCEDURE' AND routine_schema = '{{ db_lilac }}';
   register: lilac_procedures
   changed_when: lilac_procedures.stdout != "6"
 

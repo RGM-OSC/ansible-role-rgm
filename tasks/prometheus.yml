@@ -30,13 +30,9 @@
     mode: 0640
 
 - name: enable prometheus module for metricbeat
-  command: "mv /etc/metricbeat/modules.d/{{ item }}.disabled /etc/metricbeat/modules.d/{{ item }}"
+  command: mv /etc/metricbeat/modules.d/prometheus.yml.disabled /etc/metricbeat/modules.d/prometheus.yml
   args:
-    creates: "/etc/metricbeat/modules.d/{{ item }}"
-  with_items:
-  - prometheus.yml
-  - apache.yml
-  - kibana.yml
-  - mysql.yml
+    creates: /etc/metricbeat/modules.d/prometheus.yml
+  notify: service_restart_metricbeat
 
 # https://docs.influxdata.com/influxdb/v1.5/administration/server_monitoring/#influxdb-metrics-http-endpoint
