@@ -1,5 +1,6 @@
 ---
-# tasks for mariadb RGM setup
+# tasks for mariadb_prep RGM setup
+# mariadb preparation (install and configure)
 # vim: bs=2 sw=2 expandtab:
 
 # This is redundant as all RPM packages are already installed from main tasks
@@ -30,6 +31,7 @@
   - name: generate random root password for mariadb
     set_fact:
       mariadb_root_password: "{{ lookup('password', '/dev/null length=16 chars=ascii_letters,digits,-,_,!,.,*') }}"
+    no_log: True
 
   - name: Set root user password
     mysql_user:
@@ -39,6 +41,7 @@
       check_implicit_admin: yes
       login_user: root
       state: present
+    no_log: True
 
   - name: set .my.cnf for root user
     template:
@@ -50,6 +53,7 @@
     vars:
       mariadbuser: 'root'
       mariadbpasswd: "{{ mariadb_root_password }}"
+    no_log: True
 
   when: mariadb_status.rc == 0
 
@@ -66,43 +70,19 @@
       "Please check the /root/.my.cnf"
   when: mariadb_status.rc != 0
 
-- name: "ensure {{ db_grafana }} database exists"
-  mysql_db:
-    name: "{{ db_grafana }}"
-    state: present
-  register: mysql_db_grafana_created
-  tags: grafana
-
-- name: "grant RGM user to {{ db_grafana }} database"
-  mysql_user:
-    host: localhost
-    name: "{{ mariadb_user }}"
-    password: "{{ mariadb_pwd }}"
-    priv: "{{ db_grafana }}.*:ALL"
-    append_privs: yes
-    login_user: root
-    state: present
-  when: mysql_db_grafana_created.changed
-  tags: grafana
-
-- name: "ensure {{ db_nagvis }} database exists"
-  mysql_db:
-    name: "{{ db_nagvis }}"
-    state: present
-  register: mysql_db_nagvis_created
-  tags: nagvis
-
-- name: "grant RGM user to {{ db_nagvis }} database"
-  mysql_user:
-    host: localhost
-    name: "{{ mariadb_user }}"
-    password: "{{ mariadb_pwd }}"
-    priv: "{{ db_nagvis }}.*:ALL"
-    append_privs: yes
-    login_user: root
-    state: present
-  when: mysql_db_nagvis_created.changed
-  tags: nagvis
+- name: Initialize databases
+  include_tasks:
+    file: mariadb_db.yml
+    vars:
+      db_name
+      db_user
+      db_pwd
+    with_items:
+    - { name: "{{ db_grafana }}", user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" }
+    - { name: "{{ db_nagvis }}",  user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" }
+    - { name: "{{ db_lilac }}",   user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" }
+    apply:
+      tags: mariadb
 
 - name: create mariadb internal RO account
   mysql_user:
@@ -119,9 +99,10 @@
     mysql --batch --skip-column-names mysql
       --execute="select count(*) from time_zone_name where Name = 'Europe/Paris';"
   register: mariadb_tzinfo_count
+  changed_when: mariadb_tzinfo_count.stdout != "1"
 
 - name: inject TZINFO into MySQL core database
   shell: mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql mysql
   args:
     executable: /bin/bash
-  when: mariadb_tzinfo_count.stdout != "1"
+  when: mariadb_tzinfo_count.changed

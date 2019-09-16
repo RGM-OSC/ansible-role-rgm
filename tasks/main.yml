@@ -59,9 +59,9 @@
     state: disabled
 
 ### MariaDB base configuration
-- name: configure mariadb
+- name: install and configure mariadb
   include_tasks:
-    file: mariadb.yml
+    file: mariadb_prep.yml
     apply:
       tags: mariadb
   tags:
@@ -80,6 +80,15 @@
   register: yum_result
   until: yum_result.rc == 0
   tags: packages
+
+- name: SQL post-configuration
+  include_tasks:
+    file: mariadb_post.yml
+    apply:
+      tags: mariadb
+  tags:
+  - mariadb
+
 
 ### ensure ping capabilities are enabled
 - name: set capabilities
@@ -168,6 +177,7 @@
   set_fact:
     rgma_user_password: "{{ lookup('password', '/dev/null length=16 chars=ascii_letters,digits,-,_,!,.,*') }}"
   when: not getent_passwd | json_query(rgma_user)
+  no_log: True
 
 - name: create RGM users
   user:
@@ -188,6 +198,7 @@
   with_items:
   - { user: "{{ rgm_user }}",  pwd: "{{ rgm_user_password }}",  home: '/home/rgm', comment: 'RGM user',  group: "{{ rgm_group }}", groups: 'wheel' }
   - { user: "{{ rgma_user }}", pwd: "{{ rgma_user_password }}", home: "{{ rgm_root_path }}/rgma", comment: 'RGMA user', group: "{{ rgm_group }}", groups: '' }
+  no_log: True
 
 - name: create html subdir for rgma user
   file:

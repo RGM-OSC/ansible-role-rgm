@@ -1,0 +1,34 @@
+---
+# tasks for mariadb_post RGM setup
+# mariadb database post-configuration
+# vim: bs=2 sw=2 expandtab:
+
+- name: check if lilac schema is filled
+  command: >
+    mysql --batch --skip-column-names lilac --execute="select value from lilac_configuration;"
+  register: lilac_schema
+  changed_when: lilac_schema.stdout != "61"
+
+- name: inject default Lilac schema on database
+  shell: mysql lilac < /var/lib/rgm/lilac/lilac-rgm.sql
+  args:
+    executable: /bin/bash
+  register: lilac_schema_inject
+  changed_when: lilac_schema_inject.rc == 1
+  failed_when: lilac_schema_inject.rc == 2
+  when: lilac_schema.changed
+
+- name: check if lilac procedures are installed
+  command: >
+    mysql --batch --skip-column-names mysql --execute="SELECT count(routine_name) FROM information_schema.routines WHERE routine_type = 'PROCEDURE' AND routine_schema = 'lilac';"
+  register: lilac_procedures
+  changed_when: lilac_procedures.stdout != "6"
+
+- name: inject default Lilac procedures on database
+  shell: mysql lilac < /var/lib/rgm/lilac/lilac-procedures.sql
+  args:
+    executable: /bin/bash
+  register: lilac_procedures_inject
+  changed_when: lilac_procedures_inject.rc == 1
+  failed_when: lilac_procedures_inject.rc == 2
+  when: lilac_procedures.changed
