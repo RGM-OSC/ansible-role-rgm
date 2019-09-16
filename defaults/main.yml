@@ -25,6 +25,7 @@ mariadb_ro_pwd: 'XgfLlyTmMeNntE9WrTE3ToQhy7ATZmDC'
 
 # database names
 db_rgmweb: 'rgmweb'
+db_lilac: 'lilac'
 db_grafana: 'grafana'
 db_nagvis: 'nagvis'
 
