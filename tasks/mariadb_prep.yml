@@ -24,8 +24,8 @@
 - name: check if MariaDB root user is password protected
   command: mysql --no-defaults --host=localhost --user=root -e '\q'
   register: mariadb_status
-  changed_when: mariadb_status.rc == 1
-  failed_when: mariadb_status.rc == 2
+  changed_when: mariadb_status.rc != 1
+  failed_when: mariadb_status.rc > 1
 
 - block:
   - name: generate random root password for mariadb
@@ -55,7 +55,7 @@
       mariadbpasswd: "{{ mariadb_root_password }}"
     no_log: True
 
-  when: mariadb_status.rc == 0
+  when: mariadb_status.changed
 
 - name: ensure we can connect to mariadb
   command: mysql --host=localhost --user=root -e '\q'
