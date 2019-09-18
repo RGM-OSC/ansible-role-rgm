@@ -83,6 +83,7 @@
   - { name: "{{ db_grafana }}", user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" }
   - { name: "{{ db_nagvis }}",  user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" }
   - { name: "{{ db_lilac }}",   user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" }
+  - { name: "{{ db_notifier }}",   user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" }
 
 - name: create mariadb internal RO account
   mysql_user:

@@ -28,6 +28,7 @@ db_rgmweb: 'rgmweb'
 db_lilac: 'lilac'
 db_grafana: 'grafana'
 db_nagvis: 'nagvis'
+db_notifier: 'notifier'
 
 ntp_servers:
 - '0.pool.ntp.org'

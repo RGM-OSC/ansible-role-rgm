@@ -3,6 +3,7 @@
 # mariadb database post-configuration
 # vim: bs=2 sw=2 expandtab:
 
+# Lilac
 - name: check if lilac schema is filled
   command: >
     mysql --batch --skip-column-names {{ db_lilac }} --execute='select value from lilac_configuration;'
@@ -33,3 +34,20 @@
   changed_when: lilac_procedures_inject.rc == 1
   failed_when: lilac_procedures_inject.rc == 2
   when: lilac_procedures.changed
+
+# notifier
+- name: check if notifier schema is filled
+  command: >
+    mysql --batch --skip-column-names {{ db_notifier }} --execute='SELECT COUNT(*) FROM sents_logs;'
+  register: notifier_schema
+  changed_when: notifier_schema.stdout == "0"
+  ignore_errors: yes
+
+- name: inject default notifier schema on database
+  shell: "mysql {{ db_lilac }} < /srv/rgm/notifier/docs/db/notifier.sql"
+  args:
+    executable: /bin/bash
+  register: notifier_schema_inject
+  changed_when: notifier_schema_inject.rc == 1
+  failed_when: notifier_schema_inject.rc == 2
+  when: notifier_schema.changed or notifier_schema.failed
