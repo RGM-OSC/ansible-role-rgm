@@ -49,6 +49,7 @@ grafana_root_url: '/grafana'
 grafana_rgm_dashboards: "{{ rgm_root_path }}/grafana/dashboards"
 grafana_install_plugins_core: True
 grafana_install_plugins_contrib: False
+grafana_apply_patches: True
 
 # xinetd livestatus binding port
 xinetd_livestatus_port: 14176

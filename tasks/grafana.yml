@@ -38,6 +38,7 @@
   register: grafana_patch
   failed_when: grafana_patch.rc == 255
   changed_when: grafana_patch.rc > 0
+  when: grafana_apply_patches
 
 - name: "configure grafana.ini file"
   ini_file:
