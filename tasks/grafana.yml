@@ -62,6 +62,7 @@
   - { section: 'database',          option: 'user',                 value: "{{ mariadb_user }}" }
   - { section: 'database',          option: 'password',             value: "{{ mariadb_pwd }}" }
   - { section: 'security',          option: 'admin_user',           value: 'admin' }
+  - { section: 'security',          option: 'allow_embedding',      value: 'true' }
   - { section: 'users',             option: 'default_theme',        value: 'light' }
   - { section: 'auth',              option: 'disable_login_form',   value: 'true' }
   - { section: 'auth',              option: 'disable_signout_menu', value: 'true' }
