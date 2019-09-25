@@ -10,6 +10,8 @@ fi
 
 cd $GRAFANA_BUILD
 
+VERSION_Build="$(ls app*.js | cut -d'.' -f2)"
+
 CHANGE=0
 
 # Apply RGM theme
@@ -28,8 +30,8 @@ for file in $(ls -1 *.css); do
         sed -i 's/padding:6px 10px;color: #f7f8fa;font-weight:500;/padding:6px 10px;color: #767980;font-weight:500;/g' $file
         CHANGE=$(( $CHANGE +1 ))
     fi
-    if [ "$(grep -c 'sidemenu{background:#1e2028;height:auto;box-shadow:5px 0 10px -5px #337ab7;position:relative;z-index:1025}' $file)" != "0" ]; then
-        sed -i 's/sidemenu{background:#1e2028;height:auto;box-shadow:5px 0 10px -5px #337ab7;position:relative;z-index:1025}/sidemenu{background:#f8f8f8;height:auto;box-shadow:5px 0 10px -5px #f7f8fa;position:relative;z-index:1025}/g' $file
+    if [ "$(grep -c 'sidemenu{background:#1e2028;height:auto;' $file)" != "0" ]; then
+        sed -i 's/sidemenu{background:#1e2028;height:auto;/sidemenu{background:#f8f8f8;height:auto;/g' $file
         CHANGE=$(( $CHANGE +1 ))
     fi
 done
@@ -57,12 +59,12 @@ for file in $(grep graph-legend-value * | cut -d':' -f1 | sort -u); do
 done
 
 # Patch SVG icons with RGM theme
-if [ "$(grep -c 'icons_dark_theme' grafana.light.8ec106c095469ac98ef1.css)" != "0" ]; then
-    sed -i 's/icons_dark_theme/icons_light_theme/g' grafana.light.8ec106c095469ac98ef1.css
+if [ "$(grep -c 'icons_dark_theme' grafana.light.${VERSION_Build}.css)" != "0" ]; then
+    sed -i 's/icons_dark_theme/icons_light_theme/g' grafana.light.${VERSION_Build}.css
     CHANGE=$(( $CHANGE +1 ))
 fi
-if [ "$(grep -c '.icon-gf{color:#e9edf2;' grafana.light.8ec106c095469ac98ef1.css)" != "0" ]; then
-    sed -i 's/.icon-gf{color:#e9edf2;/.icon-gf{/g' grafana.light.8ec106c095469ac98ef1.css
+if [ "$(grep -c '.icon-gf{color:#e9edf2;' grafana.light.${VERSION_Build}.css)" != "0" ]; then
+    sed -i 's/.icon-gf{color:#e9edf2;/.icon-gf{/g' grafana.light.${VERSION_Build}.css
     CHANGE=$(( $CHANGE +1 ))
 fi
 
