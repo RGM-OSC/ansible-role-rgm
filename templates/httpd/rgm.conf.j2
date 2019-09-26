@@ -7,3 +7,8 @@ RewriteEngine On
 RewriteCond %{HTTPS} !=on
 RewriteCond %{REQUEST_URI} !^/server-status
 RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L]
+
+<Location "/server-status">
+    SetHandler server-status
+    Require host localhost 127.0.0.1
+</Location>
