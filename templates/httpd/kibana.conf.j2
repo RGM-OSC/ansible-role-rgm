@@ -15,6 +15,7 @@ ProxyPreserveHost On
         AuthrgmMySQLTableSIDCondition "`sessions`.`session_id`=$session_id AND `sessions`.`user_id`=$user_id AND `users`.`user_id`=$user_id AND `users`.`user_name`=$user_name AND (`users`.`group_id`=$group_id AND `groupright`.`group_id`=$group_id AND `groupright`.`tab_7`='1' OR `users`.`user_limitation`='1')"
         AuthrgmPageLogin /login.php
         AuthrgmSessionCookies On
+        Require host localhost 127.0.0.1
         Require valid-user
         ProxyPass http://127.0.0.1:5601/kibana retry=0
         ProxyPassReverse http://127.0.0.1:5601/kibana/(.*)
