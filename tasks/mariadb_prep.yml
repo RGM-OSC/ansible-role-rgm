@@ -24,7 +24,7 @@
 - name: check if MariaDB root user is password protected
   command: mysql --no-defaults --host=localhost --user=root -e '\q'
   register: mariadb_status
-  changed_when: mariadb_status.rc != 1
+  changed_when: mariadb_status.rc == 0
   failed_when: mariadb_status.rc > 1
 
 - block:
@@ -58,7 +58,7 @@
   when: mariadb_status.changed
 
 - name: ensure we can connect to mariadb
-  command: mysql --host=localhost --user=root -e '\q'
+  command: mysql --user=root -e '\q'
   register: mariadb_status
   changed_when: mariadb_status.rc == 1
   failed_when: mariadb_status.rc == 2
@@ -67,7 +67,7 @@
   fail:
     msg: |
       "Can't connect to MariaDB server using root credentials !"
-      "Please check the /root/.my.cnf"
+      "Please check /root/.my.cnf"
   when: mariadb_status.rc != 0
 
 - name: Initialize databases
@@ -97,10 +97,9 @@
 
 - name: check if TZINFO data are present in MariaDB core database
   command: >
-    mysql --batch --skip-column-names mysql
-      --execute="select count(*) from time_zone_name where Name = 'Europe/Paris';"
+    mysql --batch --skip-column-names mysql --execute="select count(*) from time_zone_name where Name = 'Europe/Paris';"
   register: mariadb_tzinfo_count
-  changed_when: mariadb_tzinfo_count.stdout != "1"
+  changed_when: mariadb_tzinfo_count.stdout != '1'
 
 - name: inject TZINFO into MySQL core database
   shell: mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql mysql

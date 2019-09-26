@@ -2,6 +2,17 @@
 # tasks file for 4any
 # vim: bs=2 sw=2 expandtab:
 
+- name: check 4any asserts
+  assert:
+    that:
+    - forany_rgmapi_username is defined
+    - forany_rgmapi_username |length > 0
+    - forany_rgmapi_password is defined
+    - forany_rgmapi_password |length > 0
+    - xinetd_livestatus_port is defined
+    - xinetd_livestatus_port > 1024 and xinetd_livestatus_port < 65535
+    - rgm_central_host is defined
+
 - name: retrieve haproxy IP address
   command: grep -P '^[\d\.]+\s+haproxy$' /etc/hosts
   register: haproxy_out
@@ -39,3 +50,26 @@
     name: xinetd
     enabled: yes
     state: started
+
+- name: check if 4any RGMAPI user exists
+  shell: mysql {{ db_rgmweb }} --batch -e "SELECT * FROM users WHERE user_id='2' \G" | grep -v '^\*\+' | awk '{print $1 " " $2}'
+  register: forany_apiuser
+  changed_when: forany_apiuser.stdout == ''
+
+- block:
+  - name: set facts from SQL output
+    set_fact:
+      parameter: "{{ sqlout | default({}) | combine ( { item.split(':')[0]: item.split(':')[1] } ) }}"
+    with_items: "{{test.stdout_lines}}"
+
+  - name: update 4any RGMAPI user
+    command: >
+      mysql --batch --skip-column-names {{ db_rgmweb }} --execute="UPDATE users SET user_passwd='{{ forany_rgmapi_password | hash('md5') }}' WHERE user_id='{{ sqlout.user_id }} '"
+    when: forany_rgmapi_password | hash('md5') != sqlout.user_passwd
+ 
+  when: not forany_apiuser.changed
+
+- name: insert 4any RGMAPI user
+  command: >
+    mysql --batch --skip-column-names {{ db_rgmweb }} --execute="INSERT INTO users (user_id, group_id, user_name, user_descr, user_passwd, user_type, user_limitation, user_language) VALUES (2, 1, '{{ forany_rgmapi_username }}', '4any RGMAPI user', '{{ forany_rgmapi_password | hash('md5') }}', 0, 0 ,0);"
+  when: forany_apiuser.changed
