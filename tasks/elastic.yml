@@ -82,9 +82,11 @@
     regexp: "{{ item.regex }}"
     line: "{{ item.line }}"
   with_items:
-  - { regex: '^(#\s*)?reload.period: ',     line: 'reload.period: 10s' }
-  - { regex: '^(#\s*)?host:\s+".*:5601"',   line: "host: \"127.0.0.1:5601\""}
-  - { regex: '^(#\s*)?host:\s+".*:9200"',   line: "host: \"127.0.0.1:9200\"" }
+  - { regex: '^(#\s*)?reload.period: ',                line: 'reload.period: 10s' }
+  - { regex: '^(#\s*)?host:\s+".*:5601"',              line: "host: \"127.0.0.1:5601\""}
+  - { regex: '^\s+(#)?host:\s+"(.*:5601.*|.*kibana)"', line: "  host: \"http://localhost/kibana\""}
+  - { regex: '^(#\s*)?host:\s+".*:9200"',              line: "host: \"127.0.0.1:9200\"" }
+  register: metricbeat_config
   notify: service_restart_metricbeat
 
 - name: enable metricbeat modules
@@ -116,5 +118,12 @@
     line: "\\1{{ mariadb_ro_user }}:{{ mariadb_ro_pwd }}@tcp(127.0.0.1:3306)/\\2"
   notify: service_restart_metricbeat
 
+- block:
+  - name: force elasticsearch and kibana to be restarted to finalize metricbeat configuration
+    meta: flush_handlers
+
+  - name: setup metricbeat indexes and dashboards
+    command: metricbeat setup -c /etc/metricbeat/metricbeat.yml -path.home /usr/share/metricbeat -path.config /etc/metricbeat -path.data /var/lib/metricbeat -path.logs /var/log/metricbeat
+  when: metricbeat_config.changed
 
 # curl -XPUT -H "Content-Type: application/json" http://localhost:9200/_all/_settings -d '{"index.blocks.read_only_allow_delete": null}'
