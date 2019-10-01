@@ -84,7 +84,7 @@
   with_items:
   - { regex: '^(#\s*)?reload.period: ',                line: 'reload.period: 10s' }
   - { regex: '^(#\s*)?host:\s+".*:5601"',              line: "host: \"127.0.0.1:5601\""}
-  - { regex: '^\s+(#)?host:\s+"(.*:5601.*|.*kibana)"', line: "  host: \"http://localhost/kibana\""}
+  - { regex: '^\s+(#)?host:\s+"(.*:5601.*|.*kibana)"', line: "  host: \"http://localhost:5601/kibana\""}
   - { regex: '^(#\s*)?host:\s+".*:9200"',              line: "host: \"127.0.0.1:9200\"" }
   register: metricbeat_config
   notify: service_restart_metricbeat
@@ -116,6 +116,14 @@
     regexp: '^(\s*hosts: \[").*("\])$'
     backrefs: yes
     line: "\\1{{ mariadb_ro_user }}:{{ mariadb_ro_pwd }}@tcp(127.0.0.1:3306)/\\2"
+  notify: service_restart_metricbeat
+
+- name: "configure Kibana path for metricbeat"
+  lineinfile:
+    path: /etc/metricbeat/modules.d/kibana.yml
+    regexp: '^(\s*)(#\s*)?basepath: .*$'
+    backrefs: yes
+    line: "\\1basepath: \"\/bibana\""
   notify: service_restart_metricbeat
 
 - block:
