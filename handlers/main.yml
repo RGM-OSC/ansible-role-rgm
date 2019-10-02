@@ -1,5 +1,5 @@
 ---
-# handlers file for ansible-role-rgm
+# handlers file for role-rgm
 # vim: bs=2 sw=2 expandtab:
 
 - name: service_restart_mariadb

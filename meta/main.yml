@@ -48,14 +48,6 @@ galaxy_info:
     # NOTE: A tag is limited to a single word comprised of alphanumeric characters.
     #       Maximum 20 tags per role.
 
-dependencies:
-- name: ansible-role-lvm-mount
-  src: git+https://git.rgm-cloud.io/ansible-role-lvm-mount.git
-  version: '20190916'
-- name: ansible-role-snmp
-  src: git+https://git.rgm-cloud.io/ansible-role-snmp.git
-  version: '20190911'
-
 #dependencies: []
   # List your role dependencies here, one per line. Be sure to remove the '[]' above,
   # if you add dependencies to this list.
