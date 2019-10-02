@@ -20,7 +20,7 @@ for file in $(grep Roboto * | cut -d':' -f1 | sort -u); do
     sed -i 's/Roboto/Fira Sans/g' $file
 done
 
-for file in $(grep 52545c * | cut -d':' -f1 | sort -u); do
+for file in $(grep 52545c * | cut -d':' -f1 | sort -u); do 
     sed -i 's/#52545c/#337ab7/g' $file
     CHANGE=$(( $CHANGE +1 ))
 done
