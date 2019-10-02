@@ -1,5 +1,5 @@
 ---
-# defaults file for ansible-role-rgm
+# defaults file for role-rgm
 # vim: bs=2 sw=2 expandtab:
 
 rgm_admin_user: 'admin'
