@@ -44,7 +44,7 @@
   ignore_errors: yes
 
 - name: inject default notifier schema on database
-  shell: "mysql {{ db_lilac }} < /srv/rgm/notifier/docs/db/notifier.sql"
+  shell: "mysql {{ db_lilac }} < /usr/share/doc/notifier/sql/notifier.sql"
   args:
     executable: /bin/bash
   register: notifier_schema_inject
