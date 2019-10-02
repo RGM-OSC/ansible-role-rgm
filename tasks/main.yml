@@ -358,6 +358,20 @@
   changed_when: nagvis_init_sql.rc > 0
   failed_when: nagvis_init_sql.rc > 1
 
+
+### notifier configuration
+- name: configure notifier DBI ini file
+  ini_file:
+    path: /srv/rgm/notifier/etc/dbi.ini
+    section: dbi
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+  - { option: 'server', value: '127.0.0.1' }
+  - { option: 'database', value: "{{ db_notifier }}" }
+  - { option: 'user', value: "{{ mariadb_user }}" }
+  - { option: 'password', value: "{{ mariadb_pwd }}" }
+
 #- name: Reset cache file credential
 #  file:
 #    path : "{{ item }}"

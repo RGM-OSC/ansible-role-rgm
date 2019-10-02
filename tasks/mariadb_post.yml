@@ -38,13 +38,13 @@
 # notifier
 - name: check if notifier schema is filled
   command: >
-    mysql --batch --skip-column-names {{ db_notifier }} --execute='SELECT COUNT(*) FROM sents_logs;'
+    mysql --batch --skip-column-names {{ db_notifier }} --execute='SELECT COUNT(*) FROM configs;'
   register: notifier_schema
   changed_when: notifier_schema.stdout == "0"
   ignore_errors: yes
 
 - name: inject default notifier schema on database
-  shell: "mysql {{ db_lilac }} < /srv/rgm/notifier/docs/db/notifier.sql"
+  shell: "mysql {{ db_notifier }} < /srv/rgm/notifier/docs/db/notifier.sql"
   args:
     executable: /bin/bash
   register: notifier_schema_inject
