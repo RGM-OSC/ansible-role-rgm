@@ -32,9 +32,7 @@
 #  - { owner: 'grafana', group: 'rgm',  mode: '0644', src: grafana/system-metrics.json,       dest: "{{ grafana_rgm_dashboards }}/system-metrics.json" }
 
 - name: apply patches to align Grafana theme on RGM theme
-  script: /etc/grafana/grafana_rgm.sh
-  args:
-    executable: /bin/bash
+  command: /etc/grafana/grafana_rgm.sh
   register: grafana_patch
   failed_when: grafana_patch.rc == 255
   changed_when: grafana_patch.rc > 0
