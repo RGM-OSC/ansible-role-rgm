@@ -87,6 +87,7 @@ packages_system:
 - perl-Monitoring-Plugin
 - perl-IO-Socket-INET6
 - ruby
+- python2-jmespath
 
 packages_mariadb:
 - mariadb-server
