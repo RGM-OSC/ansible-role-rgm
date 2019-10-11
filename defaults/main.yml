@@ -62,6 +62,12 @@ winbeats_base_path: 'C:\Program Files'
 # Default swappiness for RGM
 sysctl_swappiness: '10'
 
+# 4any user creation
+forany_rgmapi_username: 'forany'
+forany_rgmapi_userdesc: 'forany RGMAPI user'
+forany_rgmapi_password: '4@nyPwd'
+forany_rgmapi_email: '4any@4any.io'
+
 ### RPM packages ###
 packages_system:
 - bash-completion
