@@ -71,5 +71,5 @@
 
 - name: insert 4any RGMAPI user
   command: >
-    mysql --batch --skip-column-names {{ db_rgmweb }} --execute="INSERT INTO users (user_id, group_id, user_name, user_descr, user_passwd, user_type, user_limitation, user_language) VALUES (2, 1, '{{ forany_rgmapi_username }}', '4any RGMAPI user', '{{ forany_rgmapi_password | hash('md5') }}', 0, 0 ,0);"
+    mysql --batch --skip-column-names {{ db_rgmweb }} --execute="INSERT INTO users (user_id, group_id, user_name, user_descr, user_passwd, user_type, user_limitation, user_language, email) VALUES (2, 1, '{{ forany_rgmapi_username }}', '{{ forany_rgmapi_userdesc }}', '{{ forany_rgmapi_password | hash('md5') }}', 0, 0 ,0,'{{ forany_rgmapi_email }}');"
   when: forany_apiuser.changed
