@@ -1,9 +1,10 @@
 ---
 # {{ ansible_managed }}
 # vim: expandtab ts=2 sw=2:
-
+{% set count = namespace(index=0) %}
+{% for pattern in curator_patterns %}
 actions:
-  1:
+{% set count.index = count.index + 1 %}  {% count.index %}:
     action: close
     description: >-
       close beats indices older than {{ curator.close_indices_delay }} days
@@ -13,7 +14,7 @@ actions:
     filters:
     - filtertype: pattern
       kind: regex
-      value: '^[a-z]+beat-.*'
+      value: '{{ pattern }}'
     - filtertype: age
       direction: older
       source: name
@@ -21,7 +22,7 @@ actions:
       unit: days
       unit_count: {{ curator.close_indices_delay }}
 
-  2:
+{% set count.index = count.index + 1 %}  {% count.index %}:
     action: delete_indices
     description: >-
       permanently delete beats indices older than {{ curator.delete_indices_delay }} days
@@ -30,10 +31,12 @@ actions:
     filters:
     - filtertype: pattern
       kind: regex
-      value: '^[a-z]+beat-.*'
+      value: '{{ pattern }}'
     - filtertype: age
       direction: older
       source: name
       timestring: '%Y.%m.%d'
       unit: days
       unit_count: {{ curator.delete_indices_delay }}
+
+{% endfor %}
