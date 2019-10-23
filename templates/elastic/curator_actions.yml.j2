@@ -1,10 +1,10 @@
 ---
 # {{ ansible_managed }}
 # vim: expandtab ts=2 sw=2:
-{% set count = namespace(index=0) %}
+{% set count = 0 %}
 {% for pattern in curator_patterns %}
 actions:
-{% set count.index = count.index + 1 %}  {% count.index %}:
+{% set count = count + 1 %}  {{ count }}:
     action: close
     description: >-
       close beats indices older than {{ curator.close_indices_delay }} days
@@ -22,7 +22,7 @@ actions:
       unit: days
       unit_count: {{ curator.close_indices_delay }}
 
-{% set count.index = count.index + 1 %}  {% count.index %}:
+{% set count = count + 1 %}  {{ count }}:
     action: delete_indices
     description: >-
       permanently delete beats indices older than {{ curator.delete_indices_delay }} days
