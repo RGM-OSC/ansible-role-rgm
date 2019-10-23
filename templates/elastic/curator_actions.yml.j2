@@ -1,9 +1,10 @@
 ---
 # {{ ansible_managed }}
 # vim: expandtab ts=2 sw=2:
+actions:
+
 {% set count = 0 %}
 {% for pattern in curator_patterns %}
-actions:
 {% set count = count + 1 %}  {{ count }}:
     action: close
     description: >-
