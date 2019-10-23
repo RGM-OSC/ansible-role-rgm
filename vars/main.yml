@@ -4,7 +4,13 @@
 
 prometheus_mysql_cnf: /var/lib/prometheus/.my.cnf
 
+# patterns (regex) of Elsticsearch indexes to automatically close and delete with Curator
+# this is used in 'curator_actions.yml.j2' Jinja template
+curator_patterns:
+- '^[a-z]+beat-.*'
+- '^rgm[\w\d]+-.*'
 
+# RPM packages related to RGM core services 
 rgm_services:
 - chronyd
 - firewalld
@@ -24,6 +30,7 @@ rgm_services:
 - kibana
 - prometheus
 
+# Grafana core plugins (officially maintained by Grafana team)  
 grafana_plugins_core:
 - grafana-simple-json-datasource
 - grafana-worldmap-panel
@@ -31,6 +38,7 @@ grafana_plugins_core:
 - grafana-piechart-panel
 - grafana-polystat-panel
 
+# Grafana 3rd party plugins (maintained by contributors)  
 grafana_plugins_contrib:
 - fetzerch-sunandmoon-datasource
 - satellogic-3d-globe-panel
@@ -56,7 +64,9 @@ grafana_plugins_contrib:
 - marcuscalidus-svg-panel
 - gretamosa-topology-panel
 
+#### rgmweb 'deploy' section
 
+# one line tags are used to fill deploy DB schema with these constants
 oneliner_tags:
 - { id: 1 , tag: linux }
 - { id: 2 , tag: windows }
@@ -67,6 +77,7 @@ oneliner_tags:
 - { id: 7 , tag: auditbeat }
 - { id: 8 , tag: packetbeat }
 
+# the structure bellow fills the 'deploy' DB schema with one-liners informations
 oneliner_items:
 - item: windows_metricbeat
   shell: "Windows PowerShell"

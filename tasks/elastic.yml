@@ -31,6 +31,12 @@
   - { regex: '^(#\s*)?path.repo: ',     line: 'path.repo: "/srv/rgm/elastic"' }
   notify: service_restart_elasticsearch
 
+- name: ensure elasticsearch is enabled and started
+  systemd:
+    name: elasticsearch
+    enabled: yes
+    state: started
+
 #- name: create an elasticsearch local backup reposotory
 #curl -XPUT 'http://127.0.0.1:9200/_snapshot/backup' -H 'Content-Type: application/json' -d '{ "type": "fs", "settings": {"location": "/srv/rgm/elastic/backups","compress": true}}'
 
