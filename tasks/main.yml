@@ -8,7 +8,7 @@
     lineinfile:
       path: /etc/environment
       regexp: "^{{ item.key }}=.*"
-      line: "{{ item.key }}=\"{{ item.line }}\""
+      line: "{{ item.key }}=\"{{ item.value }}\""
       insertafter: EOF
       owner: root
       group: root
