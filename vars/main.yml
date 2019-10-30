@@ -28,7 +28,8 @@ rgm_services:
 - nagios
 - httpd
 - kibana
-- prometheus
+- snmp2elastic
+#- prometheus
 
 # Grafana core plugins (officially maintained by Grafana team)  
 grafana_plugins_core:
