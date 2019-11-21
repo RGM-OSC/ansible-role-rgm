@@ -66,7 +66,7 @@ if [ "$OSTYPE" == 'debian' ]; then
 fi
 
 # get default NIC IP config to patch metricbeat config file
-CLI_NIC=$(ip route show default | sed 's/.*dev \([a-z][a-z0-9]\+\) .*/\1/')
+CLI_NIC=$(ip route show | grep ^default | sed 's/.*dev \([a-z][a-z0-9]\+\) .*/\1/')
 CLI_ADDR=$(ip addr show dev $CLI_NIC | grep 'inet ' | awk '{print $2}' | cut -d '/' -f 1)
 sed -i "s/^\( *host.ip:\) .*$/\1 $CLI_ADDR/" linux_metricbeat.yml
 
@@ -77,21 +77,28 @@ chmod 0640 /etc/metricbeat/metricbeat.yml
 
 # systemd on newer systems, legacy (initV, upstart, ...) overwise
 if [[ ("$OSTYPE" == 'redhat' && $OSVERS -ge 7) ||
-    ("$OSTYPE" == 'debian' && $OSVERS -ge 9) ||
-    ("$OSTYPE" == 'ubuntu' && $OSVERS -ge 16) ]]; then
+        ("$OSTYPE" == 'debian' && $OSVERS -ge 9) ||
+        ("$OSTYPE" == 'ubuntu' && $OSVERS -ge 16) ]]; then
     systemctl enable metricbeat.service
     systemctl restart metricbeat.service
     RC=$?
 else
-    if [ "$OSTYPE" == 'redhat' ]; then
-        chkconfig metricbeat on
-    fi
-    if [ "$OSTYPE" == 'debian' ]; then
-        update-rc.d metricbeat enable
-    fi
-    if [ "$OSTYPE" == 'ubuntu' ]; then
-    service metricbeat restart
-    RC=$?
+    case "$OSTYPE" in
+        'redhat')
+            chkconfig metricbeat on
+            RC=$?
+            ;;
+        'debian')
+            update-rc.d metricbeat enable
+            RC=$?
+            ;;
+        'ubuntu')
+            service metricbeat restart
+            RC=$?
+            ;;
+        *)
+            ;;
+    esac
 fi
 
 exit $RC
