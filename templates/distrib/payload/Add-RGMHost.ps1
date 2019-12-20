@@ -79,10 +79,10 @@ function Invoke-RGMRestMethod {
             Get-RGMApiToken
         }
         elseif ($OneTimeToken) {
-            Write-Host "The OnTimeToken is not valid`nEnd of script"
+            Write-Output "The OnTimeToken is not valid`nEnd of script"
             exit
         }else{
-            Write-Host "There is an unexpected error (no password or no OneTimeToken provided)`nEnd of script"
+            Write-Output "There is an unexpected error (no password or no OneTimeToken provided)`nEnd of script"
             exit
         }
     }
@@ -99,11 +99,11 @@ function Invoke-RGMRestMethod {
 function New-RGMHost {
     param (
         [String]$templateHostName = "GENERIC_HOST",
-        [String]$hostName, 
-        [String]$hostIp, 
-        [String]$hostAlias = ""#, 
-        #   [String]$contactName, 
-        #   [String]$contactGroupName, 
+        [String]$hostName,
+        [String]$hostIp,
+        [String]$hostAlias = ""#,
+        #   [String]$contactName,
+        #   [String]$contactGroupName,
         #   [bool]$exportConfiguration=$false
     )
 
