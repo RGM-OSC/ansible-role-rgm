@@ -325,6 +325,13 @@
   become: yes
   become_user: nagios
 
+### Nagios configuration
+- name: ensure plugins symlink are present
+  shell: ln -s $(rpm -ql nagios-plugins-rgm | head -1) rgm
+  args:
+    chdir: "{{ rgm_root_path }}/nagios/plugins"
+    creates: "{{ rgm_root_path }}/nagios/plugins/rgm"
+
 ### NagVis configuration
 - name: configure NagVis
   ini_file:

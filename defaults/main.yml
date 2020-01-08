@@ -92,6 +92,8 @@ packages_system:
 - perl-version
 - perl-Monitoring-Plugin
 - perl-IO-Socket-INET6
+- perl-Number-Format
+- perl-DateTime
 - ruby
 - python2-jmespath
 
@@ -145,6 +147,7 @@ packages_rgm:
 - rgmweb
 - rgmapi
 - snmp2elastic
+- wmi
 
 packages_prometheus:
 - prometheus
