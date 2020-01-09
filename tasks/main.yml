@@ -59,11 +59,11 @@
   with_items:
   - name: 'rgm-partner-vmware'
     descr: 'RGM Partner - VMWare'
-    url: 'https://community.repo.rgm-cloud.io/commercial/latest/Oracle/'
+    url: 'https://repo.rgm-cloud.io/commercial/latest/VMWare/'
     enabled: "{{ install_commercial_oracle | default(false) }}"
   - name: 'rgm-partner-oracle'
     descr: 'RGM Partner - Oracle'
-    url: 'https://community.repo.rgm-cloud.io/commercial/latest/VMWare/'
+    url: 'https://repo.rgm-cloud.io/commercial/latest/Oracle/'
     enabled: "{{ install_commercial_vmware | default(false) }}"
 
 - name: force yum clean & make cache
