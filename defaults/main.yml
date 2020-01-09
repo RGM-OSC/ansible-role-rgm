@@ -68,6 +68,13 @@ forany_rgmapi_userdesc: 'forany RGMAPI user'
 forany_rgmapi_password: '4@nyPwd'
 forany_rgmapi_email: '4any@4any.io'
 
+
+### Apache HTTPd server customization
+# apache SSLCertificateFile directive
+http_ssl_cert_file: /etc/pki/tls/certs/localhost.crt
+# apache SSLCertificateKeyFile directive
+http_ssl_key_file: /etc/pki/tls/private/localhost.key
+
 ### RPM packages ###
 packages_system:
 - bash-completion
