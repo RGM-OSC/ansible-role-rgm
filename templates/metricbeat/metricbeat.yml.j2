@@ -1,0 +1,39 @@
+###################### Metricbeat Configuration
+#
+# You can find the full configuration reference here:
+# https://www.elastic.co/guide/en/beats/metricbeat/index.html
+
+#==========================  Modules configuration
+
+metricbeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: true
+  reload.period: 120s
+
+#==================== Elasticsearch template setting
+
+setup.template.settings:
+  index.number_of_shards: 1
+  index.codec: best_compression
+  #_source.enabled: false
+
+#============================== Kibana
+
+setup.kibana:
+  host: "http://localhost:5601/kibana"
+
+#================================ Outputs
+
+#-------------------------- Elasticsearch output
+output.elasticsearch:
+  hosts: ["localhost:9200"]
+
+#================================ Processors
+processors:
+  - add_host_metadata: ~
+  - add_cloud_metadata: ~
+
+#================================= Migration ==================================
+
+# This allows to enable 6.7 migration aliases
+#migration.6_to_7.enabled: true

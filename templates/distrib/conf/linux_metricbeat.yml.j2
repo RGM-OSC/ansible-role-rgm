@@ -4,7 +4,8 @@
 # Modules configuration
 metricbeat.config.modules:
   path: ${path.config}/modules.d/*.yml
-  reload.enabled: false
+  reload.enabled: true
+  reload.period: 120s
 
 # Elasticsearch template setting
 setup.template.settings:

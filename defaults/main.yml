@@ -56,8 +56,10 @@ xinetd_livestatus_port: 14176
 
 enable_prometheus: no
 
+## Elastic beats
 # Windows Beats installation base patch
 winbeats_base_path: 'C:\Program Files'
+metricbeat_polling_period: 90s
 
 # Default swappiness for RGM
 sysctl_swappiness: '10'

@@ -80,56 +80,22 @@
   notify: service_restart_kibana
 
 
-### configure metricsbeat
+### configure metricbeat
 
-- name: configure metricbeat - reload period
-  lineinfile:
-    path: /etc/metricbeat/metricbeat.yml
-    regexp: "{{ item.regex }}"
-    line: "{{ item.line }}"
+- name: configure metricbeat
+  template:
+    src: "metricbeat/{{ item }}.yml.j2"
+    dest: "/etc/metricbeat/{{ item }}.yml"
+    owner: root
+    group: root
+    mode: 0640
   with_items:
-  - { regex: '^(#\s*)?reload.period: ',                line: 'reload.period: 10s' }
-  - { regex: '^(#\s*)?host:\s+".*:5601"',              line: "host: \"127.0.0.1:5601\""}
-  - { regex: '^\s+(#)?host:\s+"(.*:5601.*|.*kibana)"', line: "  host: \"http://localhost:5601/kibana\""}
-  - { regex: '^(#\s*)?host:\s+".*:9200"',              line: "host: \"127.0.0.1:9200\"" }
+  - { src: 'metricbeat',    dst: 'metricbeat' }
+  - { src: 'module_apache', dst: 'modules.d/apache' }
+  - { src: 'module_kibana', dst: 'modules.d/kibana' }
+  - { src: 'module_mysql',  dst: 'modules.d/mysql' }
+  - { src: 'module_system',  dst: 'modules.d/system' }
   register: metricbeat_config
-  notify: service_restart_metricbeat
-
-- name: enable metricbeat modules
-  command: "mv /etc/metricbeat/modules.d/{{ item }}.disabled /etc/metricbeat/modules.d/{{ item }}"
-  args:
-    creates: "/etc/metricbeat/modules.d/{{ item }}"
-  with_items:
-  - apache.yml
-  - kibana.yml
-  - mysql.yml
-  notify: service_restart_metricbeat
-
-- name: "configure metricsets mysql metricbeat"
-  lineinfile:
-    path: /etc/metricbeat/modules.d/mysql.yml
-    regexp: "{{ item.regex }}"
-    line: "{{ item.line }}"
-    insertafter: "{{ item.after }}"
-  with_items:
-  - { regex: '^(\s*#)?\s*metricsets:',     line: '  metricsets:', after: '- module: mysql' }
-  - { regex: '^(\s*#)?\s*- status',     line: '  - status', after: '^\s+metricsets:' }
-  notify: service_restart_metricbeat
-
-- name: "configure DSN for mysql metricbeat"
-  lineinfile:
-    path: /etc/metricbeat/modules.d/mysql.yml
-    regexp: '^(\s*hosts: \[").*("\])$'
-    backrefs: yes
-    line: "\\1{{ mariadb_ro_user }}:{{ mariadb_ro_pwd }}@tcp(127.0.0.1:3306)/\\2"
-  notify: service_restart_metricbeat
-
-- name: "configure Kibana path for metricbeat"
-  lineinfile:
-    path: /etc/metricbeat/modules.d/kibana.yml
-    regexp: '^(\s*)(#\s*)?basepath: .*$'
-    backrefs: yes
-    line: "\\1basepath: \"/kibana\""
   notify: service_restart_metricbeat
 
 - block:
