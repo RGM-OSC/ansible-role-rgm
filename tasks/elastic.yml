@@ -84,8 +84,8 @@
 
 - name: configure metricbeat
   template:
-    src: "metricbeat/{{ item }}.yml.j2"
-    dest: "/etc/metricbeat/{{ item }}.yml"
+    src: "metricbeat/{{ item.src }}.yml.j2"
+    dest: "/etc/metricbeat/{{ item.dst }}.yml"
     owner: root
     group: root
     mode: 0640
@@ -94,7 +94,7 @@
   - { src: 'module_apache', dst: 'modules.d/apache' }
   - { src: 'module_kibana', dst: 'modules.d/kibana' }
   - { src: 'module_mysql',  dst: 'modules.d/mysql' }
-  - { src: 'module_system',  dst: 'modules.d/system' }
+  - { src: 'module_system', dst: 'modules.d/system' }
   register: metricbeat_config
   notify: service_restart_metricbeat
 
