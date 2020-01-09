@@ -54,7 +54,7 @@
     gpgcheck: yes
     enabled: "{{ item.enabled }}"
     sslverify: false
-    cache: false
+    keepcache: false
     gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rgm
   with_items:
   - name: 'rgm-partner-vmware'
