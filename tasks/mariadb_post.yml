@@ -6,7 +6,7 @@
 # Lilac
 - name: check if lilac schema is filled
   command: >
-    mysql --batch --skip-column-names {{ db_lilac }} --execute='select value from lilac_configuration;'
+    mysql --batch --skip-column-names {{ db_lilac }} --execute='select value from lilac_configuration where `key` LIKE "db_builds";'
   register: lilac_schema
   changed_when: lilac_schema.stdout != "61"
   ignore_errors: yes
