@@ -30,6 +30,9 @@ db_grafana: 'grafana'
 db_nagvis: 'nagvis'
 db_notifier: 'notifier'
 
+# lilac schema expected version
+db_lilac_schema_version: '61'
+
 ntp_servers:
 - '0.pool.ntp.org'
 - '1.pool.ntp.org'

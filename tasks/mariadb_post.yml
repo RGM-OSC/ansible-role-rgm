@@ -8,7 +8,7 @@
   command: >
     mysql --batch --skip-column-names {{ db_lilac }} --execute='select value from lilac_configuration where `key` LIKE "db_builds";'
   register: lilac_schema
-  changed_when: lilac_schema.stdout != "61"
+  changed_when: lilac_schema.stdout != db_lilac_schema_version
   ignore_errors: yes
 
 - name: inject default Lilac schema on database
