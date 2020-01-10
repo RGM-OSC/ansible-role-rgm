@@ -96,6 +96,7 @@ packages_system:
 - perl-IO-Socket-INET6
 - perl-Number-Format
 - perl-DateTime
+- perl-Crypt-SSLeay
 - ruby
 - python2-jmespath
 
