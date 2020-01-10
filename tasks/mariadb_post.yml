@@ -18,7 +18,7 @@
   register: lilac_schema_inject
   changed_when: lilac_schema_inject.rc == 1
   failed_when: lilac_schema_inject.rc == 2
-  when: lilac_schema.changed or lilac_schema.failed
+  when: lilac_schema.failed
 
 - name: check if lilac procedures are installed
   command: >
