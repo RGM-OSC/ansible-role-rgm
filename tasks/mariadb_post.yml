@@ -6,9 +6,9 @@
 # Lilac
 - name: check if lilac schema is filled
   command: >
-    mysql --batch --skip-column-names {{ db_lilac }} --execute='select value from lilac_configuration;'
+    mysql --batch --skip-column-names {{ db_lilac }} --execute='select value from lilac_configuration where `key` = "db_build";'
   register: lilac_schema
-  changed_when: lilac_schema.stdout != "61"
+  changed_when: lilac_schema.stdout != db_lilac_schema_version
   ignore_errors: yes
 
 - name: inject default Lilac schema on database
@@ -18,7 +18,11 @@
   register: lilac_schema_inject
   changed_when: lilac_schema_inject.rc == 1
   failed_when: lilac_schema_inject.rc == 2
-  when: lilac_schema.changed or lilac_schema.failed
+  when: lilac_schema.failed
+
+#- name: import lilac schema upgrade tasks
+#  import_tasks: mariadb_lilac_upgrade.yml
+#  when: lilac_schema.stdout != db_lilac_schema_version and lilac_schema.changed
 
 - name: check if lilac procedures are installed
   command: >
