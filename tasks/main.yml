@@ -60,11 +60,21 @@
   - name: 'rgm-partner-vmware'
     descr: 'RGM Partner - VMWare'
     url: 'https://repo.rgm-cloud.io/commercial/latest/VMWare/'
-    enabled: "{{ install_commercial_oracle | default(false) }}"
+    enabled: "{{ install_commercial_vmware | default(false) }}"
   - name: 'rgm-partner-oracle'
     descr: 'RGM Partner - Oracle'
     url: 'https://repo.rgm-cloud.io/commercial/latest/Oracle/'
-    enabled: "{{ install_commercial_vmware | default(false) }}"
+    enabled: "{{ install_commercial_oracle | default(false) }}"
+
+- name: add activated commercial package for vmware
+  set_fact:
+    packages_partners: "{{ packages_partners + [ 'VMware-vSphere-Perl-SDK' ] }}"
+  when: install_commercial_vmware | default(false)
+
+- name: add activated commercial package for Oracle
+  set_fact:
+    packages_partners: "{{ packages_partners + [ 'oracle-instantclient12.1-basic', 'perl-DBD-Oracle' ] }}"
+  when: install_commercial_oracle | default(false)
 
 - name: force yum clean & make cache
   command: yum clean all
@@ -94,7 +104,7 @@
 - name: install RGM packages (it may take some time...)
   yum:
     update_cache: "{{ not(update_epel.changed) }}"
-    name: "{{ packages_system + packages_mariadb + packages_apache + packages_elastic + packages_influx_grafana + packages_prometheus + packages_rgm }}"
+    name: "{{ packages_system + packages_mariadb + packages_apache + packages_elastic + packages_influx_grafana + packages_prometheus + packages_rgm + packages_partners }}"
     state: latest
   retries: 10
   delay: 2
@@ -352,6 +362,16 @@
   args:
     chdir: "{{ rgm_root_path }}/nagios/plugins"
     creates: "{{ rgm_root_path }}/nagios/plugins/rgm"
+
+- name: create temporary directory for non-volatile Nagios checks
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ nagios_user }}"
+    group: "{{ rgm_group }}"
+    mode: 0750
+  with_items:
+  - /var/tmp/check_esx
 
 ### NagVis configuration
 - name: configure NagVis
