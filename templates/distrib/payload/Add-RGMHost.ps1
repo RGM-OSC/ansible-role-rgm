@@ -133,7 +133,7 @@ function New-RGMHost {
 
 
 # found active IP address
-$interfaces = Get-NetRoute -DestinationPrefix 0.0.0.0/0 # Search Interfaces with gateway to go out
+$interfaces = Get-NetRoute -DestinationPrefix 0.0.0.0/0 | Sort-Object ifIndex | select-object -first 1 # Search Interfaces with gateway to go out and filter on the first lower Index - avoid multi card and a gateway on each card
 $ActiveInterface = $interfaces | Get-NetIPInterface | where-object { $_.ConnectionState -eq "Connected" } # filter to keep active interface
 $PrincipaleIP = Get-NetIPAddress -InterfaceIndex $ActiveInterface.InterfaceIndex -AddressFamily IPV4 | Select-Object -ExpandProperty IPaddress
 # Collect current computername
