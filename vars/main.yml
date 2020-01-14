@@ -3,7 +3,7 @@
 # vim: bs=2 sw=2 expandtab:
 
 # partners packages list (oracle, vmware, etc.) is built at run-time
-packages_partners:
+packages_partners: []
 
 prometheus_mysql_cnf: /var/lib/prometheus/.my.cnf
 
