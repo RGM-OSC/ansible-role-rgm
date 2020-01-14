@@ -45,6 +45,37 @@
   register: update_epel
   tags: packages
 
+- name: enable RGM repos for 3rd party commercial partners
+  yum_repository:
+    name: "{{ item.name }}"
+    description: "{{ item.descr }}"
+    file: rgm-partners
+    baseurl: "{{ item.url }}"
+    gpgcheck: yes
+    enabled: "{{ item.enabled }}"
+    sslverify: false
+    keepcache: false
+    gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rgm
+  with_items:
+  - name: 'rgm-partner-vmware'
+    descr: 'RGM Partner - VMWare'
+    url: 'https://repo.rgm-cloud.io/commercial/latest/VMWare/'
+    enabled: "{{ install_commercial_vmware | default(false) }}"
+  - name: 'rgm-partner-oracle'
+    descr: 'RGM Partner - Oracle'
+    url: 'https://repo.rgm-cloud.io/commercial/latest/Oracle/'
+    enabled: "{{ install_commercial_oracle | default(false) }}"
+
+- name: add activated commercial package for vmware
+  set_fact:
+    packages_partners: "{{ packages_partners + [ 'VMware-vSphere-Perl-SDK' ] }}"
+  when: install_commercial_vmware | default(false)
+
+- name: add activated commercial package for Oracle
+  set_fact:
+    packages_partners: "{{ packages_partners + [ 'oracle-instantclient12.1-basic', 'perl-DBD-Oracle' ] }}"
+  when: install_commercial_oracle | default(false)
+
 - name: force yum clean & make cache
   command: yum clean all
   args:
@@ -73,7 +104,7 @@
 - name: install RGM packages (it may take some time...)
   yum:
     update_cache: "{{ not(update_epel.changed) }}"
-    name: "{{ packages_system + packages_mariadb + packages_apache + packages_elastic + packages_influx_grafana + packages_prometheus + packages_rgm }}"
+    name: "{{ packages_system + packages_mariadb + packages_apache + packages_elastic + packages_influx_grafana + packages_prometheus + packages_rgm + packages_partners }}"
     state: latest
   retries: 10
   delay: 2
@@ -324,6 +355,23 @@
     creates: /home/nagios/.ssh/id_rsa
   become: yes
   become_user: nagios
+
+### Nagios configuration
+- name: ensure plugins symlink are present
+  shell: ln -s $(rpm -ql nagios-plugins-rgm | head -1) rgm
+  args:
+    chdir: "{{ rgm_root_path }}/nagios/plugins"
+    creates: "{{ rgm_root_path }}/nagios/plugins/rgm"
+
+- name: create temporary directory for non-volatile Nagios checks
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ nagios_user }}"
+    group: "{{ rgm_group }}"
+    mode: 0750
+  with_items:
+  - /var/tmp/check_esx
 
 ### NagVis configuration
 - name: configure NagVis

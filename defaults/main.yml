@@ -30,6 +30,9 @@ db_grafana: 'grafana'
 db_nagvis: 'nagvis'
 db_notifier: 'notifier'
 
+# lilac schema expected version
+db_lilac_schema_version: '61'
+
 ntp_servers:
 - '0.pool.ntp.org'
 - '1.pool.ntp.org'
@@ -56,8 +59,10 @@ xinetd_livestatus_port: 14176
 
 enable_prometheus: no
 
+## Elastic beats
 # Windows Beats installation base patch
 winbeats_base_path: 'C:\Program Files'
+metricbeat_polling_period: 90s
 
 # Default swappiness for RGM
 sysctl_swappiness: '10'
@@ -99,6 +104,9 @@ packages_system:
 - perl-version
 - perl-Monitoring-Plugin
 - perl-IO-Socket-INET6
+- perl-Number-Format
+- perl-DateTime
+- perl-Crypt-SSLeay
 - ruby
 - python2-jmespath
 
@@ -151,6 +159,8 @@ packages_rgm:
 - lilac
 - rgmweb
 - rgmapi
+- snmp2elastic
+- wmi
 
 packages_prometheus:
 - prometheus
@@ -184,3 +194,4 @@ packages_python36:
 - python36-setuptools
 - python36-six
 - python36-urllib3
+- python36-mysql

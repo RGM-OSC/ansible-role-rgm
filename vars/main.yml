@@ -2,6 +2,9 @@
 # vars file for ansible-role-rgm
 # vim: bs=2 sw=2 expandtab:
 
+# partners packages list (oracle, vmware, etc.) is built at run-time
+packages_partners: []
+
 prometheus_mysql_cnf: /var/lib/prometheus/.my.cnf
 
 # patterns (regex) of Elsticsearch indexes to automatically close and delete with Curator
@@ -28,7 +31,8 @@ rgm_services:
 - nagios
 - httpd
 - kibana
-- prometheus
+- snmp2elastic
+#- prometheus
 
 # Grafana core plugins (officially maintained by Grafana team)  
 grafana_plugins_core:
@@ -76,6 +80,7 @@ oneliner_tags:
 - { id: 6 , tag: filebeat }
 - { id: 7 , tag: auditbeat }
 - { id: 8 , tag: packetbeat }
+- { id: 9 , tag: prometheus }
 
 # the structure bellow fills the 'deploy' DB schema with one-liners informations
 oneliner_items:
@@ -119,3 +124,21 @@ oneliner_items:
   - https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-oss-7.3.1-amd64.deb
   re_pattern: '^.*\/(?P<prefix>\w+-oss-).*(?P<suffix>-(x86_|amd)64.+)$'
   re_replace: '\g<prefix>latest\g<suffix>'
+
+- item: prometheus
+  shell: "bash"
+  markdown_instruction: prometheus_instructions.md
+  markdown_help: ''
+  command: bash <(curl -k "https://{{ ansible_default_ipv4.address }}/distrib/install/install-prometheus.bash")
+  tags:
+  - 1
+  - 9
+  payload_files:
+  - install-prometheus.bash
+#  config_files:
+#  - linux_metricbeat.yml
+#  upstream_files:
+#  - https://community.repo.rgm-cloud.io/rgm/latest/updates/x86_64/Packages/metricbeat-oss-7.3.1-x86_64.rpm
+#  - https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-oss-7.3.1-amd64.deb
+#  re_pattern: '^.*\/(?P<prefix>\w+-oss-).*(?P<suffix>-(x86_|amd)64.+)$'
+#  re_replace: '\g<prefix>latest\g<suffix>'

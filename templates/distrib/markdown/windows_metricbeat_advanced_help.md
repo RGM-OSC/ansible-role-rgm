@@ -28,12 +28,17 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
 
 There is some variable available to be able to register the Host in RGM.
 
-* __username__ : enter an RGM internal account
-* __password__ : enter the associate password
-* __token__ : If you already know the token, it can bu used instead of the password
-* __RGMServer__ : _optionnal_. By default the IP of the RGM server is used, you can provide another IP.
-* InstallSomething : _optionnal - not yet usable_. Use this switch to install Something
-* Common commandlets are available like -verbose
+| name | defaults | description |
+|--|--|--|
+| `Username`  |  | _mandatory_. enter an RGM internal account |
+| `Password`  |  | _mandatory_. enter the associate password |
+| `OneTimeToken`  |  | _mandatory_. If you already know the token, it can bu used instead of the password |
+| `RGMServer`  | rgm server ip | _optionnal_. By default the IP of the RGM server is used, you can provide another IP |
+| `RGMTemplate`  | GENERIC_HOST | _optionnal_.RGM template model to use when the computer is registered in RGM |
+| `HostAlias`  |  | _optionnal_. Alias Name for the server in RGM |
+| `NoMetricBeat`  | false | _optionnal_. Use this option to **not** install metric beat |
+| `AuditBeat`  | false | _optionnal_. Use this option to install audit beat |
+| `Verbose`  | false | _optionnal_. Common Commandlets are available. Use Verbose to have more details |
 
 
 Launch the installation with this command :

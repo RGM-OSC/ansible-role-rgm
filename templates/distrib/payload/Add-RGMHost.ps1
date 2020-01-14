@@ -7,6 +7,8 @@ param (
     [Parameter(Mandatory=$true,ParameterSetName="OneTimeToken")]
     [String]$OneTimeToken,
     [String]$RGMServer = "{{ ansible_default_ipv4.address }}",
+    [String]$RGMTemplate = "GENERIC_HOST",
+    [String]$HostAlias = "",
     [Switch]$NoMetricBeat,
     [Switch]$AuditBeat,
     [Switch]$InstallSomething
@@ -31,13 +33,15 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
 
 # Create header with token value if the token is passed in variable
 If ($OneTimeToken) {
-    $Header = @{
+    Write-Verbose "Header default Construct with Token"
+    $script:Header = @{
         "Content-Type" = "application/json"
         "token"        = $OneTimeToken
     }
 }
 Else {
-    $Header = @{
+    Write-Verbose "Header default Construct without Token"
+    $script:Header = @{
         "Content-Type" = "application/json"
     }
 }
@@ -46,7 +50,8 @@ function Get-RGMApiToken {
 
     $UriAuthent = "https://$RGMServer/rgmapi/getAuthToken?&username=$Username&password=$Password"
 
-    $TokenReturn = Invoke-RestMethod -Uri $UriAuthent -Method GET -Headers $Header
+    $TokenReturn = Invoke-RestMethod -Uri $UriAuthent -Method GET -Headers $script:Header
+    Write-Verbose "New Token = $($TokenReturn.RGMAPI_TOKEN)"
 
     # Update the current header with the current active token
     $script:Header = @{
@@ -60,11 +65,13 @@ function Test-RGMApiToken {
 
     $UriTokenCheck = "https://$RGMServer/rgmapi/checkAuthToken"
     try {
-        $null = Invoke-RestMethod -Uri $UriTokenCheck -Method GET -Headers $Header
+        $null = Invoke-RestMethod -Uri $UriTokenCheck -Method GET -Headers $:scriptHeader
     }
     catch {
+        Write-Verbose "Token non valide"
         return $false
     }
+    Write-Verbose "Token valide"
     return $true
 }
 
@@ -75,23 +82,26 @@ function Invoke-RGMRestMethod {
         [String]$Body
     )
     if (!(Test-RGMApiToken)) {
-        if ($password) {
+        if ($Password) {
+            Write-Verbose $($Header|ConvertTo-Json)
+            Write-Verbose "Request token with password"
             Get-RGMApiToken
+            Write-Verbose $($Header|ConvertTo-Json)
         }
         elseif ($OneTimeToken) {
-            Write-Host "The OnTimeToken is not valid`nEnd of script"
+            Write-Output "The OnTimeToken is not valid`nEnd of script"
             exit
         }else{
-            Write-Host "There is an unexpected error (no password or no OneTimeToken provided)`nEnd of script"
+            Write-Output "There is an unexpected error (no password or no OneTimeToken provided)`nEnd of script"
             exit
         }
     }
 
     if ($Methode -eq "Get") {
-        return (Invoke-RestMethod -Uri $Uri -Method Get -Headers $Header)
+        return (Invoke-RestMethod -Uri $Uri -Method Get -Headers $script:Header)
     }
     else {
-        return (Invoke-RestMethod -Uri $Uri -Method $Methode -Body $Body -Headers $Header)
+        return (Invoke-RestMethod -Uri $Uri -Method $Methode -Body $Body -Headers $script:Header)
     }
 }
 
@@ -99,11 +109,11 @@ function Invoke-RGMRestMethod {
 function New-RGMHost {
     param (
         [String]$templateHostName = "GENERIC_HOST",
-        [String]$hostName, 
-        [String]$hostIp, 
-        [String]$hostAlias = ""#, 
-        #   [String]$contactName, 
-        #   [String]$contactGroupName, 
+        [String]$hostName,
+        [String]$hostIp,
+        [String]$hostAlias = ""#,
+        #   [String]$contactName,
+        #   [String]$contactGroupName,
         #   [bool]$exportConfiguration=$false
     )
 
@@ -113,6 +123,7 @@ function New-RGMHost {
         "hostIp"           = $hostIp
         "hostAlias"        = $hostAlias
     } | ConvertTo-Json
+    Write-Verbose $CreateHostBody
 
     $UriCreateHost = "https://$RGMServer/rgmapi/createHost"
 
@@ -122,29 +133,33 @@ function New-RGMHost {
 
 
 # found active IP address
-$interfaces = Get-NetRoute -DestinationPrefix 0.0.0.0/0 # Search Interfaces with gateway to go out
+$interfaces = Get-NetRoute -DestinationPrefix 0.0.0.0/0 | Sort-Object ifIndex | select-object -first 1 # Search Interfaces with gateway to go out and filter on the first lower Index - avoid multi card and a gateway on each card
 $ActiveInterface = $interfaces | Get-NetIPInterface | where-object { $_.ConnectionState -eq "Connected" } # filter to keep active interface
 $PrincipaleIP = Get-NetIPAddress -InterfaceIndex $ActiveInterface.InterfaceIndex -AddressFamily IPV4 | Select-Object -ExpandProperty IPaddress
 # Collect current computername
 $Hostname = $env:COMPUTERNAME
-
+Write-Verbose "Hostname: $Hostname, IP: $PrincipaleIP"
 
 # Create the object on the RGM server
-$NewHost = New-RGMHost -hostName $Hostname -hostIp $PrincipaleIP
+$NewHost = New-RGMHost -hostName $Hostname -hostIp $PrincipaleIP -templateHostName $RGMTemplate -hostAlias $HostAlias
 $NewHost.result
 
 # Call MetricBeat Install
-if ($NoMetricBeat) { }else {
+if ($NoMetricBeat) { 
+    Write-Verbose "MetricBeat installation bypassed"
+}else {
+    Write-Verbose "MetricBeat installation"
     powershell.exe -executionpolicy bypass -Command $([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString("https://$RGMServer/distrib/install/Install-MetricBeat.ps1")))
 }
 
 # Ready to add other install options
 if ($AuditBeat) {
+    Write-Verbose "AuditBeat installation"
     powershell.exe -executionpolicy bypass -Command $([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString("https://$RGMServer/distrib/install/Install-AuditBeat.ps1")))
 
 }
 # Ready to add other install options
 if ($InstallSomething) {
-
+    Write-Verbose "Something installation"
 
 }

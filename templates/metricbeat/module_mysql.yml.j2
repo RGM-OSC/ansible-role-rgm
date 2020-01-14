@@ -1,0 +1,19 @@
+# Module: mysql
+# Docs: https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-module-mysql.html
+
+- module: mysql
+  metricsets:
+  - status
+  #  - galera_status
+  period: {{ metricbeat_polling_period }}
+
+  # Host DSN should be defined as "user:pass@tcp(127.0.0.1:3306)/"
+  # The username and password can either be set in the DSN or using the username
+  # and password config options. Those specified in the DSN take precedence.
+  hosts: ["{{ mariadb_ro_user }}:{{ mariadb_ro_pwd }}@tcp(127.0.0.1:3306)/"]
+
+  # Username of hosts. Empty by default.
+  #username: root
+
+  # Password of hosts. Empty by default.
+  #password: secret

@@ -70,6 +70,19 @@
       "Please check /root/.my.cnf"
   when: mariadb_status.rc != 0
 
+- name: remove uneeded databases
+  mysql_db:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+  - test
+
+- name: removes all anonymous user accounts
+  mysql_user:
+    name: ''
+    host_all: yes
+    state: absent
+
 - name: Initialize databases
   include_tasks:
     file: mariadb_db.yml
@@ -80,10 +93,11 @@
         db_user: "{{ item.user }}"
         db_pwd: "{{ item.pwd }}"
   with_items:
-  - { name: "{{ db_grafana }}", user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" }
-  - { name: "{{ db_nagvis }}",  user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" }
-  - { name: "{{ db_lilac }}",   user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" }
-  - { name: "{{ db_notifier }}",   user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" }
+  - { name: "{{ db_grafana }}",   user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" }
+  - { name: "{{ db_nagvis }}",    user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" }
+  - { name: "{{ db_lilac }}",     user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" }
+  - { name: "{{ db_lilac }}_tmp", user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" }
+  - { name: "{{ db_notifier }}",  user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" }
 
 - name: create mariadb internal RO account
   mysql_user:
