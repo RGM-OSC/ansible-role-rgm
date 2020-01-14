@@ -11,13 +11,18 @@
   changed_when: lilac_schema.stdout != db_lilac_schema_version
   ignore_errors: yes
 
-- name: inject default Lilac schema on database
-  shell: "mysql {{ db_lilac }} < /var/lib/rgm/lilac/lilac-rgm.sql"
-  args:
-    executable: /bin/bash
-  register: lilac_schema_inject
-  changed_when: lilac_schema_inject.rc == 1
-  failed_when: lilac_schema_inject.rc == 2
+- block:
+  - name: inject default Lilac schema on database
+    shell: "mysql {{ db_lilac }} < /var/lib/rgm/lilac/lilac-rgm.sql"
+    args:
+      executable: /bin/bash
+    register: lilac_schema_inject
+    changed_when: lilac_schema_inject.rc == 1
+    failed_when: lilac_schema_inject.rc == 2
+
+  - name: set AUTO_INCREMENT for customer
+    command: /usr/share/rgm/lilac_manage_auto_increments.sh -s
+
   when: lilac_schema.failed
 
 #- name: import lilac schema upgrade tasks
