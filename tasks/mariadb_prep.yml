@@ -98,6 +98,7 @@
   - { name: "{{ db_lilac }}",     user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" }
   - { name: "{{ db_lilac }}_tmp", user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" }
   - { name: "{{ db_notifier }}",  user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" }
+  - { name: "{{ db_thruk_log }}", user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" }
 
 - name: create mariadb internal RO account
   mysql_user:
