@@ -104,7 +104,7 @@
 - name: install RGM packages (it may take some time...)
   yum:
     update_cache: "{{ not(update_epel.changed) }}"
-    name: "{{ packages_system + packages_mariadb + packages_apache + packages_elastic + packages_influx_grafana + packages_prometheus + packages_rgm + packages_partners }}"
+    name: "{{ packages_system + packages_mariadb + packages_apache + packages_elastic + packages_influx_grafana + packages_prometheus + packages_rgm + packages_partners + extra_packages }}"
     state: latest
   retries: 10
   delay: 2
@@ -238,6 +238,14 @@
     owner: "{{ rgm_user }}"
     group: "{{ rgm_group }}"
     mode: 0775
+
+- name: ensure config symlink is present
+  file:
+    src: /etc/rgm
+    path: "{{ rgm_root_path }}/config"
+    owner: root
+    group: root
+    state: link
 
 ### configure chronyd
 - name: configure chrony daemon
