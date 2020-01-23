@@ -101,14 +101,14 @@ SSLSessionTickets off
 # the certificate is encrypted, then you will be prompted for a
 # pass phrase.  Note that a kill -HUP will prompt again.  A new
 # certificate can be generated using the genkey(1) command.
-SSLCertificateFile /etc/pki/tls/certs/localhost.crt
+SSLCertificateFile {{ http_ssl_cert_file }}
 
 #   Server Private Key:
 #   If the key is not combined with the certificate, use this
 #   directive to point at the key file.  Keep in mind that if
 #   you've both a RSA and a DSA private key you can configure
 #   both in parallel (to also allow the use of DSA ciphers, etc.)
-SSLCertificateKeyFile /etc/pki/tls/private/localhost.key
+SSLCertificateKeyFile {{ http_ssl_key_file }}
 
 #   Server Certificate Chain:
 #   Point SSLCertificateChainFile at a file containing the
@@ -118,12 +118,18 @@ SSLCertificateKeyFile /etc/pki/tls/private/localhost.key
 #   when the CA certificates are directly appended to the server
 #   certificate for convinience.
 #SSLCertificateChainFile /etc/pki/tls/certs/server-chain.crt
+{% if http_ssl_cert_chain is defined %}
+SSLCertificateChainFile http_ssl_cert_chain
+{% endif %}
 
 #   Certificate Authority (CA):
 #   Set the CA certificate verification path where to find CA
 #   certificates for client authentication or alternatively one
 #   huge file containing all of them (file must be PEM encoded)
 #SSLCACertificateFile /etc/pki/tls/certs/ca-bundle.crt
+{% if http_ssl_cert_ca is defined %}
+SSLCACertificateFile http_ssl_cert_ca
+{% endif %}
 
 #   Client Authentication (Type):
 #   Client certificate verification type and depth.  Types are

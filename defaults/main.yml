@@ -77,3 +77,9 @@ forany_rgmapi_email: '4any@4any.io'
 # final users can add into this list RPM packages they wish to see installed
 # see in vars/main.yml the lists of packages installed de-facto by the role
 extra_packages: []
+
+### Apache HTTPd server customization
+# apache SSLCertificateFile directive
+http_ssl_cert_file: /etc/pki/tls/certs/localhost.crt
+# apache SSLCertificateKeyFile directive
+http_ssl_key_file: /etc/pki/tls/private/localhost.key
