@@ -239,6 +239,14 @@
     group: "{{ rgm_group }}"
     mode: 0775
 
+- name: ensure config symlink is present
+  file:
+    src: /etc/rgm
+    path: "{{ rgm_root_path }}/config"
+    owner: root
+    group: root
+    state: link
+
 ### configure chronyd
 - name: configure chrony daemon
   include_tasks:
