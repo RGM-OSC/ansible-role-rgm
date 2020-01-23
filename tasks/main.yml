@@ -104,7 +104,7 @@
 - name: install RGM packages (it may take some time...)
   yum:
     update_cache: "{{ not(update_epel.changed) }}"
-    name: "{{ packages_system + packages_mariadb + packages_apache + packages_elastic + packages_influx_grafana + packages_prometheus + packages_rgm + packages_partners }}"
+    name: "{{ packages_system + packages_mariadb + packages_apache + packages_elastic + packages_influx_grafana + packages_prometheus + packages_rgm + packages_partners + extra_packages }}"
     state: latest
   retries: 10
   delay: 2
