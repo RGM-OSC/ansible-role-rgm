@@ -31,6 +31,25 @@
   - { regex: '^(#\s*)?path.repo: ',     line: 'path.repo: "/srv/rgm/elastic"' }
   notify: service_restart_elasticsearch
 
+- name: determine elasticsearch's JVM heap size (total memory /2)
+  set_fact:
+    jvmheapsize: "{{ (((ansible_facts['memtotal_mb'] / 1024) | round | int) / 2) | round | int }}"
+
+- name: restrict JVM heap size to {{ max_jvm_heapsize}}
+  set_fact:
+    jvmheapsize: "{{ max_jvm_heapsize}}"
+  when: (jvmheapsize | int) > (max_jvm_heapsize | int)
+
+- name: set Elasticsearch's JVM heap size
+  lineinfile:
+    path: /etc/elasticsearch/jvm.options
+    regexp: "{{ item.regex }}"
+    line: "{{ item.line }}"
+  with_items:
+  - { regex: '^-Xms.*$',  line: "-Xms{{ jvmheapsize }}g" }
+  - { regex: '^-Xmx.*$',  line: "-Xmx{{ jvmheapsize }}g" }
+  notify: service_restart_elasticsearch
+
 - name: ensure elasticsearch is enabled and started
   systemd:
     name: elasticsearch

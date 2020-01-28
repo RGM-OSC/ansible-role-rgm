@@ -40,6 +40,9 @@ ntp_servers:
 - '2.pool.ntp.org'
 - '3.pool.ntp.org'
 
+# Maximum allowed JVM heap size value (in MB)
+max_jvm_heapsize: 8
+
 # Elasticsearch Curator values
 curator:
   close_indices_delay: 2
