@@ -60,3 +60,18 @@
   changed_when: notifier_schema_inject.rc == 1
   failed_when: notifier_schema_inject.rc == 2
   when: notifier_schema.changed or notifier_schema.failed
+
+- name: test if mariadb backup configuration file exist
+  stat:
+    path: /root/.my-backup.cnf
+  register: mariadb_backup_conf
+
+- name: check if MariaDB backup user is password protected
+  command: mysql --defaults-extra-file=/root/.my-backup.cnf --host=localhost --user='{{ mariadb_backup_username }}' -e '\q'
+  register: mariadb_backup_status
+  changed_when: mariadb_backup_status.rc == 0 or mariadb_backup_conf.stat.exists == false
+  failed_when: mariadb_backup_status.rc > 1
+
+- name: include mariadb backup user management
+  include_tasks: mariadb_backup_account.yml
+  when: mariadb_backup_status.changed
