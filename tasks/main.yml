@@ -149,6 +149,15 @@
   - https
   notify: service_restart_firewalld
 
+- name: configure firewalld explicit ports
+  firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    state: enabled
+  with_items:
+  - 68/udp
+  notify: service_restart_firewalld
+
 - name: create Ansible tmp dirs for alternate users
   file:
     path: "/tmp/.ansible-{{ item }}/tmp"

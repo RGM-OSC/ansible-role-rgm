@@ -14,7 +14,7 @@ fi
 OSTYPE=
 OSVERS=
 if [ -e /etc/redhat-release ]; then
-    grep -P '^(CentOS|RedHat)' /etc/redhat-release &> /dev/null
+    grep -P '^(CentOS|RedHat|Red Hat)' /etc/redhat-release &> /dev/null
     if [ $? -eq 0 ]; then
         OSTYPE='redhat'
         OSVERS=$(sed 's/.*release \([0-9]\+\).*/\1/' /etc/redhat-release)

@@ -31,6 +31,38 @@
   - { regex: '^(#\s*)?path.repo: ',     line: 'path.repo: "/srv/rgm/elastic"' }
   notify: service_restart_elasticsearch
 
+- name: determine elasticsearch's JVM heap size (total memory /2)
+  set_fact:
+    jvmheapsize: "{{ (((ansible_facts['memtotal_mb'] / 1024) | round | int) / 2) | round | int }}"
+
+- name: restrict JVM heap size to {{ max_jvm_heapsize}}
+  set_fact:
+    jvmheapsize: "{{ max_jvm_heapsize}}"
+  when: (jvmheapsize | int) > (max_jvm_heapsize | int)
+
+- name: set Elasticsearch's JVM configuration
+  lineinfile:
+    path: /etc/elasticsearch/jvm.options
+    regexp: "{{ item.regex }}"
+    line: "{{ item.line }}"
+    insertafter: "{{ item.after }}"
+  with_items:
+  - { regex: '^-Xms.*$',                                              line: "-Xms{{ jvmheapsize }}g",                            after: 'EOF' }
+  - { regex: '^-Xmx.*$',                                              line: "-Xmx{{ jvmheapsize }}g",                            after: 'EOF' }
+  - { regex: '^.*-XX:\+UseConcMarkSweepGC$',                          line: '# -XX:+UseConcMarkSweepGC',                         after: 'EOF' }
+  - { regex: '^.*-XX:CMSInitiatingOccupancyFraction=.*$',             line: '# -XX:CMSInitiatingOccupancyFraction=75',           after: 'EOF' }
+  - { regex: '^.*-XX:\+UseCMSInitiatingOccupancyOnly$',               line: '# -XX:+UseCMSInitiatingOccupancyOnly',              after: 'EOF' }
+  - { regex: '^.*10-:-XX:\+UseG1GC$',                                 line: '10-:-XX:+UseG1GC',                                  after: '^#+ G1GC Configuration$' }
+  - { regex: '^.*10-:-XX:G1ReservePercent=.*$',                       line: '10-:-XX:G1ReservePercent=25',                       after: '^.*-XX:\+UseG1GC$' }
+  - { regex: '^.*10-:-XX:InitiatingHeapOccupancyPercent=.*$',         line: '10-:-XX:InitiatingHeapOccupancyPercent=30',         after: '^.*-XX:\+UseG1GC$' }
+  - { regex: '^# JMX',                                                line: '# JMX',                                             after: 'EOF' }
+  - { regex: '^.*-Dcom.sun.management.jmxremote$',                    line: '-Dcom.sun.management.jmxremote',                    after: '^# JMX$' }
+  - { regex: '^.*-Dcom.sun.management.jmxremote.port=\\d+$',          line: '-Dcom.sun.management.jmxremote.port=10001',         after: '^-Dcom.sun.management.jmxremote.*$' }
+  - { regex: '^.*-Dcom.sun.management.jmxremote.rmi.port=\\d+$',      line: '-Dcom.sun.management.jmxremote.rmi.port=10002',     after: '^-Dcom.sun.management.jmxremote.*$' }
+  - { regex: '^.*-Dcom.sun.management.jmxremote.ssl=false$',          line: '-Dcom.sun.management.jmxremote.ssl=false',          after: '^-Dcom.sun.management.jmxremote.*$' }
+  - { regex: '^.*-Dcom.sun.management.jmxremote.authenticate=false$', line: '-Dcom.sun.management.jmxremote.authenticate=false', after: '^-Dcom.sun.management.jmxremote.*$' }
+  notify: service_restart_elasticsearch
+
 - name: ensure elasticsearch is enabled and started
   systemd:
     name: elasticsearch

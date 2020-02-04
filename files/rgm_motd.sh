@@ -16,6 +16,9 @@ function get_ip_fqdn() {
 	fi
 }
 
+# set some system-wide aliases for RGM
+alias rgmvenv='. /srv/rgm/python-rgm/bin/activate'
+
 # compute CPU and memory info, display system stats
 CPU_INFO="$(grep processor /proc/cpuinfo | wc -l)x$(grep 'model name' /proc/cpuinfo | uniq | awk -F ':' '{print $2}')"
 MEMORY="$(free -m |grep Mem: | awk -F " " '{print $2}') MB"

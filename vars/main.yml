@@ -5,6 +5,7 @@
 ### RPM packages ###
 packages_system:
 - bash-completion
+- bzip2
 - vim
 - sudo
 - net-snmp
