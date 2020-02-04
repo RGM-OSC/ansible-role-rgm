@@ -137,7 +137,7 @@ $interfaces = Get-NetRoute -DestinationPrefix 0.0.0.0/0 | Sort-Object ifIndex | 
 $ActiveInterface = $interfaces | Get-NetIPInterface | where-object { $_.ConnectionState -eq "Connected" } # filter to keep active interface
 $PrincipaleIP = Get-NetIPAddress -InterfaceIndex $ActiveInterface.InterfaceIndex -AddressFamily IPV4 | Select-Object -ExpandProperty IPaddress
 # Collect current computername
-$Hostname = $env:COMPUTERNAME
+$Hostname = Get-ComputerInfo -Property CsDNSHostName | Select-Object -ExpandProperty CsDNSHostName
 Write-Verbose "Hostname: $Hostname, IP: $PrincipaleIP"
 
 # Create the object on the RGM server
