@@ -15,6 +15,7 @@
   - "{{ rgm_root_path }}/distrib/packages"
   - "{{ rgm_root_path }}/distrib/markdown"
   - "{{ rgm_root_path }}/distrib/conf"
+  - "{{ rgm_root_path }}/distrib/conf/modules"
 
 - name: copy one-liner payloads
   template:
@@ -41,6 +42,18 @@
   with_subelements:
   - "{{ oneliner_items }}"
   - config_files
+  - skip_missing: true
+
+- name: copy default modules files
+  template:
+    src: "distrib/conf/modules/{{ item.1 }}.j2"
+    dest: "{{ rgm_root_path }}/distrib/conf/modules/{{ item.1 }}"
+    owner: "{{ rgmweb_user }}"
+    group: "{{ rgm_group }}"
+    mode: 0444
+  with_subelements:
+  - "{{ oneliner_items }}"
+  - modules_files
   - skip_missing: true
 
 - name: install markdown instruction pages

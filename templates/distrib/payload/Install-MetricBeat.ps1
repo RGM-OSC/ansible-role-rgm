@@ -17,9 +17,9 @@ If (($PSVersionTable.PSVersion).Major -le 3){
 
 $MetricBeatFileDownloadLink = "https://{{ ansible_default_ipv4.address }}/distrib/packages/metricbeat-oss-latest-windows-x86_64.zip"
 $MetricBeatConfFileLink = "https://{{ ansible_default_ipv4.address }}/distrib/conf/windows_metricbeat.yml"
-$MetricBeatConfRGMsystemcoreLink = "https://{{ ansible_default_ipv4.address }}/distrib/conf/windows_rgm-system-core.yml"
-$MetricBeatConfRGMsystemfsLink = "https://{{ ansible_default_ipv4.address }}/distrib/conf/windows_rgm-system-fs.yml"
-$MetricBeatConfRGMsystemuptimeLink = "https://{{ ansible_default_ipv4.address }}/distrib/conf/windows_rgm-system-uptime.yml"
+$MetricBeatConfRGMsystemcoreLink = "https://{{ ansible_default_ipv4.address }}/distrib/conf/modules/windows_rgm-system-core.yml"
+$MetricBeatConfRGMsystemfsLink = "https://{{ ansible_default_ipv4.address }}/distrib/conf/modules/windows_rgm-system-fs.yml"
+$MetricBeatConfRGMsystemuptimeLink = "https://{{ ansible_default_ipv4.address }}/distrib/conf/modules/windows_rgm-system-uptime.yml"
 
 $MetricBeatBasePath="{{ winbeats_base_path }}"
 # {{ ansible_default_ipv4.address }}
@@ -136,7 +136,7 @@ If (($PSVersionTable.PSVersion).Major -le 4) {
 	# install the new version of the service
 	$serviceName="metricbeat"
 	$displayName="metricbeat"
-	$path = """$MetricBeatBasePath\MetricBeat\metricbeat.exe"" -c ""$MetricBeatBasePath\MetricBeat\metricbeat.yml"" -path.home ""$MetricBeatBasePath\MetricBeat"" -path.data ""C:\ProgramData\metricbeat"" -path.logs ""$MetricBeatBasePath\MetricBeat"""
+	$path = """$MetricBeatBasePath\MetricBeat\metricbeat.exe"" -c ""$MetricBeatBasePath\MetricBeat\metricbeat.yml"" -path.home ""$MetricBeatBasePath\MetricBeat"" -path.data ""C:\ProgramData\metricbeat"" -path.logs ""$MetricBeatBasePath\MetricBeat\logs"""
 	$startMode = "Automatic"
 	$interactWithDesktop= $false
 	$params = $serviceName, $displayName, $path, 16, 1, $startMode, $interactWithDesktop, $null, $null, $null, $null, $null           
