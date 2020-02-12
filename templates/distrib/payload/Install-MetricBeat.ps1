@@ -118,7 +118,7 @@ If (($PSVersionTable.PSVersion).Major -le 4) {
 	# install the new version of the service
 	$serviceName="metricbeat"
 	$displayName="metricbeat"
-	$path = """$MetricBeatBasePath\MetricBeat\metricbeat.exe"" -c ""$MetricBeatBasePath\MetricBeat\metricbeat.yml"" -path.home ""$MetricBeatBasePath\MetricBeat"" -path.data ""C:\ProgramData\metricbeat"" -path.logs ""C:\ProgramData\metricbeat\logs"""
+	$path = """$MetricBeatBasePath\MetricBeat\metricbeat.exe"" -c ""$MetricBeatBasePath\MetricBeat\metricbeat.yml"" -path.home ""$MetricBeatBasePath\MetricBeat"" -path.data ""C:\ProgramData\metricbeat"" -path.logs ""$MetricBeatBasePath\MetricBeat"""
 	$startMode = "Automatic"
 	$interactWithDesktop= $false
 	$params = $serviceName, $displayName, $path, 16, 1, $startMode, $interactWithDesktop, $null, $null, $null, $null, $null           
