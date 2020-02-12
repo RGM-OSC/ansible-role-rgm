@@ -67,6 +67,10 @@ enable_prometheus: no
 # Windows Beats installation base patch
 winbeats_base_path: 'C:\Program Files'
 metricbeat_polling_period: 90s
+# global metric value configuration
+d_metric_sys_core_period: '2m'
+d_metric_sys_fs_period: '2m'
+d_metric_sys_uptime_period: '2m'
 
 # Default swappiness for RGM
 sysctl_swappiness: '10'

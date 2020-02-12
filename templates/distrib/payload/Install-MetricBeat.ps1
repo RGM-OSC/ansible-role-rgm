@@ -17,6 +17,10 @@ If (($PSVersionTable.PSVersion).Major -le 3){
 
 $MetricBeatFileDownloadLink = "https://{{ ansible_default_ipv4.address }}/distrib/packages/metricbeat-oss-latest-windows-x86_64.zip"
 $MetricBeatConfFileLink = "https://{{ ansible_default_ipv4.address }}/distrib/conf/windows_metricbeat.yml"
+$MetricBeatConfRGMsystemcoreLink = "https://{{ ansible_default_ipv4.address }}/distrib/conf/windows_rgm-system-core.yml"
+$MetricBeatConfRGMsystemfsLink = "https://{{ ansible_default_ipv4.address }}/distrib/conf/windows_rgm-system-fs.yml"
+$MetricBeatConfRGMsystemuptimeLink = "https://{{ ansible_default_ipv4.address }}/distrib/conf/windows_rgm-system-uptime.yml"
+
 $MetricBeatBasePath="{{ winbeats_base_path }}"
 # {{ ansible_default_ipv4.address }}
 ######  Download Part #######
@@ -102,6 +106,20 @@ $ConfigurationFilePath = "$MetricBeatBasePath\MetricBeat\metricbeat.yml"
 $ConfigurationFileContent = Get-Content $ConfigurationFilePath
 $ConfigurationFileContent = $ConfigurationFileContent -replace ("%%IP%%",$IPaddress)
 Set-Content -Path $ConfigurationFilePath -Value $ConfigurationFileContent
+
+# Get RGM dedicated system files
+$ConfigurationFilePathRGMsystemcoreLink = "$MetricBeatBasePath\MetricBeat\modules.d\rgm-system-core.yml"
+(New-Object System.Net.WebClient).DownloadFile($MetricBeatConfRGMsystemcoreLink, $ConfigurationFilePathRGMsystemcoreLink)
+$ConfigurationFilePathRGMsystemfsLink = "$MetricBeatBasePath\MetricBeat\modules.d\rgm-system-fs.yml"
+(New-Object System.Net.WebClient).DownloadFile($MetricBeatConfRGMsystemfsLink, $ConfigurationFilePathRGMsystemfsLink)
+$ConfigurationFilePathRGMsystemuptimeLink = "$MetricBeatBasePath\MetricBeat\modules.d\rgm-system-uptime.yml"
+(New-Object System.Net.WebClient).DownloadFile($MetricBeatConfRGMsystemuptimeLink, $ConfigurationFilePathRGMsystemuptimeLink)
+
+# Disable the default system module
+$SystemModulePath = "$MetricBeatBasePath\MetricBeat\modules.d\system.yml"
+if (Test-Path $SystemModulePath){
+	Rename-Item -Path $SystemModulePath -NewName "system.yml.disabled"
+}
 
 ######  Service Creation part #######
 
