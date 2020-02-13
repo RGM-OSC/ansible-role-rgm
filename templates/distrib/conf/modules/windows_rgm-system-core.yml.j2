@@ -1,0 +1,18 @@
+# Module: system
+# Docs: https://www.elastic.co/guide/en/beats/metricbeat/7.3/metricbeat-module-system.html
+​
+- module: system
+  period: {{ d_metric_sys_core_period }}
+  metricsets:
+    - cpu
+    - memory
+    - network
+    - process
+    - process_summary
+    - socket_summary
+    - diskio
+​
+- module: windows
+  period: {{ d_metric_sys_core_period }}
+  metricsets:
+    - service
