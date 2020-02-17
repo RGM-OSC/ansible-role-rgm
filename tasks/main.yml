@@ -135,6 +135,7 @@
   systemd:
     name: firewalld
     enabled: yes
+    masked: no
     state: started
 
 - name: configure firewalld services
@@ -246,7 +247,11 @@
     state: directory
     owner: "{{ rgm_user }}"
     group: "{{ rgm_group }}"
-    mode: 0775
+    mode: 0750
+    seuser: system_u
+    serole: object_r
+    setype: httpd_sys_rw_content_t
+    selevel: s0
 
 - name: ensure config symlink is present
   file:
@@ -497,6 +502,7 @@
   systemd:
     name: "{{ item }}"
     enabled: yes
+    masked: no
     state: started
   with_items: "{{ rgm_services }}"
 
