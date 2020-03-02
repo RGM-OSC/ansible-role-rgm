@@ -1,6 +1,8 @@
 #Requires -RunAsAdministrator
 [cmdletbinding()]
-Param()
+Param(
+	[String]$RGMServer = "{{ ansible_default_ipv4.address }}"
+)
 
 function Test-Administrator  
 {  
@@ -15,14 +17,14 @@ If (($PSVersionTable.PSVersion).Major -le 3){
 	}
 }
 
-$MetricBeatFileDownloadLink = "https://{{ ansible_default_ipv4.address }}/distrib/packages/metricbeat-oss-latest-windows-x86_64.zip"
-$MetricBeatConfFileLink = "https://{{ ansible_default_ipv4.address }}/distrib/conf/windows_metricbeat.yml"
-$MetricBeatConfRGMsystemcoreLink = "https://{{ ansible_default_ipv4.address }}/distrib/conf/modules/windows_rgm-system-core.yml"
-$MetricBeatConfRGMsystemfsLink = "https://{{ ansible_default_ipv4.address }}/distrib/conf/modules/windows_rgm-system-fs.yml"
-$MetricBeatConfRGMsystemuptimeLink = "https://{{ ansible_default_ipv4.address }}/distrib/conf/modules/windows_rgm-system-uptime.yml"
+$MetricBeatFileDownloadLink = "https://$RGMServer/distrib/packages/metricbeat-oss-latest-windows-x86_64.zip"
+$MetricBeatConfFileLink = "https://$RGMServer/distrib/conf/windows_metricbeat.yml"
+$MetricBeatConfRGMsystemcoreLink = "https://$RGMServer/distrib/conf/modules/windows_rgm-system-core.yml"
+$MetricBeatConfRGMsystemfsLink = "https://$RGMServer/distrib/conf/modules/windows_rgm-system-fs.yml"
+$MetricBeatConfRGMsystemuptimeLink = "https://$RGMServer/distrib/conf/modules/windows_rgm-system-uptime.yml"
 
 $MetricBeatBasePath="{{ winbeats_base_path }}"
-# {{ ansible_default_ipv4.address }}
+# $RGMServer
 ######  Download Part #######
 
 $MetricBeatFileName = ($MetricBeatFileDownloadLink -split ("/"))[-1]
@@ -147,8 +149,12 @@ If (($PSVersionTable.PSVersion).Major -le 4) {
 	$null = $mgt.InvokeMethod("Create", $params)    
 
 }Else{
-	# Powershell V5 and most recent, ability to use the integrated install service script
-	Powershell -executionpolicy bypass -file "$MetricBeatBasePath\MetricBeat\install-service-metricbeat.ps1"
+	# Powershell V5 and most recent, ability to use the integrated install service script but replace the log folder destination
+	$InstallServiceFilePath = "$MetricBeatBasePath\MetricBeat\install-service-metricbeat.ps1"
+	$setupfile = Get-Content $InstallServiceFilePath
+	$setupfile = $setupfile -replace ("C:\\ProgramData\\metricbeat\\logs",'$workdir\metricbeat\logs')
+	set-Content $InstallServiceFilePath -Value $setupfile
+	Powershell -executionpolicy bypass -file $InstallServiceFilePath
 }
 
 # start the service
