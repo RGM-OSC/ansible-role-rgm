@@ -11,9 +11,12 @@ function Test-Administrator
 	(New-Object Security.Principal.WindowsPrincipal $user).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)  
 }
 
+Write-Verbose -Message "Start Beat agents script installation"
+
 If (($PSVersionTable.PSVersion).Major -le 3){
 	If (Test-Administrator -eq $false) {
 		Write-Information -MessageData "The script require Administrator privileges" -InformationAction Continue
+		Write-Verbose -Message "The script require Administrator privileges"
 		exit 1
 	}
 }
@@ -66,8 +69,18 @@ foreach ($BeatFailed in $BeatsFailed) {
 	Write-Information -MessageData "$BeatFailed is not a valide agent name or not managed yet" -InformationAction Continue
 }
 
+# test the $BeatsBasePath value if not good
+# Clean any '\' present at the end to avoid issue on next commands
+$BeatsBasePath = $BeatsBasePath.TrimEnd("\")
+if ((Test-Path $BeatsBasePath) -eq $false) {
+	Write-Information -MessageData "The folder $BeatsBasePath doesn't exist. Exit" -InformationAction Continue
+	Write-Verbose -Message "The folder $BeatsBasePath doesn't exist. Exit"
+	exit 1
+}
 
 ### SSL Bypass process
+Write-Verbose -Message "Bypass SSL and set TLS12"
+
 if ("TrustAllCertsPolicy" -as [type]) {} else{
 add-type @"
 using System.Net;
@@ -93,12 +106,15 @@ foreach ($Beattoinstall in $Beatstoinstall) {
 	$AgentServiceName = $AgentDetail.servicename
 	$AgentfolderPath = $BeatsBasePath + "\" + $AgentDetail.foldername
 	Write-Information -MessageData "Installation of the $AgentName agent" -InformationAction Continue
+	Write-Verbose -Message "Installation of the $AgentName agent"
 
 	# generate download links
+	Write-Verbose -Message "generate download links"
 	$BeatFileDownloadLink = "https://$RGMServer/distrib/packages/$AgentName-oss-latest-windows-x86_64.zip"
 	$BeatConfFileLink = "https://$RGMServer/distrib/conf/windows_$AgentName.yml"
 	
 	# generate files names and local path variables
+	Write-Verbose -Message "generate files names and local path variables"
 	$BeatFileName = ($BeatFileDownloadLink -split ("/"))[-1]
 	$BeatConfFileName = ($BeatConfFileLink -split ("/"))[-1]
 	$BeatFoldername = $BeatFileName.Replace(".zip", "")
@@ -106,26 +122,55 @@ foreach ($Beattoinstall in $Beatstoinstall) {
 
 	# Donwload the zip file agent (New-Object System.Net.WebClient).DownloadFile is very fastest than Invoke-WebRequest
 	$DownloadPathName = (Get-Location).Path , $BeatFileName -join "\"
-	(New-Object System.Net.WebClient).DownloadFile($BeatFileDownloadLink, $DownloadPathName)
-
+	try {
+		Write-Information -MessageData "Download $BeatFileDownloadLink file" -InformationAction Continue
+		Write-Verbose -Message "Download $BeatFileDownloadLink file"
+		(New-Object System.Net.WebClient).DownloadFile($BeatFileDownloadLink, $DownloadPathName)
+	}
+	catch {
+		Write-Information -MessageData "unable to donwload the $BeatFileDownloadLink file" -InformationAction Continue
+		Write-Verbose -Message "unable to donwload the $BeatFileDownloadLink file"
+		exit 1
+	}
 	######  Unzip Part #######
 
 	# Create the Destination zip folder 
-	$DestinationUnZIPFolder=(new-item -Name $BeatFoldername -ItemType Directory).FullName
+	
+	if (Test-Path $BeatFoldername){
+		Remove-Item $BeatFoldername -Recurse
+		write-verbose -Message "Clean $BeatFoldername before unzip"
+	}
+	try {
+		$DestinationUnZIPFolder=(new-item -Name $BeatFoldername -ItemType Directory).FullName
+		write-verbose -Message "create $BeatFoldername folder"
+
+	}
+	catch{
+		Write-Information -MessageData "Issue to create the temporary unzipped folder" -InformationAction Continue
+		Write-verbose -Message "Issue to create the temporary unzipped folder"
+		exit 1
+	}
 
 	# UnZIP MetricBeat
-	# Manage unzip depending Powershell Version
-	If (($PSVersionTable.PSVersion).Major -le 4) {
-		# oldest Powershell version (4 and oldest ) use old unzip methode
-		$SourceFile = (Get-ChildItem -filter $BeatFileName -File).FullName
-		$shell_app=new-object -com shell.application
-		$zip_file = $shell_app.namespace($SourceFile)
-		$destination = $shell_app.namespace($DestinationUnZIPFolder)
-		# Copyhere option 16 (Respond Yes to all) + 4 (do not display progress dialog box)
-		$destination.Copyhere($zip_file.items(),20)
-	}else{
-	# Most recent Powershell version
-		Expand-Archive -Path .\$BeatFileName -DestinationPath $DestinationUnZIPFolder -Force
+	try {
+		# Manage unzip depending Powershell Version
+		Write-verbose -Message "unzip"
+		If (($PSVersionTable.PSVersion).Major -le 4) {
+			# oldest Powershell version (4 and oldest ) use old unzip methode
+			$SourceFile = (Get-ChildItem -filter $BeatFileName -File).FullName
+			$shell_app=new-object -com shell.application
+			$zip_file = $shell_app.namespace($SourceFile)
+			$destination = $shell_app.namespace($DestinationUnZIPFolder)
+			# Copyhere option 16 (Respond Yes to all) + 4 (do not display progress dialog box)
+			$destination.Copyhere($zip_file.items(),20)
+		}else{
+		# Most recent Powershell version
+			Expand-Archive -Path .\$BeatFileName -DestinationPath $DestinationUnZIPFolder -Force
+		}
+	}
+	catch{
+		Write-Information -MessageData "Issue to unzipped the content" -InformationAction Continue
+		exit 1
 	}
 
 	######  Destination Folder Part #######
@@ -133,10 +178,11 @@ foreach ($Beattoinstall in $Beatstoinstall) {
 	if ((Test-Path $AgentfolderPath) -eq $false) {
 		try {
 			New-Item -Path $AgentfolderPath -Type "directory"
+			Write-verbose -Message "Create destination folder"
 		}
 		catch {
-			Write-Information - "The folder $AgentfolderPath can't be created"
-			#
+			Write-Information -MessageData "The folder $AgentfolderPath can't be created" -InformationAction Continue
+			Write-verbose -Message "The folder $AgentfolderPath can't be created"
 			exit 1
 		}
 	}
@@ -153,10 +199,12 @@ foreach ($Beattoinstall in $Beatstoinstall) {
 	######  Copy Part #######
 	# Copie of download/unzipped folder to Program file. Option force used to force remplacement files
 	# If other file existe, it is keeped.
+	Write-Verbose -Message "Copy from temporary folder to destination folder"
 	$TempfolderContent = Get-ChildItem $DestinationUnZIPFolder
 	Copy-Item -Path "$($TempfolderContent.FullName)\*" -Destination $AgentfolderPath -Recurse -Force
 	
 	# Download dedicated Agent configuration file from RGM
+	Write-Verbose -Message "Download Agent configuration file"
 	(New-Object System.Net.WebClient).DownloadFile($BeatConfFileLink, $ConfigurationFilePath)
 
 	# Part depending of the agent
@@ -175,6 +223,7 @@ foreach ($Beattoinstall in $Beatstoinstall) {
 
 			# Rgm module adjustement
 			# Loop to download all rgm dedicated module for metricbeat to the module.d folder
+			Write-Verbose -Message "Inject RGM modules"
 			foreach ($module in $AgentDetail.modules) {
 				$BeatConfRGMLink = "https://$RGMServer/distrib/conf/modules/$module"
 				$BeatDestFileName = $module -replace ("windows_")
@@ -183,6 +232,7 @@ foreach ($Beattoinstall in $Beatstoinstall) {
 			}
 
 			# Disable the default system module
+			Write-verbose -Message "Disable the default system module"
 			$SystemModulePath = "$AgentfolderPath\modules.d\system.yml"
 			if (Test-Path $SystemModulePath){
 				# Use Move-item instead of rename-item to bypass if file already exist
@@ -194,7 +244,7 @@ foreach ($Beattoinstall in $Beatstoinstall) {
 	}
 
 	######  Service Creation part #######
-
+	Write-verbose -Message "Create the $AgentName service"
 	If (($PSVersionTable.PSVersion).Major -le 4) {
 		#  # oldest Powershell version (4 and oldest ) use old service management methode
 		# delete the service if exist
@@ -240,14 +290,16 @@ foreach ($Beattoinstall in $Beatstoinstall) {
 	}
 
 	# start the service
+	Write-verbose -Message "start the $AgentServiceName service"
 	start-service $AgentServiceName -PassThru
 	# on some case, the PassThru is not displayed. call the get-service to avec the exact service status
 	get-service $AgentServiceName
 
 	# Clean installation folder -> (TO DO -> funtion to be able to call it in case of failure)
+	Write-Verbose -Message "Remove temp files and folders"
 	Remove-Item .\$BeatFileName
 	Remove-Item $DestinationUnZIPFolder -Recurse
 	Write-Information -MessageData "Agent $AgentName installed" -InformationAction Continue
+	Write-Verbose -Message "Agent $AgentName installed"
 }
-
-exit
+Write-Verbose -Message "End of Install-Beats Script"

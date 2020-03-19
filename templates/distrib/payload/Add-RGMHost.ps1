@@ -9,8 +9,9 @@ param (
     [String]$RGMServer = "{{ ansible_default_ipv4.address }}",
     [String]$RGMTemplate = "GENERIC_HOST",
     [String]$HostAlias = "",
-    [Switch]$NoMetricBeat,
-    [Switch]$AuditBeat,
+    [String[]]$Agents,
+    [String]$BeatsBasePath = "{{ winbeats_base_path }}",
+    [Switch]$NoBeat,
     [Switch]$InstallSomething
 )
 
@@ -145,21 +146,32 @@ $NewHost = New-RGMHost -hostName $Hostname -hostIp $PrincipaleIP -templateHostNa
 $NewHost.result
 
 # Call MetricBeat Install
-if ($NoMetricBeat) { 
-    Write-Verbose "MetricBeat installation bypassed"
+if ($NoBeat) { 
+    Write-Verbose "Beat Agents installation bypassed"
 }else {
-    Write-Verbose "MetricBeat installation"
-    powershell.exe -executionpolicy bypass -Command $([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString("https://$RGMServer/distrib/install/Install-MetricBeat.ps1")))
+    Write-Verbose "Beat Agents installation"
+    $arguments = @{
+        RGMServer = $RGMServer
+    }
+    if ($BeatsBasePath){
+        $arguments.BeatsBasePath = $BeatsBasePath
+    }
+    if ($Agents){
+        $arguments.Agents = $Agents
+    }
+    if ($VerbosePreference -eq "Continue"){
+        $arguments.Verbose = $true
+    }
+    Write-Verbose -message "launche Beat Agents installation with arguments : $arguments"
+    
+    & $([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString("https://192.168.12.149/distrib/install/Install-Beats.ps1"))) @arguments
 }
 
 # Ready to add other install options
-if ($AuditBeat) {
-    Write-Verbose "AuditBeat installation"
-    powershell.exe -executionpolicy bypass -Command $([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString("https://$RGMServer/distrib/install/Install-AuditBeat.ps1")))
-
-}
 # Ready to add other install options
 if ($InstallSomething) {
     Write-Verbose "Something installation"
 
 }
+
+Write-Verbose "End of add-host script"
