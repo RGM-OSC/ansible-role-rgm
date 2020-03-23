@@ -120,7 +120,7 @@ $ConfigurationFilePathRGMsystemuptimeLink = "$MetricBeatBasePath\MetricBeat\modu
 # Disable the default system module
 $SystemModulePath = "$MetricBeatBasePath\MetricBeat\modules.d\system.yml"
 if (Test-Path $SystemModulePath){
-	Rename-Item -Path $SystemModulePath -NewName "system.yml.disabled"
+	Move-Item  -Path $SystemModulePath -Destination $($SystemModulePath -replace (".yml",".yml.disabled")) -force
 }
 
 ######  Service Creation part #######
