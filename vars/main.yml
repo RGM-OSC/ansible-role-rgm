@@ -212,9 +212,14 @@ oneliner_items:
   - 3
   payload_files:
   - Install-MetricBeat.ps1
+  - Install-Beats.ps1
   - Add-RGMHost.ps1
   config_files:
   - windows_metricbeat.yml
+  - windows_auditbeat.yml
+  - windows_filebeat.yml
+  - windows_heartbeat.yml
+  - windows_winlogbeat.yml
   modules_files:
   - windows_rgm-system-core.yml
   - windows_rgm-system-fs.yml

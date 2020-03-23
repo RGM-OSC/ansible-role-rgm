@@ -33,20 +33,46 @@ There is some variable available to be able to register the Host in RGM.
 | `Username`  |  | _mandatory_. enter an RGM internal account |
 | `Password`  |  | _mandatory_. enter the associate password |
 | `OneTimeToken`  |  | _mandatory_. If you already know the token, it can bu used instead of the password |
-| `RGMServer`  | rgm server ip | _optionnal_. By default the IP of the RGM server is used, you can provide another IP |
-| `RGMTemplate`  | GENERIC_HOST | _optionnal_.RGM template model to use when the computer is registered in RGM |
+| `RGMServer`  | rgm server ip | _optionnal_. By default the IP of the RGM server is used, you can provide another IP or the FQDN|
+| `RGMTemplate`  | GENERIC_HOST | _optionnal_. RGM template model to use when the computer is registered in RGM |
 | `HostAlias`  |  | _optionnal_. Alias Name for the server in RGM |
-| `NoMetricBeat`  | false | _optionnal_. Use this option to **not** install metric beat |
-| `AuditBeat`  | false | _optionnal_. Use this option to install audit beat |
+| `Agents`  | false | _optionnal_. Use this option to install beat agents. if no present or if set, metricbeat is always installed (exepted when _NoBeat_ is *True*). Agents available are : _auditbeat, filebeat, heartbeat, metricbeat, winlogbeat_ |
+| `NoBeat`  | false | _optionnal_. Use this option to **not** install metric beat or any beat agent even if the _Agents_ variable is completed |
+| `BeatsBasePath`  | C:\Program Files | _optionnal_. Use this option define a different location to install Beat Agents |
 | `Verbose`  | false | _optionnal_. Common Commandlets are available. Use Verbose to have more details |
 
 
 Launch the installation with this command :
 
-```
+```Powershell
 & $([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString("https://{{ ansible_default_ipv4.address }}/distrib/install/Add-RGMHost.ps1"))) -username admin -password ******
-
 ```
+
+Example with
+ - RGM serveur FQDN
+ - Installation of metricbeat, heartbeat an winlogbeat agents
+ - Different installation folder for BeatAgents
+ - Verbose
+
+```Powershell
+& $([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString("https://{{ ansible_default_ipv4.address }}/distrib/install/Add-RGMHost.ps1"))) -username admin -password ****** -RGMServer rgmserver.domaine.in -Agents metricbeat,heartbeat,winlogbeat -BeatsBasePath 'C:\BeatAgents' -verbose
+```
+
+Example with
+ - no Beat Agents installation
+ - Verbose
+
+```Powershell
+& $([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString("https://{{ ansible_default_ipv4.address }}/distrib/install/Add-RGMHost.ps1"))) -username admin -password ****** -NoBeat -Verbose
+```
+
+You are also able to replace the IP adress in the onliner with the RGM serveur FQDN. In this case, it is also recommanded to use the `RGMServer` option
+
+```Powershell
+& $([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString("https://rgmserver.domaine.in/distrib/install/Add-RGMHost.ps1"))) -username admin -password ****** -RGMServer rgmserver.domaine.in  -verbose
+```
+
+
 
 <s>If Powershell is 6.0
 
@@ -59,13 +85,3 @@ Invoke-Expression ([System.Text.Encoding]::ASCII.GetString((Invoke-WebRequest ht
  __PowerShell Core 6 is not yet supported__
 
 <s>
-
-## Command DOS
-AS the Powershell method, it is higly recommanded to use a trusted certificate (public authority or company auhtority) for the RGM server to avoid SSL issus during the setup of Metricbeats agents
-
-```
-Powershell -executionPolicy bypass -command "& {Invoke-Expression ([System.Text.Encoding]::ASCII.GetString((Invoke-WebRequest https://{{ ansible_default_ipv4.address }}/distrib/install/install-beats.ps1).Content))}"
-```
-</s>
-
- __Better to use PowerShell__
