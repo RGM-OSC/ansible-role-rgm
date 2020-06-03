@@ -64,7 +64,7 @@
   - { section: 'users',             option: 'default_theme',        value: 'light' }
   - { section: 'auth',              option: 'disable_login_form',   value: 'true' }
   - { section: 'auth',              option: 'disable_signout_menu', value: 'true' }
-  - { section: 'auth.anonymous',    option: 'enabled',              value: 'false' }
+  - { section: 'auth.anonymous',    option: 'enabled',              value: 'true' }
   - { section: 'auth.anonymous',    option: 'org_role',             value: 'Viewer' }
   - { section: 'auth.github',       option: 'enabled',              value: 'false' }
   - { section: 'auth.google',       option: 'enabled',              value: 'false' }
