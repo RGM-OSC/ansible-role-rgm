@@ -30,7 +30,7 @@
   - { owner: 'root',    group: 'root', mode: '0744', src: grafana/grafana_rgm.sh,            dest: /etc/grafana/grafana_rgm.sh }
   - { owner: 'grafana', group: 'rgm',  mode: '0644', src: grafana/multi-system-metrics.json, dest: "{{ grafana_rgm_dashboards }}/multi-system-metrics.json" }
   - { owner: 'grafana', group: 'rgm',  mode: '0644', src: grafana/4any-k8s-monitoring.json, dest: "{{ grafana_rgm_dashboards }}/4any-k8s-monitoring.json" }
-  - { owner: 'grafana', group: 'rgm',  mode: '0644', src: grafana/Realtime-containers-nodes-metrics.json, dest: "{{ grafana_rgm_dashboards }}/Realtime-containers-nodes-metrics.json" }
+  - { owner: 'grafana', group: 'rgm',  mode: '0644', src: grafana/realtime-containers-nodes-metrics.json, dest: "{{ grafana_rgm_dashboards }}/realtime-containers-nodes-metrics.json" }
 #  - { owner: 'grafana', group: 'rgm',  mode: '0644', src: grafana/system-metrics.json,       dest: "{{ grafana_rgm_dashboards }}/system-metrics.json" }
 
 - name: apply patches to align Grafana theme on RGM theme
