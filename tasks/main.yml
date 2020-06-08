@@ -243,15 +243,18 @@
 
 - name: create html subdir for rgma user
   file:
-    path: "{{ rgm_root_path }}/rgma/html"
+    path: "{{ item.path }}"
     state: directory
     owner: "{{ rgm_user }}"
     group: "{{ rgm_group }}"
-    mode: 0750
+    mode: "{{ item.mode }}"
     seuser: system_u
     serole: object_r
-    setype: httpd_sys_rw_content_t
+    setype: "{{ item.setype }}"
     selevel: s0
+  with_items:
+  - { path: "{{ rgm_root_path }}/rgma/",     mode: '0750', setype: 'user_home_dir_t' }
+  - { path: "{{ rgm_root_path }}/rgma/html", mode: '0750', setype: 'httpd_sys_rw_content_t' }
 
 - name: ensure config symlink is present
   file:
