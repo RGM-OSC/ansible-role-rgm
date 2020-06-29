@@ -59,15 +59,15 @@
     mode: 0644
   with_items:
   - 00_hardening
-  - ssl
-  - rgm
-  - grafana
-  - elasticsearch
-  - kibana
-  - nrdp
-  - rgmapi
-  - distrib
-  - rgma
+  - 01_ssl
+  - 10_rgm
+  - 11_rgmapi
+  - 11_distrib
+  - 15_grafana
+  - 15_elasticsearch
+  - 15_kibana
+  - 15_nrdp
+  - 15_rgma
   notify: service_reload_http
 
 ## restart apache now as we'll use RGM API later on role
