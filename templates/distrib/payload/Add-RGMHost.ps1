@@ -164,7 +164,7 @@ if ($NoBeat) {
     }
     Write-Verbose -message "launche Beat Agents installation with arguments : $arguments"
     
-    & $([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString("https://192.168.12.149/distrib/install/Install-Beats.ps1"))) @arguments
+    & $([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString("https://$RGMServer/distrib/install/Install-Beats.ps1"))) @arguments
 }
 
 # Ready to add other install options
