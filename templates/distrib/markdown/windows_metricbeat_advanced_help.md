@@ -24,6 +24,7 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
 }
 "@
 [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 ```
 
 There is some variable available to be able to register the Host in RGM.
