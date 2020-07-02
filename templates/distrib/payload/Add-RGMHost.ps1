@@ -162,8 +162,8 @@ if ($NoBeat) {
     if ($VerbosePreference -eq "Continue"){
         $arguments.Verbose = $true
     }
-    Write-Verbose -message "launche Beat Agents installation with arguments : $arguments"
-    
+    $args = $arguments| Out-String
+    Write-Verbose -message "launch Beat Agents installation with arguments : $args"
     & $([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString("https://$RGMServer/distrib/install/Install-Beats.ps1"))) @arguments
 }
 
