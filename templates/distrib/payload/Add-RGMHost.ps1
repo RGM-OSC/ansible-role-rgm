@@ -129,6 +129,16 @@ function New-RGMHost {
     $UriCreateHost = "https://$RGMServer/rgmapi/createHost"
 
     $NewHost = Invoke-RGMRestMethod -Uri $UriCreateHost -Method Post -Body $CreateHostBody
+
+    $ExportConfigBody = @{
+            "jobName"= "Nagios Export"
+    }| ConvertTo-Json
+    Write-Verbose $ExportConfigBody
+
+    $UriExportConfig = "https://$RGMServer/rgmapi/exportConfiguration"
+    $ExportConfig = Invoke-RGMRestMethod -Uri $UriExportConfig -Method Post -Body $ExportConfigBody
+    Write-Verbose $($ExportConfig | Out-String)
+
     return $NewHost
 }
 
