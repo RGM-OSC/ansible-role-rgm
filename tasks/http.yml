@@ -43,12 +43,23 @@
     line: "DocumentRoot \"{{ rgm_root_path }}/rgmweb\""
   notify: service_reload_http
 
-- name: backup ssl.conf original (distrib) file
-  copy:
-    remote_src: yes
-    force: no
-    src: /etc/httpd/conf.d/ssl.conf
-    dest: /etc/httpd/conf.d/ssl.conf.distrib
+- name: test if original SSL configuration file exists
+  stat:
+    path: /etc/httpd/conf.d/ssl.conf
+  register: stat_ssl_conf
+
+- block:
+  - name: backup ssl.conf original (distrib) file
+    copy:
+      remote_src: yes
+      force: no
+      src: /etc/httpd/conf.d/ssl.conf
+      dest: /etc/httpd/conf.d/ssl.conf.distrib
+  - name: remove ssl.conf original file
+    file:
+      path: /etc/httpd/conf.d/ssl.conf
+      state: absent
+  when: stat_ssl_conf.stat.exists
 
 - name: Install RGM httpd config files
   template:
