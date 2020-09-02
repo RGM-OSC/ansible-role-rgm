@@ -7,7 +7,7 @@ param (
     [Parameter(Mandatory=$true,ParameterSetName="OneTimeToken")]
     [String]$OneTimeToken,
     [String]$RGMServer = "{{ ansible_default_ipv4.address }}",
-    [String]$RGMTemplate = "GENERIC_HOST",
+    [String]$RGMTemplate = "RGM_WINDOWS_ES",
     [String]$HostAlias = "",
     [String[]]$Agents,
     [String]$BeatsBasePath = "{{ winbeats_base_path }}",
@@ -109,7 +109,7 @@ function Invoke-RGMRestMethod {
 
 function New-RGMHost {
     param (
-        [String]$templateHostName = "GENERIC_HOST",
+        [String]$templateHostName = "RGM_WINDOWS_ES",
         [String]$hostName,
         [String]$hostIp,
         [String]$hostAlias = ""#,
