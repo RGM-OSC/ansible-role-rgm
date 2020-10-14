@@ -1,5 +1,7 @@
 ###################### Metricbeat Configuration
 #
+# {{ ansible_managed }}
+#
 # You can find the full configuration reference here:
 # https://www.elastic.co/guide/en/beats/metricbeat/index.html
 
@@ -14,6 +16,7 @@ metricbeat.config.modules:
 
 setup.template.settings:
   index.number_of_shards: 1
+  index.number_of_replicas: 0
   index.codec: best_compression
   #_source.enabled: false
 
