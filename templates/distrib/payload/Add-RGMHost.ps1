@@ -12,6 +12,7 @@ param (
     [String[]]$Agents,
     [String]$BeatsBasePath = "{{ winbeats_base_path }}",
     [Switch]$NoBeat,
+    [Switch]$NoExportConfig = $false,
     [Switch]$InstallSomething
 )
 
@@ -112,7 +113,8 @@ function New-RGMHost {
         [String]$templateHostName = "RGM_WINDOWS_ES",
         [String]$hostName,
         [String]$hostIp,
-        [String]$hostAlias = ""#,
+        [String]$hostAlias = "",
+        [Switch]$NoExportConfig#,
         #   [String]$contactName,
         #   [String]$contactGroupName,
         #   [bool]$exportConfiguration=$false
@@ -129,15 +131,19 @@ function New-RGMHost {
     $UriCreateHost = "https://$RGMServer/rgmapi/createHost"
 
     $NewHost = Invoke-RGMRestMethod -Uri $UriCreateHost -Method Post -Body $CreateHostBody
+    if($NoExportConfig){
+        Write-Verbose "no export config!"
+    }
+    else{
+        $ExportConfigBody = @{
+                "jobName"= "Nagios Export"
+        }| ConvertTo-Json
+        Write-Verbose "Launch ExportConfig"
 
-    $ExportConfigBody = @{
-            "jobName"= "Nagios Export"
-    }| ConvertTo-Json
-    Write-Verbose $ExportConfigBody
-
-    $UriExportConfig = "https://$RGMServer/rgmapi/exportConfiguration"
-    $ExportConfig = Invoke-RGMRestMethod -Uri $UriExportConfig -Method Post -Body $ExportConfigBody
-    Write-Verbose $($ExportConfig | Out-String)
+        $UriExportConfig = "https://$RGMServer/rgmapi/exportConfiguration"
+        $ExportConfig = Invoke-RGMRestMethod -Uri $UriExportConfig -Method Post -Body $ExportConfigBody
+        Write-Verbose $($ExportConfig | Out-String)
+    }
 
     return $NewHost
 }
@@ -152,7 +158,7 @@ $Hostname = Get-WmiObject -Class Win32_ComputerSystem -Property DNSHostName | Se
 Write-Verbose "Hostname: $Hostname, IP: $PrincipaleIP"
 
 # Create the object on the RGM server
-$NewHost = New-RGMHost -hostName $Hostname -hostIp $PrincipaleIP -templateHostName $RGMTemplate -hostAlias $HostAlias
+$NewHost = New-RGMHost -hostName $Hostname -hostIp $PrincipaleIP -templateHostName $RGMTemplate -hostAlias $HostAlias -NoExportConfig:$NoExportConfig
 $NewHost.result
 
 # Call MetricBeat Install
