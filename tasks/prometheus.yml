@@ -35,4 +35,18 @@
     creates: /etc/metricbeat/modules.d/prometheus.yml
   notify: service_restart_metricbeat
 
-# https://docs.influxdata.com/influxdb/v1.5/administration/server_monitoring/#influxdb-metrics-http-endpoint
+- name: restart grafana service if config changed
+  systemd:
+    name: prometheus
+    enabled: yes
+    state: restarted
+  when: prometheus_cfg_changed.changed
+
+- name: ensure prometheus service is running
+  systemd:
+    name: prometheus
+    enabled: yes
+    state: started
+  register: prometheus_first_start
+
+# https://prometheus.io/docs/prometheus/latest/getting_started/
