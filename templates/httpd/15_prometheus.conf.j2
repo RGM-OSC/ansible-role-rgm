@@ -1,8 +1,9 @@
 # {{ ansible_managed }}
 # Apache configuration for Prometheus
 
-ProxyPreserveHost On
-<Location /prometheus>
+Alias /prometheus "/etc/prometheus"
+
+<Directory "/etc/prometheus">
         AuthType Basic
         AuthName "Restricted"
         AuthrgmAuthoritative On
@@ -12,10 +13,24 @@ ProxyPreserveHost On
         AuthrgmMySQLDB {{ db_rgmweb }}
         AuthrgmMySQLTableSID sessions,users,groupright
         AuthrgmMySQLFieldUID sessions.user_id
-        AuthrgmMySQLTableSIDCondition "`sessions`.`session_id`=$session_id AND `sessions`.`user_id`=$user_id AND `users`.`user_id`=$user_id AND `users`.`user_name`=$user_name AND (`users`.`group_id`=$group_id AND `groupright`.`group_id`=$group_id AND `groupright`.`tab_7`='1' OR `users`.`user_limitation`='1')"
+        AuthrgmMySQLTableSIDCondition "`sessions`.`session_id`=$session_id AND `sessions`.`user_id`=$user_id AND `users`.`user_id`=$user_id AND `users`.`user_name`=$user_name AND `users`.`group_id`=$group_id AND `groupright`.`group_id`=$group_id"
         AuthrgmPageLogin /login.php
         AuthrgmSessionCookies On
         Require valid-user
-        ProxyPass http://127.0.0.1:9090/prometheus retry=0
-        ProxyPassReverse http://127.0.0.1:9090/prometheus/(.*)
+</Directory>
+<Location "/">
+        Redirect "/alerts" "/prometheus/alerts"
+        Redirect "/api" "/prometheus/api"
+        Redirect "/config" "/prometheus/config"
+        Redirect "/flags" "/prometheus/flags"
+        Redirect "/graph" "/prometheus/graph"
+        Redirect "/rules" "/prometheus/rules"
+        Redirect "/static" "/prometheus/static"
+        Redirect "/status" "/prometheus/status"
+        Redirect "/targets" "/prometheus/targets"
+</Location>
+
+<Location /prometheus>
+        ProxyPass http://127.0.0.1:9090
+        ProxyPassReverse http://127.0.0.1:9090
 </Location>
