@@ -1,9 +1,24 @@
 ---
 # {{ ansible_managed }}
 # vim: expandtab ts=2 sw=2:
+{% set count = 0 %}
 actions:
 
-{% set count = 0 %}
+{% set count = count + 1 %}  {{ count }}:
+    action: index_settings
+    description: >-
+      Force indexes for be writable and force set replicas shards to 0 (ES defaults to 1)
+    options:
+      index_settings:
+        index:
+          blocks:
+            read_only_allow_delete: False
+          number_of_replicas: 0
+      preserve_existing: False
+      ignore_unavailable: False
+    filters:
+    - filtertype: none
+
 {% for pattern in curator_patterns %}
 {% set count = count + 1 %}  {{ count }}:
     action: close
