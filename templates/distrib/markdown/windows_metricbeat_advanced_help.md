@@ -39,6 +39,7 @@ There is some variable available to be able to register the Host in RGM.
 | `HostAlias`  |  | _optionnal_. Alias Name for the server in RGM |
 | `Agents`  | false | _optionnal_. Use this option to install beat agents. if no present or if set, metricbeat is always installed (exepted when _NoBeat_ is *True*). Agents available are : _auditbeat, filebeat, heartbeat, metricbeat, winlogbeat_ |
 | `NoBeat`  | false | _optionnal_. Use this option to **not** install metric beat or any beat agent even if the _Agents_ variable is completed |
+| `NoExportConfig`  | false | _optionnal_. Use this option to **not** launch en export config on RGM. usable when deploy lot of servers in same time. don't forget to exportconfig at the end |
 | `BeatsBasePath`  | C:\Program Files | _optionnal_. Use this option define a different location to install Beat Agents |
 | `Verbose`  | false | _optionnal_. Common Commandlets are available. Use Verbose to have more details |
 
@@ -61,10 +62,11 @@ Example with
 
 Example with
  - no Beat Agents installation
+ - no Export Config
  - Verbose
 
 ```Powershell
-& $([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString("https://{{ ansible_default_ipv4.address }}/distrib/install/Add-RGMHost.ps1"))) -username admin -password ****** -NoBeat -Verbose
+& $([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString("https://{{ ansible_default_ipv4.address }}/distrib/install/Add-RGMHost.ps1"))) -username admin -password ****** -NoBeat -NoExportConfig -Verbose
 ```
 
 You are also able to replace the IP adress in the onliner with the RGM serveur FQDN. In this case, it is also recommanded to use the `RGMServer` option
