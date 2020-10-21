@@ -78,6 +78,7 @@
   - 15_elasticsearch
   - 15_kibana
   - 15_nrdp
+  - 15_prometheus
   - 15_rgma
   notify: service_reload_http
 

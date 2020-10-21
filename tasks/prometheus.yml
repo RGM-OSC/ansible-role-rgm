@@ -19,7 +19,6 @@
   - { regex: '^(#\s*)?PROMETHEUS_LISTEN=',  line: "PROMETHEUS_LISTEN='--web.listen-address=127.0.0.1:9090'" }
   - { regex: '^(#\s*)?PROMETHEUS_STORAGE=',  line: "PROMETHEUS_STORAGE='--storage.tsdb.path=/var/lib/prometheus/data --storage.tsdb.retention.time=12h'" }
   notify: service_restart_prometheus
-  register: prometheus_cfg_changed
 
 - name: set prometheus config file
   template:
@@ -28,6 +27,7 @@
     owner: root
     group: prometheus
     mode: 0640
+  notify: service_restart_prometheus
 
 - name: enable prometheus module for metricbeat
   command: mv /etc/metricbeat/modules.d/prometheus.yml.disabled /etc/metricbeat/modules.d/prometheus.yml
@@ -35,4 +35,10 @@
     creates: /etc/metricbeat/modules.d/prometheus.yml
   notify: service_restart_metricbeat
 
-# https://docs.influxdata.com/influxdb/v1.5/administration/server_monitoring/#influxdb-metrics-http-endpoint
+- name: ensure prometheus service is running
+  systemd:
+    name: prometheus
+    enabled: yes
+    state: started
+
+# https://prometheus.io/docs/prometheus/latest/getting_started/
