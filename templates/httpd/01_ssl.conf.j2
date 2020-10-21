@@ -119,7 +119,7 @@ SSLCertificateKeyFile {{ http_ssl_key_file }}
 #   certificate for convinience.
 #SSLCertificateChainFile /etc/pki/tls/certs/server-chain.crt
 {% if http_ssl_cert_chain is defined %}
-SSLCertificateChainFile http_ssl_cert_chain
+SSLCertificateChainFile {{ http_ssl_cert_chain }}
 {% endif %}
 
 #   Certificate Authority (CA):
@@ -128,7 +128,7 @@ SSLCertificateChainFile http_ssl_cert_chain
 #   huge file containing all of them (file must be PEM encoded)
 #SSLCACertificateFile /etc/pki/tls/certs/ca-bundle.crt
 {% if http_ssl_cert_ca is defined %}
-SSLCACertificateFile http_ssl_cert_ca
+SSLCACertificateFile {{ http_ssl_cert_ca }}
 {% endif %}
 
 #   Client Authentication (Type):
