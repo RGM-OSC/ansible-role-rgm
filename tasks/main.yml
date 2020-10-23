@@ -305,7 +305,6 @@
     file: prometheus.yml
     apply:
       tags: prometheus
-  when: enable_prometheus
 
 ### Actually influxdb and nagflux are correctly pre-configured
 ### out-of-the-box from their respective RPM package...

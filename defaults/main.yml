@@ -62,8 +62,6 @@ grafana_apply_patches: True
 # xinetd livestatus binding port
 xinetd_livestatus_port: 14176
 
-enable_prometheus: no
-
 ## Elastic beats
 # Windows Beats installation base patch
 winbeats_base_path: 'C:\Program Files'

@@ -9,18 +9,19 @@ EXECUTE stmt;
 -- 
 USE grafana;
 DELIMITER $$
+
 --
 -- Grafana INSERT procedure ---------------------------------------------------
 --
 DROP PROCEDURE IF EXISTS `insert_grafana_user_from_rgmweb` $$
 CREATE DEFINER=`rgminternal`@`localhost` PROCEDURE `insert_grafana_user_from_rgmweb`(
-    IN username VARCHAR(64),
-    IN fullname VARCHAR(64),
-    IN useremail VARCHAR(64),
-    IN rgmuserid INT, 
-    IN rgmgroupid INT
+	IN username VARCHAR(64),
+	IN fullname VARCHAR(64),
+	IN useremail VARCHAR(64),
+	IN rgmuserid INT, 
+	IN rgmgroupid INT
 )
-    COMMENT 'create Grafana user from rgmweb INSERT trigger'
+	COMMENT 'create Grafana user from rgmweb INSERT trigger'
 BEGIN
 	DECLARE is_grpadmin BOOL;
 	DECLARE userid MEDIUMINT;
@@ -28,7 +29,7 @@ BEGIN
 	DECLARE defrole varchar(20);
 
 	SET is_grpadmin = FALSE;
-	SET defrole = 'View';
+	SET defrole = 'Viewer';
 
 	IF rgmgroupid = 1 THEN
 		SET is_grpadmin = TRUE;
@@ -48,7 +49,6 @@ BEGIN
 		`is_admin` = is_grpadmin,
 		`email_verified` = TRUE,
 		`created` = NOW();
-	-- SET @userid = (SELECT id FROM `grafana`.`user` WHERE `login` = username);
 	SET @userid = (SELECT LAST_INSERT_ID());
 	SET @createddate = (SELECT created FROM `grafana`.`user` WHERE `id` = @userid);
 	IF @userid IS NOT NULL THEN
@@ -59,6 +59,26 @@ BEGIN
 			`created` = @createddate,
 			`updated` = NOW();
 	END IF;
+
+	-- adds default dashboard
+	SET @dashid = (SELECT id FROM grafana.dashboard WHERE title = 'Multi-System metrics');
+	IF (SELECT COUNT(`id`) FROM `grafana`.`star` WHERE `user_id` = @userid AND `dashboard_id` = @dashid) = 0 THEN
+		INSERT INTO  `grafana`.`star` SET `user_id` = @userid, `dashboard_id` = @dashid;
+	END IF;
+	IF (SELECT COUNT(*) FROM `grafana`.`preferences` WHERE `user_id` =  @userid AND `org_id` = 1) = 0 THEN
+		INSERT INTO `grafana`.`preferences` SET
+			`org_id` = 1,
+			`user_id` = @userid,
+			`version` = 0,
+			`home_dashboard_id` = @dashid,
+			`timezone` = '',
+			`theme` = '',
+			`created` = NOW(),
+			`updated` = NOW(),
+			`team_id` = 0;
+	ELSE
+		UPDATE `grafana`.`preferences` SET `home_dashboard_id` = @dashid WHERE  @userid AND `org_id` = 1;
+	END IF;
 END;
 $$
 
@@ -67,20 +87,20 @@ $$
 --
 DROP PROCEDURE IF EXISTS `update_grafana_user_from_rgmweb` $$
 CREATE DEFINER=`rgminternal`@`localhost` PROCEDURE `update_grafana_user_from_rgmweb`(
-    IN username VARCHAR(64),
-    IN fullname VARCHAR(64),
-    IN useremail VARCHAR(64),
-    IN rgmuserid INT, 
-    IN rgmgroupid INT
+	IN username VARCHAR(64),
+	IN fullname VARCHAR(64),
+	IN useremail VARCHAR(64),
+	IN rgmuserid INT, 
+	IN rgmgroupid INT
 )
-    COMMENT 'update Grafana user from rgmweb UPDATE trigger'
+	COMMENT 'update Grafana user from rgmweb UPDATE trigger'
 BEGIN
 	DECLARE is_grpadmin BOOL;
 	DECLARE userid MEDIUMINT;
 	DECLARE defrole varchar(20);
 
 	SET is_grpadmin = FALSE;
-	SET defrole = 'View';
+	SET defrole = 'Viewer';
 
 	IF rgmgroupid = 1 THEN
 		SET is_grpadmin = TRUE;
@@ -116,22 +136,24 @@ $$
 --
 DROP PROCEDURE IF EXISTS `delete_grafana_user_from_rgmweb` $$
 CREATE DEFINER=`rgminternal`@`localhost` PROCEDURE `delete_grafana_user_from_rgmweb`(
-    IN username VARCHAR(64)
+	IN username VARCHAR(64)
 )
-    COMMENT 'delete Grafana user from rgmweb DELETE trigger'
+	COMMENT 'delete Grafana user from rgmweb DELETE trigger'
 BEGIN
 	DECLARE userid MEDIUMINT;
-    DECLARE orgid MEDIUMINT;
-    
+	DECLARE orgid MEDIUMINT;
+
 	SET @userid = (SELECT `id` FROM `grafana`.`user` WHERE login = username);
-    IF @userid IS NOT NULL THEN
+	IF @userid IS NOT NULL THEN
 		SET @orgid = (SELECT `id` FROM `grafana`.`org_user` WHERE `user_id` = @userid);
-        SET SQL_SAFE_UPDATES=0;
-        IF @orgid IS NOT NULL THEN
+		SET SQL_SAFE_UPDATES=0;
+		IF @orgid IS NOT NULL THEN
 			DELETE FROM `grafana`.`org_user` WHERE `id` = @orgid;
 		END IF;
 		DELETE FROM `grafana`.`user` WHERE `id` = @userid;
-        SET SQL_SAFE_UPDATES=1;
+		DELETE FROM `grafana`.`star` WHERE `user_id` = @userid;
+		DELETE FROM `grafana`.`preferences` WHERE `user_id` = @userid;
+		SET SQL_SAFE_UPDATES=1;
 	END IF;
 END;
 $$
