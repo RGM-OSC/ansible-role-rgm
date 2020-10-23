@@ -15,7 +15,7 @@
     regexp: "{{ item.regex }}"
     line: "{{ item.line }}"
   with_items:
-  - { regex: '^(#\s*)?PROMETHEUS_WEB_URL=', line: "PROMETHEUS_WEB_URL='--web.external-url=https://10.0.2.15/prometheus'" }
+  - { regex: '^(#\s*)?PROMETHEUS_WEB_URL=', line: "PROMETHEUS_WEB_URL='--web.external-url=https://localhost/prometheus'" }
   - { regex: '^(#\s*)?PROMETHEUS_LISTEN=',  line: "PROMETHEUS_LISTEN='--web.listen-address=127.0.0.1:9090'" }
   - { regex: '^(#\s*)?PROMETHEUS_STORAGE=',  line: "PROMETHEUS_STORAGE='--storage.tsdb.path=/var/lib/prometheus/data --storage.tsdb.retention.time=12h'" }
   notify: service_restart_prometheus
