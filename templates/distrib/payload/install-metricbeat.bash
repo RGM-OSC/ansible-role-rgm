@@ -26,16 +26,16 @@ api_check_auth() {
     if [ $? -ne 0 ]; then
         return 0
     else
-        return $RCHTTP
+        return "$RCHTTP"
     fi
 }
 
 print_help() {
     cat <<EOF
 
-$(basename $0) - Install metricbeat & configure for RGM
+$(basename "$0") - Install metricbeat & configure for RGM
 
-Usage: $(basename $0) -u <RGMAPI user> -p <RGMAPI password> | -o <RPMAPI one-time token>
+Usage: $(basename "$0") -u <RGMAPI user> -p <RGMAPI password> | -o <RPMAPI one-time token>
                       [ -s <RGM host> ]
                       [ -t <RGM host template> ]
                       [ -a <RGM host alias> ]
@@ -91,8 +91,7 @@ fi
 OSTYPE=
 OSVERS=
 if [ -e /etc/redhat-release ]; then
-    grep -P '^(CentOS|RedHat|Red Hat)' /etc/redhat-release &> /dev/null
-    if [ $? -eq 0 ]; then
+    if ! grep -P '^(CentOS|RedHat|Red Hat)' /etc/redhat-release &> /dev/null; then
         OSTYPE='redhat'
         OSVERS=$(sed 's/.*release \([0-9]\+\).*/\1/' /etc/redhat-release)
     fi
@@ -102,7 +101,7 @@ if [ -e /etc/debian_version ]; then
     OSVERS=$(lsb_release -a 2>&1 | grep ^Release | awk '{print $2}' | cut -d '.' -f 1)
 fi
 
-if [ -z $OSTYPE ]; then
+if [ -z "$OSTYPE" ]; then
     echo -e "\e[1;31mError :\e[22m Failed to detect OS type\e[0m"
     exit 1
 fi
@@ -114,26 +113,22 @@ DOWNLOADBIN="https://${RGMSRVR}/distrib/packages"
 DOWNLOADCFG="https://${RGMSRVR}/distrib/conf/linux_metricbeat.yml"
 if [ "$OSTYPE" == 'redhat' ]; then
     BINFILE="metricbeat-oss-latest-x86_64.rpm"
-    rpm -qi metricbeat &> /dev/null
-    if [ $? -eq 0 ]; then
+    if rpm -qi metricbeat &> /dev/null; then
         echo "metricbeat package already installed on this host"
     else
-        curl -O -k "${DOWNLOADBIN}/${BINFILE}"
+        curl -s -O -k "${DOWNLOADBIN}/${BINFILE}"
         yum localinstall -y $BINFILE
     fi
-    curl -O -k "${DOWNLOADCFG}"
+    curl -s -O -k "${DOWNLOADCFG}"
 fi
 if [ "$OSTYPE" == 'debian' ]; then
     BINFILE="metricbeat-oss-latest-amd64.deb"
-    dpkg -V metricbeat &> /dev/null
-    if [ $? -eq 0 ]; then
+    if dpkg -V metricbeat &> /dev/null; then
         echo "metricbeat package already installed on this host"
     else
         wget --no-check-certificate "${DOWNLOADBIN}/${BINFILE}"
-        dpkg -i $BINFILE
-        if [ $? -ne 0 ]; then
-            apt-get -f -y install
-            if [ $? -ne 0 ]; then
+        if ! dpkg -i $BINFILE; then
+            if ! apt-get -f -y install; then
                 echo -e "\e[1;31mError :\e[22m Failed to install package ${BINFILE}\e[0m"
                 exit 1
             fi
@@ -144,7 +139,7 @@ fi
 
 # get default NIC IP config to patch metricbeat config file
 CLI_NIC=$(ip route show | grep ^default | sed 's/.*dev \([a-z][a-z0-9]\+\) .*/\1/')
-CLI_ADDR=$(ip addr show dev $CLI_NIC | grep 'inet ' | awk '{print $2}' | cut -d '/' -f 1)
+CLI_ADDR=$(ip addr show dev "$CLI_NIC" | grep 'inet ' | awk '{print $2}' | cut -d '/' -f 1)
 sed -i "s/^\( *host.ip:\) .*$/\1 $CLI_ADDR/" linux_metricbeat.yml
 
 # copy RGM config file in place
@@ -162,7 +157,7 @@ MODULELIST=(linux_rgm-system-core.yml linux_rgm-system-fs.yml linux_rgm-system-u
 DOWNLODMODROOT=$(dirname "$DOWNLOADCFG")
 cd /etc/metricbeat/modules.d || exit 1
 for MODULE in "${MODULELIST[@]}"; do
-    curl -O -k "${DOWNLODMODROOT}/modules/${MODULE}"
+    curl -s -O -k "${DOWNLODMODROOT}/modules/${MODULE}"
     chmod 0640 "${MODULE}"
 done
 cd "$PWD" || exit 1
@@ -195,19 +190,31 @@ else
 fi
 
 # call RGM API createhost
-RCHTTP="$(curl -s -k -XPOST -o /dev/stderr -w "%{http_code}" \
+CURLTMP=$(mktemp)
+RCHTTP="$(curl -s -k -XPOST -o "$CURLTMP" -w "%{http_code}" \
     -H 'Content-Type: application/json' -H "token: ${RGMAPI_OTT}" \
     "https://${RGMSRVR}/rgmapi/createHost" \
     -d "{\"templateHostName\": \"${RGM_HOST_TMPL}\", \
         \"hostName\": \"$(hostname -f)\", \
         \"hostIp\": \"${CLI_ADDR}\", \
         \"hostAlias\": \"${RGM_HOST_ALIAS}\"}")"
-
-if [ "$RCHTTP" == 200 ] && [ $EXPORTCONFIG -gt 0 ]; then
-    RCHTTP="$(curl -s -k -XPOST -o /dev/stderr -w "%{http_code}" \
-        -H 'Content-Type: application/json' -H "token: ${RGMAPI_OTT}" \
-        "https://${RGMSRVR}/rgmapi/exportConfiguration" \
-        -d '{"jobName": "Nagios Export"}')"
+if [ "$RCHTTP" != 200 ]; then
+    cat "$CURLTMP"
+    echo ''
+    RC=2
+else
+    if [ $EXPORTCONFIG -gt 0 ]; then
+        RCHTTP="$(curl -s -k -XPOST -o -o "$CURLTMP" -w "%{http_code}" \
+            -H 'Content-Type: application/json' -H "token: ${RGMAPI_OTT}" \
+            "https://${RGMSRVR}/rgmapi/exportConfiguration" \
+            -d '{"jobName": "Nagios Export"}')"
+        if [ "$RCHTTP" != 200 ]; then
+            cat "$CURLTMP"
+            echo ''
+            RC=2
+        fi
+    fi
 fi
+rm -f "$CURLTMP"
 
 exit $RC
