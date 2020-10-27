@@ -4,7 +4,7 @@
 # Docs: https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-module-system.html
 
 - module: system
-  period: 30s
+  period: 1m
   metricsets:
     - cpu
     - load
@@ -22,7 +22,7 @@
     by_memory: 5   # include top 5 processes by memory
 
 - module: system
-  period: 1m
+  period: 5m
   metricsets:
     - filesystem
     - fsstat

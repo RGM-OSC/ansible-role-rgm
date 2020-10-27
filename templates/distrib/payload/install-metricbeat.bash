@@ -1,12 +1,89 @@
 #!/bin/bash
 # {{ ansible_managed }}
-# vim: bs=4 ts=4 expandtab:
+# vim: ts=4 expandtab:
 #
 # RGM deployment script for Linux MetricBeat
 
+RGMSRVR="172.16.81.25"
+RGM_HOST_TMPL='RGM_LINUX_ES'
+RGM_HOST_ALIAS="$(hostname -s)"
+EXPORTCONFIG=1
+RGMAPI_USER=
+RGMAPI_PASSWD=
+RGMAPI_OTT=
+PWD="$(pwd)"
 RC=1
+
 if [ $UID -ne 0 ]; then
     echo -e "\e[1;31mError :\e[22m This script requires root privileges to execute\e[0m"
+    exit 1
+fi
+
+api_check_auth() {
+    RCHTTP="$(curl -s -k -o /dev/null -w "%{http_code}" \
+        -H 'Content-Type: application/json' -H "token: ${1}" \
+        "https://${RGMSRVR}/rgmapi/checkAuthToken")"
+    if [ $? -ne 0 ]; then
+        return 0
+    else
+        return $RCHTTP
+    fi
+}
+
+print_help() {
+    cat <<EOF
+
+$(basename $0) - Install metricbeat & configure for RGM
+
+Usage: $(basename $0) -u <RGMAPI user> -p <RGMAPI password> | -o <RPMAPI one-time token>
+                      [ -s <RGM host> ]
+                      [ -t <RGM host template> ]
+                      [ -a <RGM host alias> ]
+                      [ -d ]
+
+Arguments:
+  -u <user>              : RGM API user with admin privileges
+  -p <password>          : RGM API password
+  -o <one-time token>    : one-time usage token
+  -s <RGM host>          : Optional RGM host IP or FQDN (default to RGM server used to download this script)
+  -t <RGM host template> : Optional RGM Host Template to apply to this host. default to 'RGM_LINUX_ES'
+  -a <RGM host alias>    : Optional RGM Host Alias. Defaults to $(hostname -s)
+  -d                     : Disables automatic Lilac configuration export (enabled by default)
+
+EOF
+    exit 1
+}
+
+while getopts hdu:p:o:s:t:a: arg; do
+    case "$arg" in
+        h) print_help;;
+        d) EXPORTCONFIG=0;;
+        u) RGMAPI_USER="$OPTARG";;
+        p) RGMAPI_PASSWD="$OPTARG";;
+        o) RGMAPI_OTT="$OPTARG";;
+        s) RGMSRVR="$OPTARG";;
+        t) RGM_HOST_TMPL="$OPTARG";;
+        a) RGM_HOST_ALIAS="$OPTARG";;
+        *) print_help;;
+    esac
+done
+
+# ensure we can get RGM API Token
+RCHTTP=
+if [ -n "$RGMAPI_OTT" ]; then
+    #RCHTTP="$(api_check_auth "$RGMAPI_OTT")"
+    api_check_auth "$RGMAPI_OTT"
+    RCHTTP=$?
+fi
+if [ "$RCHTTP" != '200' ] && [ -n "$RGMAPI_USER" ] && [ -n "$RGMAPI_PASSWD" ]; then
+    RGMAPI_OTT="$(curl -s -k -H 'Content-Type: application/json' \
+        "https://${RGMSRVR}/rgmapi/getAuthToken?&username=${RGMAPI_USER}&password=${RGMAPI_PASSWD}" |
+        grep RGMAPI_TOKEN | awk '{print $2}' | xargs)"
+    api_check_auth "$RGMAPI_OTT"
+    RCHTTP=$?
+fi
+if [ "$RCHTTP" != '200' ]; then
+    echo "Fatal: unable to get auth token from RGM API on server $RGMSRVR"
     exit 1
 fi
 
@@ -32,9 +109,9 @@ fi
 
 # download files
 TMPDIR=$(mktemp -d)
-cd $TMPDIR
-DOWNLOADBIN="https://{{ ansible_default_ipv4.address }}/distrib/packages"
-DOWNLOADCFG="https://{{ ansible_default_ipv4.address }}/distrib/conf/linux_metricbeat.yml"
+cd "$TMPDIR" || exit 1
+DOWNLOADBIN="https://${RGMSRVR}/distrib/packages"
+DOWNLOADCFG="https://${RGMSRVR}/distrib/conf/linux_metricbeat.yml"
 if [ "$OSTYPE" == 'redhat' ]; then
     BINFILE="metricbeat-oss-latest-x86_64.rpm"
     rpm -qi metricbeat &> /dev/null
@@ -75,6 +152,22 @@ cp -f linux_metricbeat.yml /etc/metricbeat/metricbeat.yml
 chown root:root /etc/metricbeat/metricbeat.yml
 chmod 0640 /etc/metricbeat/metricbeat.yml
 
+# disable original system module
+if [ -e /etc/metricbeat/modules.d/system.yml ]; then
+    mv /etc/metricbeat/modules.d/system.yml /etc/metricbeat/modules.d/system.yml.disabled
+fi
+
+# add metricbeat modules
+MODULELIST=(linux_rgm-system-core.yml linux_rgm-system-fs.yml linux_rgm-system-uptime.yml)
+DOWNLODMODROOT=$(dirname "$DOWNLOADCFG")
+cd /etc/metricbeat/modules.d || exit 1
+for MODULE in "${MODULELIST[@]}"; do
+    curl -O -k "${DOWNLODMODROOT}/modules/${MODULE}"
+    chmod 0640 "${MODULE}"
+done
+cd "$PWD" || exit 1
+rm -Rf "$TMPDIR"
+
 # systemd on newer systems, legacy (initV, upstart, ...) overwise
 if [[ ("$OSTYPE" == 'redhat' && $OSVERS -ge 7) ||
         ("$OSTYPE" == 'debian' && $OSVERS -ge 9) ||
@@ -99,6 +192,22 @@ else
         *)
             ;;
     esac
+fi
+
+# call RGM API createhost
+RCHTTP="$(curl -s -k -XPOST -o /dev/stderr -w "%{http_code}" \
+    -H 'Content-Type: application/json' -H "token: ${RGMAPI_OTT}" \
+    "https://${RGMSRVR}/rgmapi/createHost" \
+    -d "{\"templateHostName\": \"${RGM_HOST_TMPL}\", \
+        \"hostName\": \"$(hostname -f)\", \
+        \"hostIp\": \"${CLI_ADDR}\", \
+        \"hostAlias\": \"${RGM_HOST_ALIAS}\"}")"
+
+if [ "$RCHTTP" == 200 ] && [ $EXPORTCONFIG -gt 0 ]; then
+    RCHTTP="$(curl -s -k -XPOST -o /dev/stderr -w "%{http_code}" \
+        -H 'Content-Type: application/json' -H "token: ${RGMAPI_OTT}" \
+        "https://${RGMSRVR}/rgmapi/exportConfiguration" \
+        -d '{"jobName": "Nagios Export"}')"
 fi
 
 exit $RC
