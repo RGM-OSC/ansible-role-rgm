@@ -1,14 +1,14 @@
 [cmdletbinding()]
 param (
-    [Parameter(Mandatory=$true,ParameterSetName="Username")]
+    [Parameter(Mandatory = $true, ParameterSetName = "Username")]
     [String]$Username,
-    [Parameter(Mandatory=$true,ParameterSetName="Username")]
+    [Parameter(Mandatory = $true, ParameterSetName = "Username")]
     [String]$Password,
-    [Parameter(Mandatory=$true,ParameterSetName="OneTimeToken")]
+    [Parameter(Mandatory = $true, ParameterSetName = "OneTimeToken")]
     [String]$OneTimeToken,
     [String]$RGMServer = "{{ ansible_default_ipv4.address }}",
     [String]$RGMTemplate = "RGM_WINDOWS_ES",
-    [String]$HostAlias = "",
+    [String]$HostAlias,
     [String[]]$Agents,
     [String]$BeatsBasePath = "{{ winbeats_base_path }}",
     [Switch]$NoBeat,
@@ -85,15 +85,16 @@ function Invoke-RGMRestMethod {
     )
     if (!(Test-RGMApiToken)) {
         if ($Password) {
-            Write-Verbose $($Header|ConvertTo-Json)
+            Write-Verbose $($Header | ConvertTo-Json)
             Write-Verbose "Request token with password"
             Get-RGMApiToken
-            Write-Verbose $($Header|ConvertTo-Json)
+            Write-Verbose $($Header | ConvertTo-Json)
         }
         elseif ($OneTimeToken) {
             Write-Output "The OnTimeToken is not valid`nEnd of script"
             exit
-        }else{
+        }
+        else {
             Write-Output "There is an unexpected error (no password or no OneTimeToken provided)`nEnd of script"
             exit
         }
@@ -131,13 +132,13 @@ function New-RGMHost {
     $UriCreateHost = "https://$RGMServer/rgmapi/createHost"
 
     $NewHost = Invoke-RGMRestMethod -Uri $UriCreateHost -Method Post -Body $CreateHostBody
-    if($NoExportConfig){
+    if ($NoExportConfig) {
         Write-Verbose "no export config!"
     }
-    else{
+    else {
         $ExportConfigBody = @{
-                "jobName"= "Nagios Export"
-        }| ConvertTo-Json
+            "jobName" = "Nagios Export"
+        } | ConvertTo-Json
         Write-Verbose "Launch ExportConfig"
 
         $UriExportConfig = "https://$RGMServer/rgmapi/exportConfiguration"
@@ -157,6 +158,15 @@ $PrincipaleIP = Get-NetIPAddress -InterfaceIndex $ActiveInterface.InterfaceIndex
 $Hostname = Get-WmiObject -Class Win32_ComputerSystem -Property DNSHostName | Select-Object -ExpandProperty DNSHostName
 Write-Verbose "Hostname: $Hostname, IP: $PrincipaleIP"
 
+# Use Hostname for HostAlias value if HostAlias value notdefined
+if ($HostAlias) {
+    #Do Nothing
+}
+else {
+    $HostAlias = $Hostname
+}
+Write-Verbose "HostAlias: $HostAlias"
+
 # Create the object on the RGM server
 $NewHost = New-RGMHost -hostName $Hostname -hostIp $PrincipaleIP -templateHostName $RGMTemplate -hostAlias $HostAlias -NoExportConfig:$NoExportConfig
 $NewHost.result
@@ -164,22 +174,23 @@ $NewHost.result
 # Call MetricBeat Install
 if ($NoBeat) { 
     Write-Verbose "Beat Agents installation bypassed"
-}else {
+}
+else {
     Write-Verbose "Beat Agents installation"
     $arguments = @{
         RGMServer = $RGMServer
     }
-    if ($BeatsBasePath){
+    if ($BeatsBasePath) {
         $arguments.BeatsBasePath = $BeatsBasePath
     }
-    if ($Agents){
+    if ($Agents) {
         $arguments.Agents = $Agents
     }
-    if ($VerbosePreference -eq "Continue"){
+    if ($VerbosePreference -eq "Continue") {
         $arguments.Verbose = $true
     }
-    $args = $arguments| Out-String
-    Write-Verbose -message "launch Beat Agents installation with arguments : $args"
+    $argumentdisplay = $arguments | Out-String
+    Write-Verbose -message "launch Beat Agents installation with arguments : $argumentdisplay"
     & $([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString("https://$RGMServer/distrib/install/Install-Beats.ps1"))) @arguments
 }
 
