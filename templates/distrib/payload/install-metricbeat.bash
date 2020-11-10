@@ -4,7 +4,7 @@
 #
 # RGM deployment script for Linux MetricBeat
 
-RGMSRVR="172.16.81.25"
+RGMSRVR="{{ ansible_default_ipv4.address }}"
 RGM_HOST_TMPL='RGM_LINUX_ES'
 RGM_HOST_ALIAS="$(hostname -s)"
 EXPORTCONFIG=1
@@ -76,8 +76,10 @@ if [ -n "$RGMAPI_OTT" ]; then
     RCHTTP=$?
 fi
 if [ "$RCHTTP" != '200' ] && [ -n "$RGMAPI_USER" ] && [ -n "$RGMAPI_PASSWD" ]; then
-    RGMAPI_OTT="$(curl -s -k -H 'Content-Type: application/json' \
-        "https://${RGMSRVR}/rgmapi/getAuthToken?&username=${RGMAPI_USER}&password=${RGMAPI_PASSWD}" |
+    RGMAPI_OTT="$(curl -s -k -G -H 'Content-Type: application/json' \
+        --data-urlencode "username=${RGMAPI_USER}" \
+        --data-urlencode "password=${RGMAPI_PASSWD}" \
+        "https://${RGMSRVR}/rgmapi/getAuthToken" |
         grep RGMAPI_TOKEN | awk '{print $2}' | xargs)"
     api_check_auth "$RGMAPI_OTT"
     RCHTTP=$?
