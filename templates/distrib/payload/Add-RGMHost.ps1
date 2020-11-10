@@ -67,7 +67,7 @@ function Test-RGMApiToken {
 
     $UriTokenCheck = "https://$RGMServer/rgmapi/checkAuthToken"
     try {
-        $null = Invoke-RestMethod -Uri $UriTokenCheck -Method GET -Headers $:scriptHeader
+        $null = Invoke-RestMethod -Uri $UriTokenCheck -Method GET -Headers $script:Header
     }
     catch {
         Write-Verbose "Token non valide"
