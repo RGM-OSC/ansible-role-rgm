@@ -187,6 +187,62 @@ grafana_plugins_contrib:
 - marcuscalidus-svg-panel
 - gretamosa-topology-panel
 
+
+# Official RGM repositories
+rgm_gpg_key: /etc/pki/rpm-gpg/RPM-GPG-KEY-rgm
+rgm_repositories:
+  rgm-community-base:
+    description: RGM Community - Base
+    baseurl: https://community.repo.rgm-cloud.io/rgm/latest/os/x86_64/
+    enabled: true
+    sslverify: false
+    cache: false
+    gpgcheck: true
+    gpgkey: "file://{{ rgm_gpg_key }}"
+  rgm-community-updates:
+    description: RGM Community - Updates
+    baseurl: https://community.repo.rgm-cloud.io/rgm/latest/updates/x86_64/
+    enabled: true
+    sslverify: false
+    cache: false
+    gpgcheck: true
+    gpgkey: "file://{{ rgm_gpg_key }}"
+  rgm-business-base:
+    description: RGM Business Base Repository
+    baseurl: https://business.repo.rgm-cloud.io/rgmb/latest/os/x86_64/
+    enabled: true
+    gpgcheck: true
+    gpgkey: "file://{{ rgm_gpg_key }}"
+    sslverify: true
+    sslclientcert: /etc/pki/tls/certs/CT1234-5678.CU1234-56789.crt
+    sslclientkey: /etc/pki/tls/private/CT1234-5678.CU1234-56789.key
+  rgm-business-updates:
+    description: RGM Business Updates Repository
+    baseurl: https://business.repo.rgm-cloud.io/rgmb/latest/updates/x86_64/
+    enabled: true
+    gpgcheck: true
+    gpgkey: "file://{{ rgm_gpg_key }}"
+    sslverify: true
+    sslclientcert: /etc/pki/tls/certs/CT1234-5678.CU1234-56789.crt
+    sslclientkey: /etc/pki/tls/private/CT1234-5678.CU1234-56789.key
+  rgm-partners-vmware:
+    description: RGM Partner - VMWare
+    baseurl: https://partners.repo.rgm-cloud.io/commercial/latest/vmware/
+    enabled: "{{ install_commercial_vmware | default(false) }}"
+    sslverify: false
+    cache: false
+    gpgcheck: true
+    gpgkey: "file://{{ rgm_gpg_key }}"
+  rgm-partners-oracle:
+    description: RGM Partner - Oracle
+    baseurl: https://partners.repo.rgm-cloud.io/commercial/latest/oracle/
+    enabled: "{{ install_commercial_oracle | default(false) }}"
+    sslverify: false
+    cache: false
+    gpgcheck: true
+    gpgkey: "file://{{ rgm_gpg_key }}"
+
+
 #### rgmweb 'deploy' section
 
 # one line tags are used to fill deploy DB schema with these constants
@@ -252,7 +308,7 @@ oneliner_items:
   - linux_rgm-system-fs.yml
   - linux_rgm-system-uptime.yml
   upstream_files:
-  - https://community.repo.rgm-cloud.io/rgm/latest/updates/x86_64/Packages/metricbeat-oss-7.3.1-x86_64.rpm
+  - "{{ rgm_repositories['rgm-community-updates']['baseurl'] | regex_replace('\\/$', '') }}/Packages/metricbeat-oss-7.3.1-x86_64.rpm"
   - https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-oss-7.3.1-amd64.deb
   re_pattern: '^.*\/(?P<prefix>\w+-oss-).*(?P<suffix>-(x86_|amd)64.+)$'
   re_replace: '\g<prefix>latest\g<suffix>'
