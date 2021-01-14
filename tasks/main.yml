@@ -42,45 +42,30 @@
   - epel
   - epel-debuginfo
   - epel-source
-  register: update_epel
+  register: update_epel_repo
   tags: packages
 
-- name: enable RGM repos for 3rd party commercial partners
+- name: update RGM repositories if required
   yum_repository:
-    name: "{{ item.name }}"
-    description: "{{ item.descr }}"
-    file: rgm-partners
-    baseurl: "{{ item.url }}"
-    gpgcheck: yes
-    enabled: "{{ item.enabled }}"
-    sslverify: false
-    keepcache: false
-    gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rgm
-  with_items:
-  - name: 'rgm-partner-vmware'
-    descr: 'RGM Partner - VMWare'
-    url: 'https://partners.repo.rgm-cloud.io/commercial/latest/vmware/'
-    enabled: "{{ install_commercial_vmware | default(false) }}"
-  - name: 'rgm-partner-oracle'
-    descr: 'RGM Partner - Oracle'
-    url: 'https://partners.repo.rgm-cloud.io/commercial/latest/oracle/'
-    enabled: "{{ install_commercial_oracle | default(false) }}"
-
-- name: add activated commercial package for vmware
-  set_fact:
-    packages_partners: "{{ packages_partners + [ 'VMware-vSphere-Perl-SDK' ] }}"
-  when: install_commercial_vmware | default(false)
-
-- name: add activated commercial package for Oracle
-  set_fact:
-    packages_partners: "{{ packages_partners + [ 'oracle-instantclient12.1-basic', 'perl-DBD-Oracle' ] }}"
-  when: install_commercial_oracle | default(false)
+    name: "{{ item.key }}"
+    description: "{{ item['value']['description'] }}"
+    file: rgm
+    baseurl: "{{ item['value']['baseurl'] }}"
+    gpgcheck: "{{ item['value']['gpgcheck'] }}"
+    enabled: "{{ item['value']['enabled'] }}"
+    keepcache: "{{ item['value']['cache'] | default(false)}}"
+    gpgkey: "{{ item['value']['gpgkey'] | default('file://' + rgm_gpg_key) }}"
+    sslverify: "{{ item['value']['sslverify'] | default(omit) }}"
+    sslclientcert: "{{ item['value']['sslclientcert'] | default(omit) }}"
+    sslclientkey: "{{ item['value']['sslclientkey'] | default(omit) }}"
+  loop: "{{ rgm_repositories | dict2items }}"
+  register: update_rgm_repo
 
 - name: force yum clean & make cache
   command: yum clean all
   args:
     warn: no
-  when: update_epel.changed
+  when: update_epel_repo.changed or update_rgm_repo.changed
   tags: packages
 
 ### selinux
@@ -103,7 +88,7 @@
 ### installs RGM packages & dependencies
 - name: install RGM packages (it may take some time...)
   yum:
-    update_cache: "{{ not(update_epel.changed) }}"
+    update_cache: "{{ not(update_epel_repo.changed) }}"
     name: "{{ packages_system + packages_mariadb + packages_apache + packages_elastic + packages_influx_grafana + packages_prometheus + packages_rgm + packages_partners + extra_packages }}"
     state: latest
   retries: 10
