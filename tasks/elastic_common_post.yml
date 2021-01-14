@@ -1,0 +1,25 @@
+---
+
+- name: ensure elasticsearch, metricbeat, and kibana are up and running
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+    masked: false
+  with_items:
+  - elasticsearch
+  - kibana
+  - metricbeat
+
+- block:
+  - name: force elasticsearch and kibana to be restarted to finalize metricbeat configuration
+    meta: flush_handlers
+
+  - name: setup metricbeat indexes and dashboards
+    command: metricbeat setup -c /etc/metricbeat/metricbeat.yml -path.home /usr/share/metricbeat -path.config /etc/metricbeat -path.data /var/lib/metricbeat -path.logs /var/log/metricbeat
+    retries: 10
+    delay: 20
+    register: metricbeat_setup
+    until: metricbeat_setup.rc == 0
+    
+  when: elasticsearch_conf.changed or elasticsearch_conf_jvm.changed or metricbeat_config.changed

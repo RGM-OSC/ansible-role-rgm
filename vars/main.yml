@@ -94,6 +94,7 @@ packages_prometheus:
 - prometheus-snmp_exporter
 - prometheus-blackbox_exporter
 - prometheus-ping_exporter
+- prometheus-elasticsearch_exporter
 
 packages_python36:
 - python36
@@ -126,6 +127,15 @@ packages_partners: []
 
 prometheus_mysql_cnf: /var/lib/prometheus/.my.cnf
 
+
+eshq_git_repo: https://github.com/ElasticHQ/elasticsearch-HQ.git
+eshq_version: v3.5.12
+eshq_root: /srv/rgm/elasticHQ/repo
+eshq_venv: /opt/pyvenv_eshq
+eshq_user: elastichq
+eshq_group: elastichq
+
+
 # patterns (regex) of Elsticsearch indexes to automatically close and delete with Curator
 # this is used in 'curator_actions.yml.j2' Jinja template
 curator_patterns:
@@ -140,7 +150,7 @@ rgm_services:
 - snmpd
 - snmptrapd
 - elasticsearch
-- mariadb
+- mariadbœ
 - metricbeat
 - influxdb
 - nagflux
@@ -334,3 +344,5 @@ oneliner_items:
 #  - https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-oss-7.3.1-amd64.deb
 #  re_pattern: '^.*\/(?P<prefix>\w+-oss-).*(?P<suffix>-(x86_|amd)64.+)$'
 #  re_replace: '\g<prefix>latest\g<suffix>'
+
+es_group: elasticsearch

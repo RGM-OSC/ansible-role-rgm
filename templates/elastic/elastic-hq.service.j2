@@ -1,0 +1,20 @@
+[Unit]
+Description = Elasticsearch-HQ service
+After = network.target
+
+[Service]
+PermissionsStartOnly = true
+PIDFile = /var/run/elastichq/elastichq.pid
+User = {{ eshq_user }}
+Group = {{ eshq_group }}
+WorkingDirectory = {{ eshq_root }}
+ExecStartPre = /bin/mkdir /var/run/elastichq
+ExecStartPre = /bin/chown -R {{ eshq_user }}:{{ eshq_group }} /var/run/elastichq
+ExecStart = {{ eshq_venv }}/bin/gunicorn -w 1 -b :5000 --worker-class eventlet application:application
+ExecReload = /bin/kill -s HUP $MAINPID
+ExecStop = /bin/kill -s TERM $MAINPID
+ExecStopPost = /bin/rm -rf /var/run/elastichq
+PrivateTmp = true
+
+[Install]
+WantedBy = multi-user.target
