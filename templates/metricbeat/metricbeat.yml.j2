@@ -15,8 +15,8 @@ metricbeat.config.modules:
 #==================== Elasticsearch template setting
 
 setup.template.settings:
-  index.number_of_shards: 1
-  index.number_of_replicas: 0
+  index.number_of_shards: {{ es_shards }}
+  index.number_of_replicas: {{ es_shards_replicas }}
   index.codec: best_compression
   #_source.enabled: false
 

@@ -1,0 +1,28 @@
+---
+# {{ ansible_managed }}
+# Elasticsearch cluster mode for RGM
+
+path.data: /var/lib/elasticsearch
+path.logs: /var/log/elasticsearch
+path.repo: '/srv/rgm/elastic'
+
+cluster.name: {{ rgm_elastic_cluster }}
+node.name: {{ node_name }}
+
+network.host:
+  - _local_
+  - _{{ ansible_default_ipv4.alias }}_
+
+discovery.seed_hosts:
+{% for item in groups['rgm'] %}
+  - {{ hostvars[item].ansible_default_ipv4.address }}
+{% endfor %}
+
+cluster.initial_master_nodes:
+{% for item in groups['rgm'] %}{% if hostvars[item].es_master %}
+  - {{ hostvars[item].node_name }}
+{% endif %}{% endfor %}
+
+node.master: {{ es_master | lower }}
+node.data: {{ es_data | lower }}
+node.ingest: {{ es_ingest | lower }}

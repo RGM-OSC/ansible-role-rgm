@@ -1,25 +1,8 @@
 ---
-# Tasks for Elastic Stack RGM setup
-# vim: bs=2 sw=2 expandtab:
 
-# This is redundant as all RPM packages are already installed from main tasks
-# but we secure it in case the role might be called directly from its tags
-- name: ensure Elastic Stack is installed
-  yum:
-    update_cache: no
-    name: "{{ packages_elastic }}"
-    state: present
-
- ### Configure Elasticsearch
-
-- name: create elastic backup repo directory
-  file:
-    path: /srv/rgm/elastic
-    owner: elasticsearch
-    group: rgm
-    mode: 0750
-    state: directory
-    recurse: yes
+- name: include ES common preliminary tasks
+  include_tasks:
+    file: elastic_common_pre.yml
 
 - name: configure Elasticsearch config file
   lineinfile:
@@ -30,44 +13,13 @@
   - { regex: '^(#\s*)?network.host: ',  line: "network.host: ['127.0.0.1']" }
   - { regex: '^(#\s*)?path.repo: ',     line: 'path.repo: "/srv/rgm/elastic"' }
   notify: service_restart_elasticsearch
+  register: elasticsearch_conf
 
-- name: determine elasticsearch's JVM heap size (total memory /2)
-  set_fact:
-    jvmheapsize: "{{ (((ansible_facts['memtotal_mb'] / 1024) | round | int) / 2) | round | int }}"
+- name: include ES common post tasks
+  include_tasks:
+    file: elastic_common_post.yml
 
-- name: restrict JVM heap size to {{ max_jvm_heapsize}}
-  set_fact:
-    jvmheapsize: "{{ max_jvm_heapsize}}"
-  when: (jvmheapsize | int) > (max_jvm_heapsize | int)
 
-- name: set Elasticsearch's JVM configuration
-  lineinfile:
-    path: /etc/elasticsearch/jvm.options
-    regexp: "{{ item.regex }}"
-    line: "{{ item.line }}"
-    insertafter: "{{ item.after }}"
-  with_items:
-  - { regex: '^-Xms\\d+$',                                            line: "-Xms{{ jvmheapsize }}g",                            after: 'EOF' }
-  - { regex: '^-Xmx\\d+$',                                            line: "-Xmx{{ jvmheapsize }}g",                            after: 'EOF' }
-  - { regex: '^.*-XX:\+UseConcMarkSweepGC$',                          line: '# -XX:+UseConcMarkSweepGC',                         after: 'EOF' }
-  - { regex: '^.*-XX:CMSInitiatingOccupancyFraction=\\d+$',           line: '# -XX:CMSInitiatingOccupancyFraction=75',           after: 'EOF' }
-  - { regex: '^.*-XX:\+UseCMSInitiatingOccupancyOnly$',               line: '# -XX:+UseCMSInitiatingOccupancyOnly',              after: 'EOF' }
-  - { regex: '^.*10-:-XX:\+UseG1GC$',                                 line: '10-:-XX:+UseG1GC',                                  after: '^#+ G1GC Configuration$' }
-  - { regex: '^.*10-:-XX:G1ReservePercent=\\d+$',                     line: '10-:-XX:G1ReservePercent=25',                       after: '^.*-XX:\+UseG1GC$' }
-  - { regex: '^.*10-:-XX:InitiatingHeapOccupancyPercent=\\d+$',       line: '10-:-XX:InitiatingHeapOccupancyPercent=30',         after: '^.*-XX:\+UseG1GC$' }
-  - { regex: '^# JMX',                                                line: '# JMX',                                             after: 'EOF' }
-  - { regex: '^.*-Dcom.sun.management.jmxremote$',                    line: '-Dcom.sun.management.jmxremote',                    after: '^# JMX$' }
-  - { regex: '^.*-Dcom.sun.management.jmxremote.port=\\d+$',          line: '-Dcom.sun.management.jmxremote.port=10001',         after: '^-Dcom.sun.management.jmxremote.*$' }
-  - { regex: '^.*-Dcom.sun.management.jmxremote.rmi.port=\\d+$',      line: '-Dcom.sun.management.jmxremote.rmi.port=10002',     after: '^-Dcom.sun.management.jmxremote.*$' }
-  - { regex: '^.*-Dcom.sun.management.jmxremote.ssl=false$',          line: '-Dcom.sun.management.jmxremote.ssl=false',          after: '^-Dcom.sun.management.jmxremote.*$' }
-  - { regex: '^.*-Dcom.sun.management.jmxremote.authenticate=false$', line: '-Dcom.sun.management.jmxremote.authenticate=false', after: '^-Dcom.sun.management.jmxremote.*$' }
-  notify: service_restart_elasticsearch
-
-- name: ensure elasticsearch is enabled and started
-  systemd:
-    name: elasticsearch
-    enabled: yes
-    state: started
 
 #- name: create an elasticsearch local backup reposotory
 #curl -XPUT 'http://127.0.0.1:9200/_snapshot/backup' -H 'Content-Type: application/json' -d '{ "type": "fs", "settings": {"location": "/srv/rgm/elastic/backups","compress": true}}'
@@ -76,71 +28,5 @@
   # curator_cli  snapshot --repository backup --name ".kibana_empty" --filter_list '{"filtertype": "pattern", "kind": "prefix", "value": ".kibana", "exclude": "False"}'
 
 
-- name: copy curator config files
-  template:
-    src: "{{ item.src }}"
-    dest: "{{ item.dst }}"
-    owner: root
-    group: root
-    mode: 0644
-  with_items:
-  - { src: 'elastic/curator_actions.yml.j2',    dst: '/etc/elasticsearch/actions.yml' }
-  - { src: 'elastic/curator.yml.j2',            dst: '/etc/elasticsearch/curator.yml' }
-
-- name: set cron job for curator
-  copy:
-    content: "10 0 * * * root /usr/bin/curator --config /etc/elasticsearch/curator.yml /etc/elasticsearch/actions.yml &> /dev/null"
-    dest: /etc/cron.d/elastic_curator
-    owner: root
-    group: root
-    mode: 0644
-  notify: service_reload_crond
-
-
-### Configure kibana
-
-- name: configure Kibana config file
-  lineinfile:
-    path: /etc/kibana/kibana.yml
-    regexp: "{{ item.regex }}"
-    line: "{{ item.line }}"
-  with_items:
-  - { regex: '^(#\s*)?server.port',              line: 'server.port: 5601' }
-  - { regex: '^(#\s*)?server.host',              line: 'server.host: "localhost"' }
-  - { regex: '^(#\s*)?server.basePath',          line: 'server.basePath: "/kibana"' }
-  - { regex: '^(#\s*)?server.rewriteBasePath',   line: 'server.rewriteBasePath: true' }
-  notify: service_restart_kibana
-
-
-### configure metricbeat
-
-- name: configure metricbeat
-  template:
-    src: "metricbeat/{{ item.src }}.yml.j2"
-    dest: "/etc/metricbeat/{{ item.dst }}.yml"
-    owner: root
-    group: root
-    mode: 0640
-  with_items:
-  - { src: 'metricbeat',    dst: 'metricbeat' }
-  - { src: 'module_apache', dst: 'modules.d/apache' }
-  - { src: 'module_kibana', dst: 'modules.d/kibana' }
-  - { src: 'module_mysql',  dst: 'modules.d/mysql' }
-  - { src: 'module_system', dst: 'modules.d/system' }
-  register: metricbeat_config
-  notify: service_restart_metricbeat
-
-- block:
-  - name: force elasticsearch and kibana to be restarted to finalize metricbeat configuration
-    meta: flush_handlers
-
-  - name: setup metricbeat indexes and dashboards
-    command: metricbeat setup -c /etc/metricbeat/metricbeat.yml -path.home /usr/share/metricbeat -path.config /etc/metricbeat -path.data /var/lib/metricbeat -path.logs /var/log/metricbeat
-    retries: 10
-    delay: 20
-    register: metricbeat_setup
-    until: metricbeat_setup.rc == 0
-    
-  when: metricbeat_config.changed
 
 # curl -XPUT -H "Content-Type: application/json" http://localhost:9200/_all/_settings -d '{"index.blocks.read_only_allow_delete": null}'

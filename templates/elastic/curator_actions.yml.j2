@@ -7,13 +7,13 @@ actions:
 {% set count = count + 1 %}  {{ count }}:
     action: index_settings
     description: >-
-      Force indexes for be writable and force set replicas shards to 0 (ES defaults to 1)
+      Force indexes for be writable and force set replicas shards to {{ es_shards_replicas }} (ES defaults to 1)
     options:
       index_settings:
         index:
           blocks:
             read_only_allow_delete: False
-          number_of_replicas: 0
+          number_of_replicas: {{ es_shards_replicas }}
       preserve_existing: False
       ignore_unavailable: False
     filters:
