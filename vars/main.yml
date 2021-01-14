@@ -94,6 +94,7 @@ packages_prometheus:
 - prometheus-snmp_exporter
 - prometheus-blackbox_exporter
 - prometheus-ping_exporter
+- prometheus-elasticsearch_exporter
 
 packages_python36:
 - python36

@@ -26,12 +26,29 @@
     group: root
     mode: "{{ item.mode }}"
   with_items:
-  - { owner: 'root',    group: 'root', mode: '0644', src: grafana/grafana_icon.svg,          dest: /usr/share/grafana/public/img/grafana_icon.svg }
-  - { owner: 'root',    group: 'root', mode: '0744', src: grafana/grafana_rgm.sh,            dest: /etc/grafana/grafana_rgm.sh }
-  - { owner: 'grafana', group: 'rgm',  mode: '0644', src: grafana/multi-system-metrics.json, dest: "{{ grafana_rgm_dashboards }}/multi-system-metrics.json" }
-  - { owner: 'grafana', group: 'rgm',  mode: '0644', src: grafana/4any-k8s-monitoring.json, dest: "{{ grafana_rgm_dashboards }}/4any-k8s-monitoring.json" }
-  - { owner: 'grafana', group: 'rgm',  mode: '0644', src: grafana/realtime-containers-nodes-metrics.json, dest: "{{ grafana_rgm_dashboards }}/realtime-containers-nodes-metrics.json" }
-#  - { owner: 'grafana', group: 'rgm',  mode: '0644', src: grafana/system-metrics.json,       dest: "{{ grafana_rgm_dashboards }}/system-metrics.json" }
+  - { mode: '0644', src: grafana/grafana_icon.svg, dest: /usr/share/grafana/public/img/grafana_icon.svg }
+  - { mode: '0744', src: grafana/grafana_rgm.sh,   dest: /etc/grafana/grafana_rgm.sh }
+
+- name: install grafana dash templates
+  copy:
+    src: "grafana/{{ item }}"
+    dest: "{{ grafana_rgm_dashboards }}/{{ item }}"
+    owner: grafana
+    group: rgm
+    mode: 0644
+  with_items:
+  - 4any-k8s-monitoring.json
+  - active_directory_dns.json
+  - apache.json
+  - azure_compute.json
+  - azure_storage.json
+  - elasticsearch_cluster.json
+  - multi-system-metrics.json
+  - mysql_percona.json
+  - prometheus_node_exporter.json
+  - prometheus_service.json
+  - realtime-containers-nodes-metrics.json
+  - vmware_stats.json
 
 - name: apply patches to align Grafana theme on RGM theme
   command: /etc/grafana/grafana_rgm.sh
