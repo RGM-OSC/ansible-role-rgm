@@ -25,12 +25,14 @@ scrape_configs:
 
     # metrics_path defaults to '/metrics'
     # scheme defaults to 'http'.
+    metrics_path: '/prometheus/metrics'
 
     static_configs:
     - targets: ['localhost:9090']
 
-  - job_name: 'rgm_daemons'
+  - job_name: 'rgm_services'
     static_configs:
     - targets:
-      # influxdb native exporter
-      - 'localhost:8086'
+      - 'localhost:9424' # influxdb native exporter
+      - 'localhost:9100' # node exporter
+      - 'localhost:9108' # elasticsearch_exporter

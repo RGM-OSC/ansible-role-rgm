@@ -43,6 +43,7 @@
   - azure_compute.json
   - azure_storage.json
   - elasticsearch_cluster.json
+  - influxdb_internals.json
   - multi-system-metrics.json
   - mysql_percona.json
   - prometheus_node_exporter.json

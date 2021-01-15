@@ -1,0 +1,13 @@
+[Unit]
+Description=InfluxDB stats exporter for Prometheus
+Documentation=https://github.com/carlpett/influxdb_stats_exporter
+After=network.target
+
+[Service]
+EnvironmentFile=-/etc/sysconfig/promotheus/influxdb_exporter
+User=prometheus
+ExecStart= {{ rgm_root_path }}/prometheus/bin/influxdb_exporter $INFLUX_EXPORTER_ARGS
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
