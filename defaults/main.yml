@@ -41,8 +41,13 @@ ntp_servers:
 - '2.pool.ntp.org'
 - '3.pool.ntp.org'
 
+### Elasticsearch related defaults
+
 # Maximum allowed JVM heap size value (in MB)
 max_jvm_heapsize: 8
+
+es_shards: 1
+es_shards_replicas: 0
 
 # Elasticsearch Curator values
 curator:

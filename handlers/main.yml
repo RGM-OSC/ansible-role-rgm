@@ -72,6 +72,11 @@
     name: prometheus
     state: restarted
 
+- name: service_restart_influxdb_exporter
+  service:
+    name: influxdb_exporter
+    state: restarted
+
 - name: service_restart_xinetd
   service:
     name: xinetd
