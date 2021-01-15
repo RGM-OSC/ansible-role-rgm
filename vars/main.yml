@@ -150,7 +150,7 @@ rgm_services:
 - snmpd
 - snmptrapd
 - elasticsearch
-- mariadbœ
+- mariadb
 - metricbeat
 - influxdb
 - nagflux
