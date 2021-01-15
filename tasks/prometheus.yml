@@ -1,6 +1,6 @@
 ---
 # prometheus configuration
-# vim: bs=2 sw=2 expandtab:
+# https://prometheus.io/docs/prometheus/latest/getting_started/
 
 - name: ensure Prometheus is installed
   yum:
@@ -50,13 +50,6 @@
   - src: influxdb_exporter.service.j2
     dst: /etc/systemd/system/influxdb_exporter.service
 
-- name: enable and start InfluxDB exporter
-  systemd:
-    name: influxdb_exporter
-    enabled: true
-    masked: false
-    state: started
-
 - name: "configure prometheus service"
   lineinfile:
     path: /etc/sysconfig/promotheus/prometheus
@@ -83,28 +76,11 @@
     creates: /etc/metricbeat/modules.d/prometheus.yml
   notify: service_restart_metricbeat
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 - name: ensure prometheus services are running
   systemd:
-    name: prometheus
-    enabled: yes
+    name: "{{ item }}"
+    enabled: true
+    masked: false
     state: started
   with_items:
   - prometheus
@@ -112,4 +88,4 @@
   - influxdb_exporter
   - elasticsearch_exporter
 
-# https://prometheus.io/docs/prometheus/latest/getting_started/
+# vim: bs=2 sw=2 expandtab:
