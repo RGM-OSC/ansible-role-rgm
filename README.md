@@ -85,14 +85,14 @@ Dependencies
 ------------
 
 The following roles are **not** mandatory dependencies, but RGM playbook relies on them for proper installation:
-  * [role-lvm-partitionner](https://framagit.org/rgm-community/ansible/roles/role-lvm-partitionner)
-  * [role-snmp](https://framagit.org/rgm-community/ansible/roles/role-snmp)
+  * [role-lvm-partitionner](https://github.com/RGM-OSC/ansible-role-lvm-part.git)
+  * [role-snmp](https://github.com/RGM-OSC/ansible-role-snmp.git)
 
 
 Example Playbook
 ----------------
 
-This role is intended to be executed by [rgm-installer](https://framagit.org/rgm-community/ansible/rgm-installer) playbook
+This role is intended to be executed by [rgm-installer](https://github.com/RGM-OSC/ansible-playbook-rgm-installer) playbook
 
 License
 -------
