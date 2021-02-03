@@ -34,14 +34,19 @@
 - name: check if RGM Business private key is present
   stat:
     path: "/etc/pki/tls/private/{{ rgm_business_registration_id }}.key"
-  when: rgm_business_registration_id | length > 0
+  when:
+  - rgm_business_registration_id is iterable
+  - rgm_business_registration_id | length > 0
   register: stat_rgm_business_key
   tags: always
 
 - name: set RGM Business RPM repository to be activated
   set_fact:
     enable_rgm_repo_business: true
-  when: stat_rgm_business_key.stat.exists
+  when:
+  - stat_rgm_business_key is defined
+  - stat_rgm_business_key.stat is defined
+  - stat_rgm_business_key.stat.exists
   tags: always
 
 # As nagios 4 is present in EPEL repo, disable nagios from EPEL
