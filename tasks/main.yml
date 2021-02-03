@@ -31,6 +31,19 @@
 
   when: proxy_host is defined
 
+- name: check if RGM Business private key is present
+  stat:
+    path: "/etc/pki/tls/private/{{ rgm_business_registration_id }}.key"
+  when: rgm_business_registration_id | length > 0
+  register: stat_rgm_business_key
+  tags: always
+
+- name: set RGM Business RPM repository to be activated
+  set_fact:
+    enable_rgm_repo_business: true
+  when: stat_rgm_business_key.stat.exists
+  tags: always
+
 # As nagios 4 is present in EPEL repo, disable nagios from EPEL
 - name: exclude nagios from EPEL repo
   ini_file:
@@ -60,6 +73,7 @@
     sslclientkey: "{{ item['value']['sslclientkey'] | default(omit) }}"
   loop: "{{ rgm_repositories | dict2items }}"
   register: update_rgm_repo
+  tags: always
 
 - name: force yum clean & make cache
   command: yum clean all
