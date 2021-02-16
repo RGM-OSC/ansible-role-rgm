@@ -173,3 +173,20 @@
   changed_when: granafa_sql_exec.rc == 1
   failed_when: granafa_sql_exec.rc == 2
   when: granafa_sql_procs.changed
+
+- name: retrieve id for 'Multi-System metrics' Grafana dashboard
+  community.mysql.mysql_query:
+    login_db: grafana
+    query: SELECT id FROM dashboard WHERE title = 'Multi-System metrics'
+  register: grafana_default_dash_id
+
+- debug:
+    var: grafana_default_dash_id
+
+- name: Set 'Multi-System metrics' as default dashboard
+  community.mysql.mysql_query:
+    login_db: grafana
+    query: UPDATE preferences SET home_dashboard_id = %(id_graph)s WHERE org_id = 1 AND user_id = 0
+    named_args:
+      id_graph: "{{ grafana_default_dash_id.query_result[0][0].id }}"
+  when: grafana_default_dash_id.rowcount[0] == 1
