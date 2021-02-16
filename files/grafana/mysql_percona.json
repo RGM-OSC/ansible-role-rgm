@@ -3828,6 +3828,7 @@
   "schemaVersion": 20,
   "style": "dark",
   "tags": [
+    "RGM",
     "Percona",
     "MySQL",
     "MariaDB"

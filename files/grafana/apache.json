@@ -679,7 +679,8 @@
   "schemaVersion": 20,
   "style": "dark",
   "tags": [
-    "apache",
+    "RGM",
+    "Apache",
     "httpd"
   ],
   "templating": {

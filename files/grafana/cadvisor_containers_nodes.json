@@ -1509,7 +1509,8 @@
     "schemaVersion": 20,
     "style": "dark",
     "tags": [
-      "4any"
+      "RGM",
+      "4ANY"
     ],
     "templating": {
       "list": [
@@ -1702,4 +1703,4 @@
     "title": "Realtime containers & nodes metrics",
     "uid": "4dMaCsRZz",
     "version": 1
-  }
+}

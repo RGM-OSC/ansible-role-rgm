@@ -3602,7 +3602,8 @@
   "schemaVersion": 20,
   "style": "dark",
   "tags": [
-    "azure",
+    "RGM",
+    "Azure",
     "templates"
   ],
   "templating": {
