@@ -59,6 +59,7 @@ packages_elastic:
 - elasticsearch-oss
 - elasticsearch-curator
 - metricbeat
+- filebeat
 - kibana-oss
 
 packages_influx_grafana:
