@@ -98,7 +98,7 @@
 - name: install grafana dash templates
   copy:
     src: "grafana/{{ item }}"
-    dest: "/etc/grafana/provisioning/dashboards/{{ item }}"
+    dest: "{{ grafana_rgm_dashboards }}/{{ item }}"
     owner: root
     group: grafana
     mode: 0640
