@@ -11,6 +11,13 @@
   - kibana
   - metricbeat
 
+- name: enable and start filebeat only if requested
+  systemd:
+    name: filebeat
+    state: "{{ filebeat_enabled | ternary('started', 'stopped') }}"
+    enabled: "{{ filebeat_enabled }}"
+    masked: false
+
 - block:
   - name: force elasticsearch and kibana to be restarted to finalize metricbeat configuration
     meta: flush_handlers
@@ -21,5 +28,20 @@
     delay: 20
     register: metricbeat_setup
     until: metricbeat_setup.rc == 0
-    
+
+  - name: setup metricbeat indexes and dashboards
+    command: metricbeat setup -c /etc/metricbeat/metricbeat.yml -path.home /usr/share/metricbeat -path.config /etc/metricbeat -path.data /var/lib/metricbeat -path.logs /var/log/metricbeat
+    retries: 10
+    delay: 20
+    register: metricbeat_setup
+    until: metricbeat_setup.rc == 0
+
   when: elasticsearch_conf.changed or elasticsearch_conf_jvm.changed or metricbeat_config.changed
+
+- name: setup filebeat indexes and dashboards
+  command: filebeat setup  --dashboards --index-management --machine-learning
+  retries: 10
+  delay: 20
+  register: filebeat_setup
+  until: filebeat_setup.rc == 0
+  when: elasticsearch_conf.changed or filebeat_config.changed

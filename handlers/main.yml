@@ -52,6 +52,13 @@
     name: metricbeat
     state: restarted
 
+- name: service_restart_filebeat
+  service:
+    name: filebeat
+    state: restarted
+  when: filebeat_enabled
+
+
 - name: service_restart_influxdb
   service:
     name: influxdb
