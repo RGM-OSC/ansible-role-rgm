@@ -17,6 +17,9 @@ rgmweb_user: apache
 nagios_user: nagios
 prometheus_user: prometheus
 
+# RGM Business licensed customer id
+rgm_business_registration_id:
+
 # internal MariaDB user used by RGM applications
 mariadb_user: 'rgminternal'
 mariadb_pwd: '0rd0-c0m1735-b47h0n143'
@@ -75,6 +78,8 @@ metricbeat_polling_period: 90s
 d_metric_sys_core_period: '2m'
 d_metric_sys_fs_period: '2m'
 d_metric_sys_uptime_period: '2m'
+# enable filebeats
+filebeat_enabled: false
 
 # Default swappiness for RGM
 sysctl_swappiness: '10'

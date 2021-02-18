@@ -59,6 +59,7 @@ packages_elastic:
 - elasticsearch-oss
 - elasticsearch-curator
 - metricbeat
+- filebeat
 - kibana-oss
 
 packages_influx_grafana:
@@ -124,6 +125,9 @@ packages_python36:
 
 # partners packages list (oracle, vmware, etc.) is built at run-time
 packages_partners: []
+
+# RGM repositories
+enable_rgm_repo_business: false
 
 prometheus_mysql_cnf: /var/lib/prometheus/.my.cnf
 
@@ -220,24 +224,24 @@ rgm_repositories:
   rgm-business-base:
     description: RGM Business Base Repository
     baseurl: https://business.repo.rgm-cloud.io/rgmb/latest/os/x86_64/
-    enabled: true
+    enabled: "{{ enable_rgm_repo_business }}"
     gpgcheck: true
     gpgkey: "file://{{ rgm_gpg_key }}"
     sslverify: true
-    sslclientcert: /etc/pki/tls/certs/CT1234-5678.CU1234-56789.crt
-    sslclientkey: /etc/pki/tls/private/CT1234-5678.CU1234-56789.key
+    sslclientcert: "/etc/pki/tls/certs/{{ rgm_business_registration_id }}.crt"
+    sslclientkey: "/etc/pki/tls/private/{{ rgm_business_registration_id }}.key"
   rgm-business-updates:
     description: RGM Business Updates Repository
     baseurl: https://business.repo.rgm-cloud.io/rgmb/latest/updates/x86_64/
-    enabled: true
+    enabled: "{{ enable_rgm_repo_business }}"
     gpgcheck: true
     gpgkey: "file://{{ rgm_gpg_key }}"
     sslverify: true
-    sslclientcert: /etc/pki/tls/certs/CT1234-5678.CU1234-56789.crt
-    sslclientkey: /etc/pki/tls/private/CT1234-5678.CU1234-56789.key
+    sslclientcert: "/etc/pki/tls/certs/{{ rgm_business_registration_id }}.crt"
+    sslclientkey: "/etc/pki/tls/private/{{ rgm_business_registration_id }}.key"
   rgm-partners-vmware:
     description: RGM Partner - VMWare
-    baseurl: https://partners.repo.rgm-cloud.io/commercial/latest/vmware/
+    baseurl: https://partners.repo.rgm-cloud.io/latest/vmware/
     enabled: "{{ install_commercial_vmware | default(false) }}"
     sslverify: false
     cache: false
@@ -245,7 +249,7 @@ rgm_repositories:
     gpgkey: "file://{{ rgm_gpg_key }}"
   rgm-partners-oracle:
     description: RGM Partner - Oracle
-    baseurl: https://partners.repo.rgm-cloud.io/commercial/latest/oracle/
+    baseurl: https://partners.repo.rgm-cloud.io/latest/oracle/
     enabled: "{{ install_commercial_oracle | default(false) }}"
     sslverify: false
     cache: false

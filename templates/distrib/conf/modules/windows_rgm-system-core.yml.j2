@@ -10,7 +10,28 @@
     - process_summary
     - socket_summary
     - diskio
+  processes: ['.*']
+  process.include_top_n.enabled: false
+
 - module: windows
   period: {{ d_metric_sys_core_period }}
   metricsets:
     - service
+    - perfmon
+  perfmon.counters:
+    - instance_label: system.processor_queue_length
+      instance_name: system.name
+      measurement_label: system.processor_queue_length
+      query: '\System\Processor Queue Length'
+    - instance_label: network_interface.name
+      instance_name: network_interface.name
+      measurement_label: network_interface.output_queue_length
+      query: '\Network Interface(*)\Output Queue Length'
+    - instance_label: physical_disk.name
+      instance_name: physical_disk.name
+      measurement_label: physical_disk.average_queue_length
+      query: '\PhysicalDisk(*)\Avg. Disk Queue Length'
+    - instance_label: logical_disk.name
+      instance_name: logical_disk.name
+      measurement_label: logical_disk.average_queue_length
+      query: '\LogicalDisk(*)\Avg. Disk Queue Length' 

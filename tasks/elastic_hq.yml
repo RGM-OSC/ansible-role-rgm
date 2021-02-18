@@ -1,5 +1,8 @@
 ---
 
+# Installs ElasticHQ front-end. As we already get ES metrics from Prometheus,
+# this is *really* optional and should't be necessary anymore
+
 - name: ensure Elasticsearch-HQ group exists
   group:
     name: "{{ eshq_group }}"

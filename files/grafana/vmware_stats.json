@@ -1790,7 +1790,8 @@
   "schemaVersion": 20,
   "style": "dark",
   "tags": [
-    "vmware"
+    "RGM",
+    "VMWare"
   ],
   "templating": {
     "list": [

@@ -127,3 +127,19 @@
   - { src: 'module_system', dst: 'modules.d/system' }
   register: metricbeat_config
   notify: service_restart_metricbeat
+
+### configure filebeat
+
+- name: configure filebeat
+  template:
+    src: "filebeat/{{ item.src }}.yml.j2"
+    dest: "/etc/filebeat/{{ item.dst }}.yml"
+    owner: root
+    group: root
+    mode: 0640
+  with_items:
+  - { src: 'filebeat',    dst: 'filebeat' }
+  - { src: 'system', dst: 'modules.d/system' }
+  - { src: 'apache', dst: 'modules.d/apache' }
+  register: filebeat_config
+  notify: service_restart_filebeat
