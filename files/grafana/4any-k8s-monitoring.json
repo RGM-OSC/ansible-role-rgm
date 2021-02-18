@@ -1757,8 +1757,9 @@
   "schemaVersion": 20,
   "style": "dark",
   "tags": [
-    "kubernetes",
-    "4any"
+    "RGM",
+    "Kubernetes",
+    "4ANY"
   ],
   "templating": {
     "list": [
@@ -1862,11 +1863,6 @@
       },
       {
         "allValue": ".*",
-        "current": {
-          "tags": [],
-          "text": "cadvisor-002.prv.4any.fr",
-          "value": "cadvisor-002.prv.4any.fr"
-        },
         "datasource": "Prometheus",
         "definition": "label_values(container_cpu_user_seconds_total, instance)",
         "hide": 0,
@@ -1888,11 +1884,6 @@
       },
       {
         "allValue": ".*",
-        "current": {
-          "tags": [],
-          "text": "prometheus-node-exporter-002.prv.4any.fr",
-          "value": "prometheus-node-exporter-002.prv.4any.fr"
-        },
         "datasource": "Prometheus",
         "definition": "label_values(node_memory_Active_bytes, instance)",
         "hide": 0,

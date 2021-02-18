@@ -98,7 +98,7 @@
 - name: install grafana dash templates
   copy:
     src: "grafana/{{ item }}"
-    dest: "/etc/grafana/provisioning/dashboards/{{ item }}"
+    dest: "{{ grafana_rgm_dashboards }}/{{ item }}"
     owner: root
     group: grafana
     mode: 0640
@@ -173,3 +173,25 @@
   changed_when: granafa_sql_exec.rc == 1
   failed_when: granafa_sql_exec.rc == 2
   when: granafa_sql_procs.changed
+
+- name: retrieve id for 'Multi-System metrics' Grafana dashboard
+  community.mysql.mysql_query:
+    login_db: grafana
+    query: SELECT id FROM dashboard WHERE title = 'Multi-System metrics'
+  register: grafana_default_dash_id
+
+- debug:
+    var: grafana_default_dash_id
+
+- name: Set 'Multi-System metrics' as default dashboard
+  community.mysql.mysql_query:
+    login_db: grafana
+    query:
+      - INSERT INTO star (user_id, dashboard_id) VALUES (1, %(id_graph)s)
+      - INSERT INTO preferences (org_id,user_id,home_dashboard_id,created,updated,team_id) VALUES (1,0,%(id_graph)s,%(date)s,%(date)s,0)
+    named_args:
+      id_graph: "{{ grafana_default_dash_id.query_result[0][0].id }}"
+      date: 'now()'
+  when: grafana_default_dash_id.rowcount[0] == 1
+
+  

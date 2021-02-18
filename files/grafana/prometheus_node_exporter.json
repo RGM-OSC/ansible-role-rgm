@@ -2126,6 +2126,7 @@
   "schemaVersion": 20,
   "style": "dark",
   "tags": [
+    "RGM",
     "Prometheus",
     "node_exporter"
   ],

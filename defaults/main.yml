@@ -78,6 +78,8 @@ metricbeat_polling_period: 90s
 d_metric_sys_core_period: '2m'
 d_metric_sys_fs_period: '2m'
 d_metric_sys_uptime_period: '2m'
+# enable filebeats
+filebeat_enabled: false
 
 # Default swappiness for RGM
 sysctl_swappiness: '10'

@@ -1070,7 +1070,10 @@
     "refresh": false,
     "schemaVersion": 20,
     "style": "dark",
-    "tags": [],
+    "tags": [
+      "RGM",
+      "Nutanix"
+    ],
     "templating": {
       "list": []
     },
@@ -1096,4 +1099,4 @@
     "title": "Nutanix Dashboard",
     "uid": "jhoD_HcMk",
     "version": 26
-  }
+}
