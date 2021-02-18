@@ -241,7 +241,7 @@ rgm_repositories:
     sslclientkey: "/etc/pki/tls/private/{{ rgm_business_registration_id }}.key"
   rgm-partners-vmware:
     description: RGM Partner - VMWare
-    baseurl: https://partners.repo.rgm-cloud.io/commercial/latest/vmware/
+    baseurl: https://partners.repo.rgm-cloud.io/latest/vmware/
     enabled: "{{ install_commercial_vmware | default(false) }}"
     sslverify: false
     cache: false
@@ -249,7 +249,7 @@ rgm_repositories:
     gpgkey: "file://{{ rgm_gpg_key }}"
   rgm-partners-oracle:
     description: RGM Partner - Oracle
-    baseurl: https://partners.repo.rgm-cloud.io/commercial/latest/oracle/
+    baseurl: https://partners.repo.rgm-cloud.io/latest/oracle/
     enabled: "{{ install_commercial_oracle | default(false) }}"
     sslverify: false
     cache: false
