@@ -238,9 +238,10 @@ foreach ($Beattoinstall in $Beatstoinstall) {
 
 	# Part depending of the agent
 	switch ($AgentName) {
-		metricbeat { 
+		"metricbeat" { 
 			# Dedicated part of the metricbeat agent
 			Write-Verbose -Message "tunning of metricbeat agent"
+			Write-log -MessageData "tunning of metricbeat agent" -InformationAction Continue
 
 			# Collect current IP address
 			$IPaddress = Get-WmiObject -class Win32_NetworkAdapterConfiguration -Filter "IpEnabled = 'True' " | Where-Object {$_.DefaultIPGateway -ne $null} | Select-Object -ExpandProperty IPaddress | Select-Object -First 1
@@ -257,10 +258,15 @@ foreach ($Beattoinstall in $Beatstoinstall) {
 				1036 { 
 					#Case French
 					$modules = $AgentDetail.modules_fr
+					Write-log -MessageData "Language $OSLanguage" -InformationAction Continue
+					Write-Verbose -Message "Language $OSLanguage"
 				}
 				Default {
 					#Default English
 					$modules = $AgentDetail.modules_en
+					Write-log -MessageData "Language $OSLanguage" -InformationAction Continue
+					Write-Verbose -Message "Language $OSLanguage"
+				
 				}
 			}
 			# Loop to download all rgm dedicated module for metricbeat to the module.d folder
@@ -269,6 +275,7 @@ foreach ($Beattoinstall in $Beatstoinstall) {
 				$BeatConfRGMLink = "https://$RGMServer/distrib/conf/modules/$module"
 				$BeatDestFileName = $module -replace ("windows_")
 				$BeatConfPath = $AgentfolderPath + "\modules.d\" + $BeatDestFileName
+				Write-Verbose -Message "Download $BeatConfRGMLink to $BeatConfPath"
 				(New-Object System.Net.WebClient).DownloadFile($BeatConfRGMLink, $BeatConfPath)
 			}
 
