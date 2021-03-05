@@ -271,7 +271,7 @@ foreach ($Beattoinstall in $Beatstoinstall) {
 			}
 			# Loop to download all rgm dedicated module for metricbeat to the module.d folder
 			Write-Verbose -Message "Inject RGM modules"
-			foreach ($module in $modules ) {
+			foreach ($module in $modules) {
 				$BeatConfRGMLink = "https://$RGMServer/distrib/conf/modules/$module"
 				$BeatDestFileName = $module -replace ("windows_")
 				$BeatConfPath = $AgentfolderPath + "\modules.d\" + $BeatDestFileName
