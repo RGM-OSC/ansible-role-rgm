@@ -292,7 +292,8 @@ oneliner_items:
   - windows_heartbeat.yml
   - windows_winlogbeat.yml
   modules_files:
-  - windows_rgm-system-core.yml
+  - windows_rgm-system-core-en.yml
+  - windows_rgm-system-core-fr.yml
   - windows_rgm-system-fs.yml
   - windows_rgm-system-uptime.yml
   upstream_files:

@@ -40,7 +40,8 @@ $AgentsDetails =
 		"agent": "metricbeat",
 		"servicename": "metricbeat",
 		"foldername": "MetricBeat",
-		"modules": ["windows_rgm-system-core.yml","windows_rgm-system-fs.yml","windows_rgm-system-uptime.yml"]
+		"modules_en": ["windows_rgm-system-core-en.yml","windows_rgm-system-fs.yml","windows_rgm-system-uptime.yml"],
+		"modules_fr": ["windows_rgm-system-core-fr.yml","windows_rgm-system-fs.yml","windows_rgm-system-uptime.yml"]
     },
     {
         "agent": "winlogbeat",
@@ -250,9 +251,21 @@ foreach ($Beattoinstall in $Beatstoinstall) {
 			Set-Content -Path $ConfigurationFilePath -Value $ConfigurationFileContent
 
 			# Rgm module adjustement
+			# Test language to push the good version
+			$OSLanguage = (GET-WinSystemLocale).LCID
+			switch ($OSLanguage) {
+				1036 { 
+					#Case French
+					$modules = $AgentDetail.modules_fr
+				}
+				Default {
+					#Default English
+					$modules = $AgentDetail.modules_en
+				}
+			}
 			# Loop to download all rgm dedicated module for metricbeat to the module.d folder
 			Write-Verbose -Message "Inject RGM modules"
-			foreach ($module in $AgentDetail.modules) {
+			foreach ($module in $modules ) {
 				$BeatConfRGMLink = "https://$RGMServer/distrib/conf/modules/$module"
 				$BeatDestFileName = $module -replace ("windows_")
 				$BeatConfPath = $AgentfolderPath + "\modules.d\" + $BeatDestFileName
