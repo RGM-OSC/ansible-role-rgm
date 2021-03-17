@@ -68,6 +68,7 @@ packages_influx_grafana:
 - histou
 - grafana
 - nodejs
+- grafana-dashboards
 
 packages_rgm:
 - python-dateutil

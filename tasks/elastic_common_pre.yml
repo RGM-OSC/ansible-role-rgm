@@ -11,10 +11,18 @@
     name: "{{ packages_elastic }}"
     state: present
 
-- name: force la suppression du sto ES
-  file:
-    path: /var/lib/elasticsearch/nodes
-    state: absent
+- block:
+
+  - name: ensure elasticsearch is enabled and started
+    systemd:
+      name: elasticsearch
+      state: stopped
+
+  - name: force la suppression du sto ES
+    file:
+      path: /var/lib/elasticsearch/nodes
+      state: absent
+
   when: force_delete_es is defined and force_delete_es
 
 - name: verifie l'existence du group RGM

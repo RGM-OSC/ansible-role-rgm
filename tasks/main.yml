@@ -49,6 +49,13 @@
   - stat_rgm_business_key.stat.exists
   tags: always
 
+# override_rhsm
+- name: override RHSM to exclude RGM packages also provided by EPEL
+  command: "subscription-manager repo-override --repo={{ rhsm_epel_repo }} --add='exclude:nagios* elasticsearch* metricbeat* kibana* grafana* influxdb* snmptt"
+  when:
+  - rhsm_epel_repo is defined
+  - rhsm_epel_repo | length > 0
+
 # As nagios 4 is present in EPEL repo, disable nagios from EPEL
 - name: exclude nagios from EPEL repo
   ini_file:
