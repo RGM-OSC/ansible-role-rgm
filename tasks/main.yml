@@ -51,7 +51,7 @@
 
 # override_rhsm
 - name: override RHSM to exclude RGM packages also provided by EPEL
-  command: "subscription-manager repo-override --repo={{ rhsm_epel_repo }} --add='exclude:nagios* elasticsearch* metricbeat* kibana* grafana* influxdb* snmptt"
+  command: "subscription-manager repo-override --repo={{ rhsm_epel_repo }} --add='exclude:nagios* elasticsearch* metricbeat* kibana* grafana* influxdb* snmptt'"
   when:
   - rhsm_epel_repo is defined
   - rhsm_epel_repo | length > 0
@@ -69,9 +69,6 @@
   - epel-source
   register: update_epel_repo
   tags: packages
-
-- name: install "rawhide" RGM repositories if requested
-  when: enable_rawhide
 
 - name: update RGM repositories if required
   yum_repository:
