@@ -153,4 +153,4 @@
   when: granafa_sql_procs.changed
 
 - name: Set 'Multi-System metrics' as default dashboard
-  command: "/etc/grafana/grafana_default_dash.sh 'Multi-System metrics'"
+  command: "/etc/grafana/grafana_default_dash.sh -d -b 'Multi-System metrics'"
