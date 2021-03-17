@@ -36,51 +36,52 @@
 
 ## apache configuration
 
-- name: set Apache root path
-  lineinfile:
-    path: /etc/httpd/conf/httpd.conf
-    regexp: '^DocumentRoot'
-    line: "DocumentRoot \"{{ rgm_root_path }}/rgmweb\""
-  notify: service_reload_http
+- name: list enabled httpd configs
+  find:
+    path: /etc/httpd/conf.d
+    patterns: '*.conf'
+  register: find_httpd_conf_d
 
-- name: test if original SSL configuration file exists
+- name: ensure default httpd config files are disabled
+  command: "mv {{ http_conf.path }} {{ http_conf.path }}.distrib"
+  loop: "{{ find_httpd_conf_d.files }}"
+  loop_control:
+    loop_var: http_conf
+  when:
+  - find_httpd_conf_d.matched > 0
+  - http_conf.path | basename in apache_httpd_default_conf_to_disable
+
+- name: test if original fcgid.conf file exists
   stat:
-    path: /etc/httpd/conf.d/ssl.conf
-  register: stat_ssl_conf
+    path: /etc/httpd/conf.d/fcgid.conf
+  register: stat_fcgid_conf
 
-- block:
-  - name: backup ssl.conf original (distrib) file
-    copy:
-      remote_src: yes
-      force: no
-      src: /etc/httpd/conf.d/ssl.conf
-      dest: /etc/httpd/conf.d/ssl.conf.distrib
-  - name: remove ssl.conf original file
-    file:
-      path: /etc/httpd/conf.d/ssl.conf
-      state: absent
-  when: stat_ssl_conf.stat.exists
+- name: move fcgid.conf to 01_fcgid.conf
+  command: mv /etc/httpd/conf.d/fcgid.conf /etc/httpd/conf.d/01_fcgid.conf
+  when: stat_fcgid_conf.stat.exists
 
 - name: Install RGM httpd config files
   template:
-    src: "httpd/{{ item }}.conf.j2"
-    dest: "/etc/httpd/conf.d/{{ item }}.conf"
+    src: "httpd/{{ item.src }}.j2"
+    dest: "/etc/httpd/conf.d/{{ item.dst }}"
     owner: root
     group: root
     mode: 0644
   with_items:
-  - 00_hardening
-  - 01_ssl
-  - 10_rgm
-  - 11_rgmapi
-  - 11_distrib
-  - 15_grafana
-  - 15_elasticsearch
-  - 15_kibana
-  - 15_nrdp
-  - 15_prometheus
-  - 15_rgma
+  - { src: '00_hardening.conf',  dst: '00_hardening.conf'}
+  - { src: 'ssl.conf',           dst: '10_ssl.conf'}
+  - { src: 'zz_elastic_hq.conf', dst: 'zz_elastic_hq.conf.disabled'}
   notify: service_reload_http
+
+
+#ged_rss.conf
+#histou.conf
+#nagios.conf
+#perl.conf
+#php.conf
+#thruk.conf
+
+
 
 ## restart apache now as we'll use RGM API later on role
 - name: flush handlers

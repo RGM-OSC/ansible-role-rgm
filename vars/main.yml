@@ -42,7 +42,6 @@ packages_mariadb:
 
 packages_apache:
 - httpd
-- mod_auth_rgm
 - mod_perl
 - mod_ssl
 - mod_fcgid
@@ -257,6 +256,42 @@ rgm_repositories:
     gpgcheck: true
     gpgkey: "file://{{ rgm_gpg_key }}"
 
+rgm_repositories_rawhide:
+  rgm-community-base-rawhide:
+    description: RGM Community - Base - rawhide
+    baseurl: https://community.repo.rgm-cloud.io/rawhide/latest/os/x86_64/
+    enabled: true
+    sslverify: false
+    cache: false
+    gpgcheck: true
+    gpgkey: "file://{{ rgm_gpg_key }}"
+  rgm-community-updates-rawhide:
+    description: RGM Community - Updates - rawhide
+    baseurl: https://community.repo.rgm-cloud.io/rawhide/latest/updates/x86_64/
+    enabled: true
+    sslverify: false
+    cache: false
+    gpgcheck: true
+    gpgkey: "file://{{ rgm_gpg_key }}"
+  rgm-business-base-rawhide:
+    description: RGM Business Base Repository - rawhide
+    baseurl: https://business.repo.rgm-cloud.io/rawhide/latest/os/x86_64/
+    enabled: "{{ enable_rgm_repo_business }}"
+    gpgcheck: true
+    gpgkey: "file://{{ rgm_gpg_key }}"
+    sslverify: true
+    sslclientcert: "/etc/pki/tls/certs/{{ rgm_business_registration_id }}.crt"
+    sslclientkey: "/etc/pki/tls/private/{{ rgm_business_registration_id }}.key"
+  rgm-business-updates-rawhide:
+    description: RGM Business Updates Repository - rawhide
+    baseurl: https://business.repo.rgm-cloud.io/rawhide/latest/updates/x86_64/
+    enabled: "{{ enable_rgm_repo_business }}"
+    gpgcheck: true
+    gpgkey: "file://{{ rgm_gpg_key }}"
+    sslverify: true
+    sslclientcert: "/etc/pki/tls/certs/{{ rgm_business_registration_id }}.crt"
+    sslclientkey: "/etc/pki/tls/private/{{ rgm_business_registration_id }}.key"
+
 
 #### rgmweb 'deploy' section
 
@@ -324,8 +359,8 @@ oneliner_items:
   - linux_rgm-system-fs.yml
   - linux_rgm-system-uptime.yml
   upstream_files:
-  - "{{ rgm_repositories['rgm-community-updates']['baseurl'] | regex_replace('\\/$', '') }}/Packages/metricbeat-oss-7.10.2-x86_64.rpm"
-  - https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-oss-7.10.2-amd64.deb
+  - "{{ rgm_repositories_rawhide['rgm-community-updates-rawhide']['baseurl'] | regex_replace('\\/$', '') }}/Packages/metricbeat-oss-7.10.2-x86_64.rpm"
+  #- https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-oss-7.10.2-amd64.deb
   re_pattern: '^.*\/(?P<prefix>\w+-oss-).*(?P<suffix>-(x86_|amd)64.+)$'
   re_replace: '\g<prefix>latest\g<suffix>'
 
@@ -352,3 +387,10 @@ oneliner_items:
 #  re_replace: '\g<prefix>latest\g<suffix>'
 
 es_group: elasticsearch
+
+
+apache_httpd_default_conf_to_disable:
+- autoindex.conf
+- userdir.conf
+- welcome.conf
+- ssl.conf

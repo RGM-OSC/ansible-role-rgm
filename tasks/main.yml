@@ -51,7 +51,7 @@
 
 # override_rhsm
 - name: override RHSM to exclude RGM packages also provided by EPEL
-  command: "subscription-manager repo-override --repo={{ rhsm_epel_repo }} --add='exclude:nagios* elasticsearch* metricbeat* kibana* grafana* influxdb* snmptt"
+  command: "subscription-manager repo-override --repo={{ rhsm_epel_repo }} --add='exclude:nagios* elasticsearch* metricbeat* kibana* grafana* influxdb* snmptt'"
   when:
   - rhsm_epel_repo is defined
   - rhsm_epel_repo | length > 0
@@ -86,6 +86,22 @@
   loop: "{{ rgm_repositories | dict2items }}"
   register: update_rgm_repo
   tags: always
+
+- name: install "rawhide" RGM repositories if requested
+  yum_repository:
+    name: "{{ item.key }}"
+    description: "{{ item['value']['description'] }}"
+    file: rgm-rawhide
+    baseurl: "{{ item['value']['baseurl'] }}"
+    gpgcheck: "{{ item['value']['gpgcheck'] }}"
+    enabled: "{{ item['value']['enabled'] }}"
+    keepcache: "{{ item['value']['cache'] | default(false)}}"
+    gpgkey: "{{ item['value']['gpgkey'] | default('file://' + rgm_gpg_key) }}"
+    sslverify: "{{ item['value']['sslverify'] | default(omit) }}"
+    sslclientcert: "{{ item['value']['sslclientcert'] | default(omit) }}"
+    sslclientkey: "{{ item['value']['sslclientkey'] | default(omit) }}"
+  loop: "{{ rgm_repositories_rawhide | dict2items }}"
+  when: enable_rawhide
 
 - name: force yum clean & make cache
   command: yum clean all
