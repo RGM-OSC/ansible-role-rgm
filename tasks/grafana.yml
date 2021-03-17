@@ -26,8 +26,9 @@
     group: root
     mode: "{{ item.mode }}"
   with_items:
-  - { mode: '0644', src: grafana/grafana_icon.svg, dest: /usr/share/grafana/public/img/grafana_icon.svg }
-  - { mode: '0744', src: grafana/grafana_rgm.sh,   dest: /etc/grafana/grafana_rgm.sh }
+  - { mode: '0644', src: grafana/grafana_icon.svg,        dest: /usr/share/grafana/public/img/grafana_icon.svg }
+  - { mode: '0740', src: grafana/grafana_rgm.sh,          dest: /etc/grafana/grafana_rgm.sh }
+  - { mode: '0740', src: grafana/grafana_default_dash.sh, dest: /etc/grafana/grafana_default_dash.sh }
 
 - name: apply patches to align Grafana theme on RGM theme
   command: /etc/grafana/grafana_rgm.sh
@@ -95,29 +96,6 @@
   - { src: rgm_ds.yml.j2,   dest: datasources/rgm_ds.yaml }
   - { src: rgm_dash.yml.j2, dest: dashboards/rgm_dash.yaml }
 
-- name: install grafana dash templates
-  copy:
-    src: "grafana/{{ item }}"
-    dest: "{{ grafana_rgm_dashboards }}/{{ item }}"
-    owner: root
-    group: grafana
-    mode: 0640
-  with_items:
-  - 4any-k8s-monitoring.json
-  - active_directory_dns.json
-  - apache.json
-  - azure_compute.json
-  - azure_storage.json
-  - cadvisor_containers_nodes.json
-  - elasticsearch_cluster.json
-  - influxdb_internals.json
-  - multi-system-metrics.json
-  - mysql_percona.json
-  - nutanix.json
-  - prometheus_node_exporter.json
-  - prometheus_service.json
-  - vmware_stats.json
-
 - name: ensure grafana service is running
   systemd:
     name: grafana-server
@@ -174,24 +152,5 @@
   failed_when: granafa_sql_exec.rc == 2
   when: granafa_sql_procs.changed
 
-- name: retrieve id for 'Multi-System metrics' Grafana dashboard
-  community.mysql.mysql_query:
-    login_db: grafana
-    query: SELECT id FROM dashboard WHERE title = 'Multi-System metrics'
-  register: grafana_default_dash_id
-
-- debug:
-    var: grafana_default_dash_id
-
 - name: Set 'Multi-System metrics' as default dashboard
-  community.mysql.mysql_query:
-    login_db: grafana
-    query:
-      - INSERT INTO star (user_id, dashboard_id) VALUES (1, %(id_graph)s)
-      - INSERT INTO preferences (org_id,user_id,home_dashboard_id,created,updated,team_id) VALUES (1,0,%(id_graph)s,%(date)s,%(date)s,0)
-    named_args:
-      id_graph: "{{ grafana_default_dash_id.query_result[0][0].id }}"
-      date: 'now()'
-  when: grafana_default_dash_id.rowcount[0] == 1
-
-  
+  command: "/etc/grafana/grafana_default_dash.sh 'Multi-System metrics'"
