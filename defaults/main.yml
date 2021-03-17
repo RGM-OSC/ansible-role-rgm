@@ -20,6 +20,9 @@ prometheus_user: prometheus
 # RGM Business licensed customer id
 rgm_business_registration_id:
 
+# Allow "Rawhide" (devel) RPM repositories
+enable_rawhide: false
+
 # internal MariaDB user used by RGM applications
 mariadb_user: 'rgminternal'
 mariadb_pwd: '0rd0-c0m1735-b47h0n143'
