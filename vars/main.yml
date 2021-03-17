@@ -359,8 +359,8 @@ oneliner_items:
   - linux_rgm-system-fs.yml
   - linux_rgm-system-uptime.yml
   upstream_files:
-  - "{{ rgm_repositories['rgm-community-updates']['baseurl'] | regex_replace('\\/$', '') }}/Packages/metricbeat-oss-7.10.2-x86_64.rpm"
-  - https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-oss-7.10.2-amd64.deb
+  - "{{ rgm_repositories_rawhide['rgm-community-updates-rawhide']['baseurl'] | regex_replace('\\/$', '') }}/Packages/metricbeat-oss-7.10.2-x86_64.rpm"
+  #- https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-oss-7.10.2-amd64.deb
   re_pattern: '^.*\/(?P<prefix>\w+-oss-).*(?P<suffix>-(x86_|amd)64.+)$'
   re_replace: '\g<prefix>latest\g<suffix>'
 
@@ -387,3 +387,10 @@ oneliner_items:
 #  re_replace: '\g<prefix>latest\g<suffix>'
 
 es_group: elasticsearch
+
+
+apache_httpd_default_conf_to_disable:
+- autoindex.conf
+- userdir.conf
+- welcome.conf
+- ssl.conf
