@@ -85,7 +85,6 @@
     mode: 0640
   with_items:
   - { src: rgm_ds.yml.j2,   dest: datasources/rgm_ds.yaml }
-  - { src: rgm_dash.yml.j2, dest: dashboards/rgm_dash.yaml }
 
 - name: ensure grafana service is running
   systemd:
