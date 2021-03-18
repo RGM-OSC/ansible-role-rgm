@@ -10,14 +10,6 @@
     name: "{{ packages_influx_grafana }}"
     state: present
 
-- name: creates Grafana RGM dashboards directory
-  file:
-    path: "{{ grafana_rgm_dashboards }}"
-    owner: grafana
-    group: "{{ rgm_group }}"
-    mode: 0755
-    state: directory
-
 - name: copy grafana patches
   copy:
     src: "{{ item.src }}"
@@ -152,5 +144,5 @@
   failed_when: granafa_sql_exec.rc == 2
   when: granafa_sql_procs.changed
 
-- name: Set 'Multi-System metrics' as default dashboard
-  command: "/etc/grafana/grafana_default_dash.sh -d -b 'Multi-System metrics'"
+- name: Set 'Multi-System metrics' as default dashboard for admin user
+  command: "/srv/rgm/grafana/scripts/grafana_star.sh -b 'Multi-System metrics' -u 'admin' -d"

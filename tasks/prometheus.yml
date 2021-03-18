@@ -28,6 +28,7 @@
     group: root
     state: link
 
+# FIXME : packager influxdb_exporter, ou mieux, voir si ça a été backporter dans influxdb lui-même...
 - name: get Prometheus InfluxDB exporter from Github
   get_url:
     url: https://github.com/carlpett/influxdb_stats_exporter/releases/download/v0.1.1/influx_stats_exporter_linux_amd64
