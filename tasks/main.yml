@@ -167,14 +167,15 @@
 
 - name: configure firewalld services
   firewalld:
-    service: "{{ item }}"
+    service: "{{ item.srv }}"
     permanent: yes
-    state: enabled
+    state: "{{ item.state }}"
   with_items:
-  - snmp
-  - ssh
-  - http
-  - https
+  - { srv: 'snmp',          state: 'enabled' }
+  - { srv: 'ssh',           state: 'enabled' }
+  - { srv: 'http',          state: 'enabled' }
+  - { srv: 'https',         state: 'enabled' }
+  - { srv: 'dhcpv6-client', state: 'disabled' }
   notify: service_restart_firewalld
 
 - name: configure firewalld explicit ports
