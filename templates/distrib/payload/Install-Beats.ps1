@@ -40,7 +40,7 @@ $AgentsDetails =
 		"agent": "metricbeat",
 		"servicename": "metricbeat",
 		"foldername": "MetricBeat",
-		"modules_en": ["windows_rgm-system-core-en.yml","windows_rgm-system-fs.yml","windows_rgm-system-uptime.yml"],
+		"modules_en": ["windows_rgm-system-core.yml","windows_rgm-system-fs.yml","windows_rgm-system-uptime.yml"],
 		"modules_fr": ["windows_rgm-system-core-fr.yml","windows_rgm-system-fs.yml","windows_rgm-system-uptime.yml"]
     },
     {
@@ -253,22 +253,23 @@ foreach ($Beattoinstall in $Beatstoinstall) {
 
 			# Rgm module adjustement
 			# Test language to push the good version
-			$OSLanguage = (GET-WinSystemLocale).LCID
-			switch ($OSLanguage) {
-				1036 { 
-					#Case French
-					$modules = $AgentDetail.modules_fr
-					Write-log -MessageData "Language $OSLanguage" -InformationAction Continue
-					Write-Verbose -Message "Language $OSLanguage"
-				}
-				Default {
-					#Default English
+		## Disable Language mode no more necessary with Metric beat 7.10.2 procmon module refactoring 
+			# $OSLanguage = (Get-WmiObject -class Win32_OperatingSystem).OSLanguage
+			# switch ($OSLanguage) {
+			# 	1036 { 
+			# 		#Case French
+			# 		$modules = $AgentDetail.modules_fr
+			# 		Write-log -MessageData "Language $OSLanguage" -InformationAction Continue
+			# 		Write-Verbose -Message "Language $OSLanguage"
+			# 	}
+			# 	Default {
+			# 		#Default English
 					$modules = $AgentDetail.modules_en
-					Write-log -MessageData "Language $OSLanguage" -InformationAction Continue
-					Write-Verbose -Message "Language $OSLanguage"
-				
-				}
-			}
+			# 		Write-log -MessageData "Language $OSLanguage" -InformationAction Continue
+			# 		Write-Verbose -Message "Language $OSLanguage"
+			# 	}
+			# }
+
 			# Loop to download all rgm dedicated module for metricbeat to the module.d folder
 			Write-Verbose -Message "Inject RGM modules"
 			foreach ($module in $modules) {
