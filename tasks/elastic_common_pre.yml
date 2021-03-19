@@ -135,10 +135,13 @@
     regexp: "{{ item.regex }}"
     line: "{{ item.line }}"
   with_items:
-  - { regex: '^(#\s*)?server.port',              line: 'server.port: 5601' }
-  - { regex: '^(#\s*)?server.host',              line: 'server.host: "localhost"' }
-  - { regex: '^(#\s*)?server.basePath',          line: 'server.basePath: "/kibana"' }
-  - { regex: '^(#\s*)?server.rewriteBasePath',   line: 'server.rewriteBasePath: true' }
+  - { regex: '^(#\s*)?server.port',                         line: 'server.port: 5601' }
+  - { regex: '^(#\s*)?server.host',                         line: 'server.host: "localhost"' }
+  - { regex: '^(#\s*)?server.basePath',                     line: 'server.basePath: "/kibana"' }
+  - { regex: '^(#\s*)?server.rewriteBasePath',              line: 'server.rewriteBasePath: true' }
+  - { regex: '^(#\s*)?kibana.defaultAppId',                 line: 'kibana.defaultAppId: "discover"' }
+  - { regex: '^(#\s*)?newsfeed.enabled',                    line: ''newsfeed.enabled: false' }
+  - { regex: '^(#\s*)?security.showInsecureClusterWarning', line: 'security.showInsecureClusterWarning: false' }
   notify: service_restart_kibana
 
 
