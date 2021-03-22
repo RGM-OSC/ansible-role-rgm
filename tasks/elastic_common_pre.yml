@@ -140,7 +140,7 @@
   - { regex: '^(#\s*)?server.basePath',                     line: 'server.basePath: "/kibana"' }
   - { regex: '^(#\s*)?server.rewriteBasePath',              line: 'server.rewriteBasePath: true' }
   - { regex: '^(#\s*)?kibana.defaultAppId',                 line: 'kibana.defaultAppId: "discover"' }
-  - { regex: '^(#\s*)?newsfeed.enabled',                    line: ''newsfeed.enabled: false' }
+  - { regex: '^(#\s*)?newsfeed.enabled',                    line: 'newsfeed.enabled: false' }
   - { regex: '^(#\s*)?security.showInsecureClusterWarning', line: 'security.showInsecureClusterWarning: false' }
   notify: service_restart_kibana
 
