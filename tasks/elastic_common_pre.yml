@@ -11,10 +11,18 @@
     name: "{{ packages_elastic }}"
     state: present
 
-- name: force la suppression du sto ES
-  file:
-    path: /var/lib/elasticsearch/nodes
-    state: absent
+- block:
+
+  - name: ensure elasticsearch is enabled and started
+    systemd:
+      name: elasticsearch
+      state: stopped
+
+  - name: force la suppression du sto ES
+    file:
+      path: /var/lib/elasticsearch/nodes
+      state: absent
+
   when: force_delete_es is defined and force_delete_es
 
 - name: verifie l'existence du group RGM
@@ -52,22 +60,46 @@
     line: "{{ item.line }}"
     insertafter: "{{ item.after }}"
   with_items:
-  - { regex: '^-Xms\\d+$',                                            line: "-Xms{{ jvmheapsize }}g",                            after: 'EOF' }
-  - { regex: '^-Xmx\\d+$',                                            line: "-Xmx{{ jvmheapsize }}g",                            after: 'EOF' }
+  - { regex: '^-Xms\d+\w$',                                           line: "-Xms{{ jvmheapsize }}g",                            after: 'EOF' }
+  - { regex: '^-Xmx\d+\w$',                                           line: "-Xmx{{ jvmheapsize }}g",                            after: 'EOF' }
   - { regex: '^.*-XX:\+UseConcMarkSweepGC$',                          line: '# -XX:+UseConcMarkSweepGC',                         after: 'EOF' }
-  - { regex: '^.*-XX:CMSInitiatingOccupancyFraction=\\d+$',           line: '# -XX:CMSInitiatingOccupancyFraction=75',           after: 'EOF' }
+  - { regex: '^.*-XX:CMSInitiatingOccupancyFraction=\d+$',            line: '# -XX:CMSInitiatingOccupancyFraction=75',           after: 'EOF' }
   - { regex: '^.*-XX:\+UseCMSInitiatingOccupancyOnly$',               line: '# -XX:+UseCMSInitiatingOccupancyOnly',              after: 'EOF' }
   - { regex: '^.*10-:-XX:\+UseG1GC$',                                 line: '10-:-XX:+UseG1GC',                                  after: '^#+ G1GC Configuration$' }
-  - { regex: '^.*10-:-XX:G1ReservePercent=\\d+$',                     line: '10-:-XX:G1ReservePercent=25',                       after: '^.*-XX:\+UseG1GC$' }
-  - { regex: '^.*10-:-XX:InitiatingHeapOccupancyPercent=\\d+$',       line: '10-:-XX:InitiatingHeapOccupancyPercent=30',         after: '^.*-XX:\+UseG1GC$' }
+  - { regex: '^.*10-:-XX:G1ReservePercent=\d+$',                      line: '10-:-XX:G1ReservePercent=25',                       after: '^.*-XX:\+UseG1GC$' }
+  - { regex: '^.*10-:-XX:InitiatingHeapOccupancyPercent=\d+$',        line: '10-:-XX:InitiatingHeapOccupancyPercent=30',         after: '^.*-XX:\+UseG1GC$' }
   - { regex: '^# JMX',                                                line: '# JMX',                                             after: 'EOF' }
   - { regex: '^.*-Dcom.sun.management.jmxremote$',                    line: '-Dcom.sun.management.jmxremote',                    after: '^# JMX$' }
-  - { regex: '^.*-Dcom.sun.management.jmxremote.port=\\d+$',          line: '-Dcom.sun.management.jmxremote.port=10001',         after: '^-Dcom.sun.management.jmxremote.*$' }
-  - { regex: '^.*-Dcom.sun.management.jmxremote.rmi.port=\\d+$',      line: '-Dcom.sun.management.jmxremote.rmi.port=10002',     after: '^-Dcom.sun.management.jmxremote.*$' }
+  - { regex: '^.*-Dcom.sun.management.jmxremote.port=\d+$',           line: '-Dcom.sun.management.jmxremote.port=10001',         after: '^-Dcom.sun.management.jmxremote.*$' }
+  - { regex: '^.*-Dcom.sun.management.jmxremote.rmi.port=\d+$',       line: '-Dcom.sun.management.jmxremote.rmi.port=10002',     after: '^-Dcom.sun.management.jmxremote.*$' }
   - { regex: '^.*-Dcom.sun.management.jmxremote.ssl=false$',          line: '-Dcom.sun.management.jmxremote.ssl=false',          after: '^-Dcom.sun.management.jmxremote.*$' }
   - { regex: '^.*-Dcom.sun.management.jmxremote.authenticate=false$', line: '-Dcom.sun.management.jmxremote.authenticate=false', after: '^-Dcom.sun.management.jmxremote.*$' }
   register: elasticsearch_conf_jvm
   notify: service_restart_elasticsearch
+
+- name: set Elasticsearch's log4j configuration
+  lineinfile:
+    path: /etc/elasticsearch/log4j2.properties
+    regexp: "{{ item.regex }}"
+    line: "{{ item.line }}"
+    insertafter: '^appender.deprecation_rolling_old.strategy.max.*'
+    backrefs: "{{ item.br | default('no') }}"
+  with_items:
+  - { regex: '^appender.deprecation_rolling_old.regexfilter.onmatch =.*$',            line: 'appender.deprecation_rolling_old.regexfilter.onmatch = DENY' }
+  - { regex: '^appender.deprecation_rolling_old.regexfilter.regex =.*$',              line: 'appender.deprecation_rolling_old.regexfilter.regex = .*\\[\\.kibana_\\d+\\].*' }
+  - { regex: '^appender.deprecation_rolling_old.regexfilter.type =.*$',               line: 'appender.deprecation_rolling_old.regexfilter.type = RegexFilter' }
+  - { regex: '^(#\s*?)?(logger.deprecation.appenderRef.deprecation_rolling.ref\s*=.*)$', line: '#\2', br: 'yes' }
+
+- name: ensure ES data path is owned by elasticsearch user
+  file:
+    path: /var/lib/elasticsearch
+    recurse: yes
+    owner: elasticsearch
+    group: elasticsearch
+    seuser: system_u
+    serole: object_r
+    setype: var_lib_t
+    selevel: s0
 
 - name: ensure elasticsearch is enabled and started
   systemd:
@@ -88,7 +120,7 @@
 
 - name: set cron job for curator
   copy:
-    content: "10 0 * * * root /usr/bin/curator --config /etc/elasticsearch/curator.yml /etc/elasticsearch/actions.yml &> /dev/null"
+    content: "10 0 * * * root /usr/bin/curator --config /etc/elasticsearch/curator.yml /etc/elasticsearch/actions.yml > /dev/null"
     dest: /etc/cron.d/elastic_curator
     owner: root
     group: root
@@ -103,10 +135,13 @@
     regexp: "{{ item.regex }}"
     line: "{{ item.line }}"
   with_items:
-  - { regex: '^(#\s*)?server.port',              line: 'server.port: 5601' }
-  - { regex: '^(#\s*)?server.host',              line: 'server.host: "localhost"' }
-  - { regex: '^(#\s*)?server.basePath',          line: 'server.basePath: "/kibana"' }
-  - { regex: '^(#\s*)?server.rewriteBasePath',   line: 'server.rewriteBasePath: true' }
+  - { regex: '^(#\s*)?server.port',                         line: 'server.port: 5601' }
+  - { regex: '^(#\s*)?server.host',                         line: 'server.host: "localhost"' }
+  - { regex: '^(#\s*)?server.basePath',                     line: 'server.basePath: "/kibana"' }
+  - { regex: '^(#\s*)?server.rewriteBasePath',              line: 'server.rewriteBasePath: true' }
+  - { regex: '^(#\s*)?kibana.defaultAppId',                 line: 'kibana.defaultAppId: "discover"' }
+  - { regex: '^(#\s*)?newsfeed.enabled',                    line: 'newsfeed.enabled: false' }
+  - { regex: '^(#\s*)?security.showInsecureClusterWarning', line: 'security.showInsecureClusterWarning: false' }
   notify: service_restart_kibana
 
 

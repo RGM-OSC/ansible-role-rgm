@@ -49,6 +49,13 @@
   - stat_rgm_business_key.stat.exists
   tags: always
 
+# override_rhsm
+- name: override RHSM to exclude RGM packages also provided by EPEL
+  command: "subscription-manager repo-override --repo={{ rhsm_epel_repo }} --add='exclude:nagios* elasticsearch* metricbeat* kibana* grafana* influxdb* snmptt'"
+  when:
+  - rhsm_epel_repo is defined
+  - rhsm_epel_repo | length > 0
+
 # As nagios 4 is present in EPEL repo, disable nagios from EPEL
 - name: exclude nagios from EPEL repo
   ini_file:
@@ -79,6 +86,22 @@
   loop: "{{ rgm_repositories | dict2items }}"
   register: update_rgm_repo
   tags: always
+
+- name: install "rawhide" RGM repositories if requested
+  yum_repository:
+    name: "{{ item.key }}"
+    description: "{{ item['value']['description'] }}"
+    file: rgm-rawhide
+    baseurl: "{{ item['value']['baseurl'] }}"
+    gpgcheck: "{{ item['value']['gpgcheck'] }}"
+    enabled: "{{ item['value']['enabled'] }}"
+    keepcache: "{{ item['value']['cache'] | default(false)}}"
+    gpgkey: "{{ item['value']['gpgkey'] | default('file://' + rgm_gpg_key) }}"
+    sslverify: "{{ item['value']['sslverify'] | default(omit) }}"
+    sslclientcert: "{{ item['value']['sslclientcert'] | default(omit) }}"
+    sslclientkey: "{{ item['value']['sslclientkey'] | default(omit) }}"
+  loop: "{{ rgm_repositories_rawhide | dict2items }}"
+  when: enable_rawhide
 
 - name: force yum clean & make cache
   command: yum clean all
@@ -144,14 +167,15 @@
 
 - name: configure firewalld services
   firewalld:
-    service: "{{ item }}"
+    service: "{{ item.srv }}"
     permanent: yes
-    state: enabled
+    state: "{{ item.state }}"
   with_items:
-  - snmp
-  - ssh
-  - http
-  - https
+  - { srv: 'snmp',          state: 'enabled' }
+  - { srv: 'ssh',           state: 'enabled' }
+  - { srv: 'http',          state: 'enabled' }
+  - { srv: 'https',         state: 'enabled' }
+  - { srv: 'dhcpv6-client', state: 'disabled' }
   notify: service_restart_firewalld
 
 - name: configure firewalld explicit ports

@@ -4,10 +4,11 @@
 apiVersion: 1
 
 datasources:
-- name: Nagflux
+- name: nagflux
   type: influxdb
   access: proxy
   orgId: 1
+  uid: 'rgm-ds-nagflux'
   url: http://localhost:8086
   password: '{{ mariadb_pwd }}'
   user: '{{ mariadb_user }}'
@@ -17,12 +18,13 @@ datasources:
   basicAuthPassword:
   withCredentials:
   isDefault: true
-  version: 2
+  version: 1
   editable: false
 - name: Elasticsearch
   type: elasticsearch
   access: proxy
   orgId: 1
+  uid: 'rgm-ds-es'
   url: http://localhost:9200
   database: 'metricbeat-*'
   basicAuth: false
@@ -34,18 +36,19 @@ datasources:
     #logMessageField:
     maxConcurrentShardRequests: 5
     timeField: '@timestamp'
-  version: 2
+  version: 1
   editable: false
 - name: Prometheus
   type: prometheus
   access: proxy
   orgId: 1
+  uid: 'rgm-ds-prom'
   url: http://localhost:9090/prometheus
   database: ''
   basicAuth: false
   isDefault: false
-  version: 1
-  editable: false
   jsonData:
     httpMethod: GET
     keepCookies: []
+  version: 1
+  editable: false

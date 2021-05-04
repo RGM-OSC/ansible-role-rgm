@@ -1,0 +1,21 @@
+# {{ ansible_managed }}
+# Apache configuration for Elasticsearch-HQ
+
+<Location /elastichq/>
+
+<Location /elastichq/>
+    AuthType Env
+    AuthEnvUser user_name
+    <RequireAny>
+        <RequireAll>
+            Require env user_name
+            Require env session_id
+            Require alias-dbd-tab6
+            Require alias-dbd-update-epoch
+        </RequireAll>
+        Require local
+    </RequireAny>
+
+    ProxyPass http://127.0.0.1:5000/
+    ProxyPassReverse http://127.0.0.1:5000/
+</Location>

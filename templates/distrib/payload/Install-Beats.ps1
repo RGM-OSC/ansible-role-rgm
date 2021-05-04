@@ -40,7 +40,8 @@ $AgentsDetails =
 		"agent": "metricbeat",
 		"servicename": "metricbeat",
 		"foldername": "MetricBeat",
-		"modules": ["windows_rgm-system-core.yml","windows_rgm-system-fs.yml","windows_rgm-system-uptime.yml"]
+		"modules_en": ["windows_rgm-system-core.yml","windows_rgm-system-fs.yml","windows_rgm-system-uptime.yml"],
+		"modules_fr": ["windows_rgm-system-core-fr.yml","windows_rgm-system-fs.yml","windows_rgm-system-uptime.yml"]
     },
     {
         "agent": "winlogbeat",
@@ -237,9 +238,10 @@ foreach ($Beattoinstall in $Beatstoinstall) {
 
 	# Part depending of the agent
 	switch ($AgentName) {
-		metricbeat { 
+		"metricbeat" { 
 			# Dedicated part of the metricbeat agent
 			Write-Verbose -Message "tunning of metricbeat agent"
+			Write-log -MessageData "tunning of metricbeat agent" -InformationAction Continue
 
 			# Collect current IP address
 			$IPaddress = Get-WmiObject -class Win32_NetworkAdapterConfiguration -Filter "IpEnabled = 'True' " | Where-Object {$_.DefaultIPGateway -ne $null} | Select-Object -ExpandProperty IPaddress | Select-Object -First 1
@@ -250,12 +252,31 @@ foreach ($Beattoinstall in $Beatstoinstall) {
 			Set-Content -Path $ConfigurationFilePath -Value $ConfigurationFileContent
 
 			# Rgm module adjustement
+			# Test language to push the good version
+		## Disable Language mode no more necessary with Metric beat 7.10.2 procmon module refactoring 
+			# $OSLanguage = (Get-WmiObject -class Win32_OperatingSystem).OSLanguage
+			# switch ($OSLanguage) {
+			# 	1036 { 
+			# 		#Case French
+			# 		$modules = $AgentDetail.modules_fr
+			# 		Write-log -MessageData "Language $OSLanguage" -InformationAction Continue
+			# 		Write-Verbose -Message "Language $OSLanguage"
+			# 	}
+			# 	Default {
+			# 		#Default English
+					$modules = $AgentDetail.modules_en
+			# 		Write-log -MessageData "Language $OSLanguage" -InformationAction Continue
+			# 		Write-Verbose -Message "Language $OSLanguage"
+			# 	}
+			# }
+
 			# Loop to download all rgm dedicated module for metricbeat to the module.d folder
 			Write-Verbose -Message "Inject RGM modules"
-			foreach ($module in $AgentDetail.modules) {
+			foreach ($module in $modules) {
 				$BeatConfRGMLink = "https://$RGMServer/distrib/conf/modules/$module"
 				$BeatDestFileName = $module -replace ("windows_")
 				$BeatConfPath = $AgentfolderPath + "\modules.d\" + $BeatDestFileName
+				Write-Verbose -Message "Download $BeatConfRGMLink to $BeatConfPath"
 				(New-Object System.Net.WebClient).DownloadFile($BeatConfRGMLink, $BeatConfPath)
 			}
 

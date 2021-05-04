@@ -10,14 +10,6 @@
     name: "{{ packages_influx_grafana }}"
     state: present
 
-- name: creates Grafana RGM dashboards directory
-  file:
-    path: "{{ grafana_rgm_dashboards }}"
-    owner: grafana
-    group: "{{ rgm_group }}"
-    mode: 0755
-    state: directory
-
 - name: copy grafana patches
   copy:
     src: "{{ item.src }}"
@@ -26,8 +18,8 @@
     group: root
     mode: "{{ item.mode }}"
   with_items:
-  - { mode: '0644', src: grafana/grafana_icon.svg, dest: /usr/share/grafana/public/img/grafana_icon.svg }
-  - { mode: '0744', src: grafana/grafana_rgm.sh,   dest: /etc/grafana/grafana_rgm.sh }
+  - { mode: '0644', src: grafana/grafana_icon.svg,        dest: /usr/share/grafana/public/img/grafana_icon.svg }
+  - { mode: '0740', src: grafana/grafana_rgm.sh,          dest: /etc/grafana/grafana_rgm.sh }
 
 - name: apply patches to align Grafana theme on RGM theme
   command: /etc/grafana/grafana_rgm.sh
@@ -93,7 +85,6 @@
     mode: 0640
   with_items:
   - { src: rgm_ds.yml.j2,   dest: datasources/rgm_ds.yaml }
-  - { src: rgm_dash.yml.j2, dest: dashboards/rgm_dash.yaml }
 
 - name: install grafana dash templates
   copy:
@@ -174,24 +165,5 @@
   failed_when: granafa_sql_exec.rc == 2
   when: granafa_sql_procs.changed
 
-- name: retrieve id for 'Multi-System metrics' Grafana dashboard
-  community.mysql.mysql_query:
-    login_db: grafana
-    query: SELECT id FROM dashboard WHERE title = 'Multi-System metrics'
-  register: grafana_default_dash_id
-
-- debug:
-    var: grafana_default_dash_id
-
-- name: Set 'Multi-System metrics' as default dashboard
-  community.mysql.mysql_query:
-    login_db: grafana
-    query:
-      - INSERT INTO star (user_id, dashboard_id) VALUES (1, %(id_graph)s)
-      - INSERT INTO preferences (org_id,user_id,home_dashboard_id,created,updated,team_id) VALUES (1,0,%(id_graph)s,%(date)s,%(date)s,0)
-    named_args:
-      id_graph: "{{ grafana_default_dash_id.query_result[0][0].id }}"
-      date: 'now()'
-  when: grafana_default_dash_id.rowcount[0] == 1
-
-  
+- name: Set 'Multi-System metrics' as default dashboard for admin user
+  command: "/srv/rgm/grafana/scripts/grafana_star.sh -b 'Multi-System metrics' -u 'admin' -d"
