@@ -86,29 +86,6 @@
   with_items:
   - { src: rgm_ds.yml.j2,   dest: datasources/rgm_ds.yaml }
 
-- name: install grafana dash templates
-  copy:
-    src: "grafana/{{ item }}"
-    dest: "{{ grafana_rgm_dashboards }}/{{ item }}"
-    owner: root
-    group: grafana
-    mode: 0640
-  with_items:
-  - 4any-k8s-monitoring.json
-  - active_directory_dns.json
-  - apache.json
-  - azure_compute.json
-  - azure_storage.json
-  - cadvisor_containers_nodes.json
-  - elasticsearch_cluster.json
-  - influxdb_internals.json
-  - multi-system-metrics.json
-  - mysql_percona.json
-  - nutanix.json
-  - prometheus_node_exporter.json
-  - prometheus_service.json
-  - vmware_stats.json
-
 - name: ensure grafana service is running
   systemd:
     name: grafana-server
