@@ -166,7 +166,7 @@
     state: started
 
 - name: configure firewalld services
-  firewalld:
+  ansible.posix.firewalld:
     service: "{{ item.srv }}"
     permanent: yes
     state: "{{ item.state }}"
@@ -179,7 +179,7 @@
   notify: service_restart_firewalld
 
 - name: configure firewalld explicit ports
-  firewalld:
+  ansible.posix.firewalld:
     port: "{{ item }}"
     permanent: yes
     state: enabled
@@ -273,16 +273,22 @@
   file:
     path: "{{ item.path }}"
     state: directory
-    owner: "{{ rgm_user }}"
-    group: "{{ rgm_group }}"
+    owner: "{{ item.owner | default(rgma_user, true) }}"
+    group: "{{ item.owner | default(rgm_group, true) }}"
     mode: "{{ item.mode }}"
     seuser: system_u
     serole: object_r
     setype: "{{ item.setype }}"
     selevel: s0
   with_items:
-  - { path: "{{ rgm_root_path }}/rgma/",     mode: '0750', setype: 'user_home_dir_t' }
-  - { path: "{{ rgm_root_path }}/rgma/html", mode: '0750', setype: 'httpd_sys_rw_content_t' }
+  - path: "{{ rgm_root_path }}/rgma/"
+    mode: '0750'
+    setype: 'user_home_dir_t'
+  - path: "{{ rgm_root_path }}/rgma/html"
+    owner: apache
+    mode: '0770'
+    setype: 'httpd_sys_rw_content_t'
+
 
 - name: ensure config symlink is present
   file:

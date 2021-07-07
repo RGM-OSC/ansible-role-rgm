@@ -42,7 +42,7 @@
   register: elasticsearch_conf
 
 - name: configure firwalld trusted zone
-  firewalld:
+  ansible.posix.firewalld:
     zone: trusted
     source: "{{ hostvars[item].ansible_default_ipv4.address }}"
     permanent: yes
@@ -51,7 +51,7 @@
   with_items: "{{ groups['rgm'] }}"
 
 - name: configure firwalld for elastic cluster mode
-  firewalld:
+  ansible.posix.firewalld:
     zone: trusted
     port: "{{ item }}"
     permanent: yes

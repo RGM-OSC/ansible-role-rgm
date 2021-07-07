@@ -38,7 +38,8 @@
   notify: service_restart_xinetd
 
 - name: configure firewalld services
-  firewalld:
+:q!
+  ansible.posix.firewalld:
     port: "{{ xinetd_livestatus_port }}/tcp"
     permanent: yes
     state: enabled
