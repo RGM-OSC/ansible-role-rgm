@@ -47,6 +47,9 @@ ntp_servers:
 - '2.pool.ntp.org'
 - '3.pool.ntp.org'
 
+# SSH hardening is enabled by default
+ssh_hardening: True
+
 ### Elasticsearch related defaults
 
 # Maximum allowed JVM heap size value (in MB)

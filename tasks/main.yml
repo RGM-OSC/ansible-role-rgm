@@ -371,34 +371,36 @@
     reload: yes
 
 ### SSH hardening
-- name: disable weak SSH ECDSA host keys
-  copy:
-    content: ''
-    dest: "/etc/ssh/{{ item.file }}"
-    owner: root
-    group: root
-    mode: "{{ item.mode }}"
-  with_items:
-  - { file: ssh_host_ecdsa_key,     mode: '0400' }
-  - { file: ssh_host_ecdsa_key.pub, mode: '0644' }
+- block:
+  - name: disable weak SSH ECDSA host keys
+    copy:
+      content: ''
+      dest: "/etc/ssh/{{ item.file }}"
+      owner: root
+      group: root
+      mode: "{{ item.mode }}"
+    with_items:
+    - { file: ssh_host_ecdsa_key,     mode: '0400' }
+    - { file: ssh_host_ecdsa_key.pub, mode: '0644' }
 
-- name: "SSH hardening"
-  lineinfile:
-    path: /etc/ssh/sshd_config
-    regexp: "{{ item.regex }}"
-    line: "{{ item.line }}"
-    insertafter: '^(#\s*)?UsePAM '
-  with_items:
-  - { regex: '^(#\s*)?PermitEmptyPasswords',         line: "PermitEmptyPasswords no" }
-  - { regex: '^(#\s*)?PermitRootLogin',              line: "PermitRootLogin without-password" }
-  - { regex: '^(#\s*)?StrictModes',                  line: "StrictModes yes" }
-  - { regex: '^HostKey /etc/ssh/ssh_host_ecdsa_key', line: "#HostKey /etc/ssh/ssh_host_ecdsa_key" }
-  - { regex: '^(#\s*)?Ciphers ',                     line: "Ciphers aes128-ctr,aes192-ctr,aes256-ctr" }
-  - { regex: '^(#\s*)?MACs ',                        line: "MACs hmac-sha2-512,hmac-sha2-256,hmac-ripemd160" }
-  - { regex: '^(#\s*)?KexAlgorithms ',               line: "KexAlgorithms diffie-hellman-group-exchange-sha256" }
-  - { regex: '^(#\s*)?RekeyLimit ',                  line: "RekeyLimit default 1200" }
-  - { regex: '^(#\s*)?TCPKeepAlive ',                line: "TCPKeepAlive yes" }
-  - { regex: '^(#\s*)?MaxSessions ',                 line: "MaxSessions 10" }
+  - name: "SSH hardening"
+    lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: "{{ item.regex }}"
+      line: "{{ item.line }}"
+      insertafter: '^(#\s*)?UsePAM '
+    with_items:
+    - { regex: '^(#\s*)?PermitEmptyPasswords',         line: "PermitEmptyPasswords no" }
+    - { regex: '^(#\s*)?PermitRootLogin',              line: "PermitRootLogin without-password" }
+    - { regex: '^(#\s*)?StrictModes',                  line: "StrictModes yes" }
+    - { regex: '^HostKey /etc/ssh/ssh_host_ecdsa_key', line: "#HostKey /etc/ssh/ssh_host_ecdsa_key" }
+    - { regex: '^(#\s*)?Ciphers ',                     line: "Ciphers aes128-ctr,aes192-ctr,aes256-ctr" }
+    - { regex: '^(#\s*)?MACs ',                        line: "MACs hmac-sha2-512,hmac-sha2-256,hmac-ripemd160" }
+    - { regex: '^(#\s*)?KexAlgorithms ',               line: "KexAlgorithms diffie-hellman-group-exchange-sha256" }
+    - { regex: '^(#\s*)?RekeyLimit ',                  line: "RekeyLimit default 1200" }
+    - { regex: '^(#\s*)?TCPKeepAlive ',                line: "TCPKeepAlive yes" }
+    - { regex: '^(#\s*)?MaxSessions ',                 line: "MaxSessions 10" }
+  when: ssh_hardening
 
 ### SSH keys
 - name: create nagios SSH key
