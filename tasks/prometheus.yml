@@ -77,6 +77,13 @@
     creates: /etc/metricbeat/modules.d/prometheus.yml
   notify: service_restart_metricbeat
 
+- name: change metricbeat's prom listener location
+  lineinfile:
+    path: /etc/metricbeat/modules.d/prometheus.yml
+    backrefs: yes
+    regexp: '^(\s+)metrics_path:.*'
+    line: '\1metrics_path: /prometheus/metrics'
+
 - name: ensure prometheus services are running
   systemd:
     name: "{{ item }}"
