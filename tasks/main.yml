@@ -273,7 +273,7 @@
   file:
     path: "{{ item.path }}"
     state: directory
-    owner: "{{ rgm_user }}"
+    owner: "{{ rgma_user }}"
     group: "{{ rgm_group }}"
     mode: "{{ item.mode }}"
     seuser: system_u
