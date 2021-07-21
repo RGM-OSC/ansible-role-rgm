@@ -282,7 +282,20 @@
     selevel: s0
   with_items:
   - { path: "{{ rgm_root_path }}/rgma/",     mode: '0750', setype: 'user_home_dir_t' }
+  - { path: "{{ rgm_root_path }}/rgma/.ssh", mode: '0700', setype: 'ssh_home_t' }
   - { path: "{{ rgm_root_path }}/rgma/html", mode: '0750', setype: 'httpd_sys_rw_content_t' }
+
+- name: touch authorized_keys for rgma user
+  copy:
+    dest: "{{ rgm_root_path }}/rgma/.ssh/authorized_keys"
+    content: ''
+    owner: "{{ rgma_user }}"
+    group: "{{ rgm_group }}"
+    mode: '0640'
+    seuser: system_u
+    serole: object_r
+    setype: ssh_home_t
+    force: no
 
 - name: ensure config symlink is present
   file:
