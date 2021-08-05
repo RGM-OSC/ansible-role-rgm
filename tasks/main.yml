@@ -273,17 +273,21 @@
   file:
     path: "{{ item.path }}"
     state: directory
-    owner: "{{ rgma_user }}"
-    group: "{{ rgm_group }}"
+    owner: "{{ item.owner | default(rgma_user, true) }}"
+    group: "{{ item.owner | default(rgm_group, true) }}"
     mode: "{{ item.mode }}"
     seuser: system_u
     serole: object_r
     setype: "{{ item.setype }}"
     selevel: s0
   with_items:
-  - { path: "{{ rgm_root_path }}/rgma/",     mode: '0750', setype: 'user_home_dir_t' }
-  - { path: "{{ rgm_root_path }}/rgma/.ssh", mode: '0700', setype: 'ssh_home_t' }
-  - { path: "{{ rgm_root_path }}/rgma/html", mode: '0750', setype: 'httpd_sys_rw_content_t' }
+  - path: "{{ rgm_root_path }}/rgma/"
+    mode: '0750'
+    setype: 'user_home_dir_t'
+  - path: "{{ rgm_root_path }}/rgma/html"
+    owner: apache
+    mode: '0770'
+    setype: 'httpd_sys_rw_content_t'
 
 - name: touch authorized_keys for rgma user
   copy:
