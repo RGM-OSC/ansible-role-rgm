@@ -57,7 +57,7 @@ function Get-RGMApiToken {
     }
     catch {
         write-host "Error during API Call`n$($Error[0])`nScript Exit"
-        exit 2
+        Break;
     }
     Write-Verbose "New Token = $($TokenReturn.RGMAPI_TOKEN)"
 
@@ -98,11 +98,11 @@ function Invoke-RGMRestMethod {
         }
         elseif ($OneTimeToken) {
             Write-Output "The OnTimeToken is not valid`nEnd of script"
-            exit 2
+            Break;
         }
         else {
             Write-Output "There is an unexpected error (no password or no OneTimeToken provided)`nEnd of script"
-            exit 2
+            Break;
         }
     }
     try {
@@ -115,7 +115,7 @@ function Invoke-RGMRestMethod {
     }
     catch {
         write-host "Error during API Call`n$($Error[0])`nScript Exit"
-        exit 2
+        Break;
 
     }
 }
@@ -186,7 +186,7 @@ try {
 }
 catch {
     Write-host "Error: unable to register the host on EON`n$Error[0]"
-    exit 2
+    Break;
 }
 
 # Call MetricBeat Install
@@ -214,7 +214,7 @@ else {
     }
     catch {
         write-host "Error during Install-Beat launch program`n$($Error[0])`nScript Exit"
-        exit 2
+        Break;
     }
 }
 
