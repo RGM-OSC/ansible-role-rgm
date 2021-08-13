@@ -206,7 +206,7 @@ if [ "$RCHTTP" != 200 ]; then
     RC=2
 else
     if [ $EXPORTCONFIG -gt 0 ]; then
-        RCHTTP="$(curl -s -k -XPOST -o -o "$CURLTMP" -w "%{http_code}" \
+        RCHTTP="$(curl -s -k -XPOST -o "$CURLTMP" -w "%{http_code}" \
             -H 'Content-Type: application/json' -H "token: ${RGMAPI_OTT}" \
             "https://${RGMSRVR}/rgmapi/exportConfiguration" \
             -d '{"jobName": "Nagios Export"}')"
