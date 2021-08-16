@@ -43,8 +43,9 @@ There is some variable available to be able to register the Host in RGM.
 | `BeatsBasePath`  | C:\Program Files | _optionnal_. Use this option define a different location to install Beat Agents |
 | `Verbose`  | false | _optionnal_. Common Commandlets are available. Use Verbose to have more details |
 
+### RGM and Beat Agent
 
-Launch the installation with this command :
+Launch the installation with this command to register the client on RGM and install Metricbeat Agent:
 
 ```Powershell
 & $([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString("https://{{ ansible_default_ipv4.address }}/distrib/install/Add-RGMHost.ps1"))) -username admin -password ******
@@ -75,6 +76,28 @@ You are also able to replace the IP adress in the onliner with the RGM serveur F
 & $([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString("https://rgmserver.domaine.in/distrib/install/Add-RGMHost.ps1"))) -username admin -password ****** -RGMServer rgmserver.domaine.in  -verbose
 ```
 
+### Beat Agent Only
+There is some variable dedicated to Beat agent installation if the Install-beat is used (No RGM host registration)
+
+| name | defaults | description |
+|--|--|--|
+| `RGMServer`  | rgm server ip | _optionnal_. By default the IP of the RGM server is used, you can provide another IP or the FQDN|
+| `Agents`  | false | _optionnal_. Use this option to install beat agents. if no present or if set, metricbeat is always installed (exepted when _NoBeat_ is *True*). Agents available are : _auditbeat, filebeat, heartbeat, metricbeat, winlogbeat_ |
+| `BeatsBasePath`  | C:\Program Files | _optionnal_. Use this option define a different location to install Beat Agents |
+| `Verbose`  | false | _optionnal_. Common Commandlets are available. Use Verbose to have more details |
+
+Launch installation of beat agents
+
+Example with
+ - RGM serveur FQDN
+ - Installation of metricbeat, heartbeat an winlogbeat agents
+ - Different installation folder for BeatAgents
+ - Verbose
+
+
+```Powershell
+& $([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString("https://{{ ansible_default_ipv4.address }}/distrib/install/Install-Beats.ps1"))) -RGMServer rgmserver.domaine.in -Agents metricbeat,heartbeat,winlogbeat -BeatsBasePath 'C:\BeatAgents' -verbose
+```
 
 
 <s>If Powershell is 6.0

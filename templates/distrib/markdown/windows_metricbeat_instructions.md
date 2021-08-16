@@ -4,7 +4,7 @@ From Windows *Start* menu, search for *Windows PowerShell* application, then rig
 
 ## Execute the one-liner
 
-Copy/paste the following line into the PowerShell. Don't forget to adapt _-username_ and _-password_ fields to your needs:
+Copy/paste the following line into the PowerShell. Don't forget to adapt ***-username*** and ***-password*** fields to your needs:
 
 ```
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -12,3 +12,4 @@ Copy/paste the following line into the PowerShell. Don't forget to adapt _-usern
 ```
 
 This will download and execute a PowerShell script from RGM server that will download, install, configure, then start metricbeat agent on the target host.
+

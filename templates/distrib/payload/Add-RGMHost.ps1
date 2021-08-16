@@ -52,7 +52,13 @@ function Get-RGMApiToken {
 
     $UriAuthent = "https://$RGMServer/rgmapi/getAuthToken?&username=$Username&password=$Password"
 
-    $TokenReturn = Invoke-RestMethod -Uri $UriAuthent -Method GET -Headers $script:Header
+    try {
+        $TokenReturn = Invoke-RestMethod -Uri $UriAuthent -Method GET -Headers $script:Header
+    }
+    catch {
+        write-host "Error during API Call`n$($Error[0])`nScript Exit"
+        Break;
+    }
     Write-Verbose "New Token = $($TokenReturn.RGMAPI_TOKEN)"
 
     # Update the current header with the current active token
@@ -92,19 +98,25 @@ function Invoke-RGMRestMethod {
         }
         elseif ($OneTimeToken) {
             Write-Output "The OnTimeToken is not valid`nEnd of script"
-            exit
+            Break;
         }
         else {
             Write-Output "There is an unexpected error (no password or no OneTimeToken provided)`nEnd of script"
-            exit
+            Break;
         }
     }
-
-    if ($Methode -eq "Get") {
-        return (Invoke-RestMethod -Uri $Uri -Method Get -Headers $script:Header)
+    try {
+        if ($Methode -eq "Get") {
+            return (Invoke-RestMethod -Uri $Uri -Method Get -Headers $script:Header)
+        }
+        else {
+            return (Invoke-RestMethod -Uri $Uri -Method $Methode -Body $Body -Headers $script:Header)
+        }
     }
-    else {
-        return (Invoke-RestMethod -Uri $Uri -Method $Methode -Body $Body -Headers $script:Header)
+    catch {
+        write-host "Error during API Call`n$($Error[0])`nScript Exit"
+        Break;
+
     }
 }
 
@@ -131,7 +143,7 @@ function New-RGMHost {
 
     $UriCreateHost = "https://$RGMServer/rgmapi/createHost"
 
-    $NewHost = Invoke-RGMRestMethod -Uri $UriCreateHost -Method Post -Body $CreateHostBody
+    $NewHost = Invoke-RGMRestMethod -Uri $UriCreateHost -Method Post -Body $CreateHostBody 
     if ($NoExportConfig) {
         Write-Verbose "no export config!"
     }
@@ -168,8 +180,14 @@ else {
 Write-Verbose "HostAlias: $HostAlias"
 
 # Create the object on the RGM server
-$NewHost = New-RGMHost -hostName $Hostname -hostIp $PrincipaleIP -templateHostName $RGMTemplate -hostAlias $HostAlias -NoExportConfig:$NoExportConfig
-$NewHost.result
+try {
+    $NewHost = New-RGMHost -hostName $Hostname -hostIp $PrincipaleIP -templateHostName $RGMTemplate -hostAlias $HostAlias -NoExportConfig:$NoExportConfig
+    $NewHost.result
+}
+catch {
+    Write-host "Error: unable to register the host on EON`n$Error[0]"
+    Break;
+}
 
 # Call MetricBeat Install
 if ($NoBeat) { 
@@ -191,7 +209,13 @@ else {
     }
     $argumentdisplay = $arguments | Out-String
     Write-Verbose -message "launch Beat Agents installation with arguments : $argumentdisplay"
-    & $([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString("https://$RGMServer/distrib/install/Install-Beats.ps1"))) @arguments
+    try {
+        & $([Scriptblock]::Create((New-Object System.Net.WebClient).DownloadString("https://$RGMServer/distrib/install/Install-Beats.ps1"))) @arguments
+    }
+    catch {
+        write-host "Error during Install-Beat launch program`n$($Error[0])`nScript Exit"
+        Break;
+    }
 }
 
 # Ready to add other install options
