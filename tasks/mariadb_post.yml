@@ -21,7 +21,7 @@
     failed_when: lilac_schema_inject.rc == 2
 
   - name: set AUTO_INCREMENT for customer
-    command: /usr/share/rgm/lilac_manage_auto_increments.sh -s
+    command: /usr/sbin/rgm-lilac-manage-auto-increments -s
 
   when: lilac_schema.failed
 
