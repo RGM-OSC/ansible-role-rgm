@@ -123,7 +123,7 @@ if [ "$OSTYPE" == 'redhat' ]; then
     fi
     curl -s -O -k "${DOWNLOADCFG}"
 fi
-if [ "$OSTYPE" == 'debian' ]; then
+if [ "$OSTYPE" == 'debian' ] | [ "$OSTYPE" == 'ubuntu' ]; then
     BINFILE="metricbeat-oss-latest-amd64.deb"
     if dpkg -V metricbeat &> /dev/null; then
         echo "metricbeat package already installed on this host"
