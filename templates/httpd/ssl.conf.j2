@@ -64,9 +64,11 @@ SSLStaplingCache "shmcb:logs/ssl_stapling(32768)"
 
 # Use separate log files for the SSL virtual host; note that LogLevel
 # is not inherited from httpd.conf.
-ErrorLog logs/ssl_error_log
-TransferLog logs/ssl_access_log
 LogLevel warn
+SetEnvIf Request_URI ^\/elasticsearch\/.*$ elastic
+ErrorLog logs/ssl_error_log
+CustomLog logs/elasticsearch.log combined env=elastic
+CustomLog logs/ssl_access_log combined env=!elastic
 
 #   SSL Engine Switch:
 #   Enable/Disable SSL for this virtual host.
@@ -220,13 +222,5 @@ BrowserMatch "MSIE [2-5]" \
          nokeepalive ssl-unclean-shutdown \
          downgrade-1.0 force-response-1.0
 
-#   Per-Server Logging:
-#   The home of a custom SSL log file. Use this when you want a
-#   compact non-error SSL logfile on a virtual host basis.
-CustomLog logs/ssl_request_log \
-          "%t %h %{SSL_PROTOCOL}x %{SSL_CIPHER}x \"%r\" %b"
-
     Include conf.d/rgm.inc
-
-</VirtualHost>                                  
-
+</VirtualHost>
