@@ -525,26 +525,27 @@
 
   - name: get a valid RGMAPI token
     uri:
-      url: "https://localhost/rgmapi/getAuthToken?&username={{ rgm_admin_user }}&password={{ rgm_admin_password }}"
-      method: GET
+      url: "https://localhost/api/v2/token?&username={{ rgm_admin_user }}&password={{ rgm_admin_password }}"
+      method: POST
       body_format: json
       validate_certs: no
-      status_code: 200
+      status_code: [200, 201]
     register: auth_rgmapi
     tags: rgmexport
 
   - name: export Lilac configuration
     uri:
-      url: "https://localhost/rgmapi/exportConfiguration?&token={{ auth_rgmapi.json.RGMAPI_TOKEN }}"
+      url: "https://localhost/api/v2/nagios/export"
       method: POST
       body_format: json
       body: '{ "jobName": "Nagios Export" }'
+      headers:
+        Authorization: "Bearer {{ auth_rgmapi.json.token }}"
       validate_certs: no
-      status_code: 200
+      status_code: [200, 201]
     when: auth_rgmapi is succeeded
     notify: service_reload_nagios
     tags: rgmexport
-
   when: lilac_rgm_host.changed
 
 ### enable and start RGM services
