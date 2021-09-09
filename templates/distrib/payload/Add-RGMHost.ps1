@@ -4,8 +4,8 @@ param (
     [String]$Username,
     [Parameter(Mandatory = $true, ParameterSetName = "Username")]
     [String]$Password,
-    [Parameter(Mandatory = $true, ParameterSetName = "OneTimeToken")]
-    [String]$OneTimeToken,
+    [Parameter(Mandatory = $true, ParameterSetName = "Token")]
+    [String]$Token,
     [String]$RGMServer = "{{ ansible_default_ipv4.address }}",
     [String]$RGMTemplate = "RGM_WINDOWS_ES",
     [String]$HostAlias,
@@ -34,11 +34,11 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 # Create header with token value if the token is passed in variable
-If ($OneTimeToken) {
+If ($Token) {
     Write-Verbose "Header default Construct with Token"
     $script:Header = @{
         "Content-Type" = "application/json"
-        "token"        = $OneTimeToken
+        "Authorization" = "Bearer $Token"
     }
 }
 Else {
@@ -49,29 +49,30 @@ Else {
 }
 
 function Get-RGMApiToken {
-
-    $UriAuthent = "https://$RGMServer/rgmapi/getAuthToken?&username=$Username&password=$Password"
-
+    $UriAuthent = "https://$RGMServer/api/v2/token"
+    $CreateAuthBody = @{
+        "username" = $Username
+        "password" = $Password
+    } 
     try {
-        $TokenReturn = Invoke-RestMethod -Uri $UriAuthent -Method GET -Headers $script:Header
+        $TokenReturn = Invoke-RestMethod -Uri $UriAuthent -Method POST -Body $CreateAuthBody
     }
     catch {
         write-host "Error during API Call`n$($Error[0])`nScript Exit"
         Break;
     }
-    Write-Verbose "New Token = $($TokenReturn.RGMAPI_TOKEN)"
+    Write-Verbose "New Token = $($TokenReturn.token)"
 
     # Update the current header with the current active token
     $script:Header = @{
         "Content-Type" = "application/json"
-        "token"        = $TokenReturn.RGMAPI_TOKEN
+        "Authorization" = "Bearer $($TokenReturn.token)"
     }
 }
 
 
 function Test-RGMApiToken {
-
-    $UriTokenCheck = "https://$RGMServer/rgmapi/checkAuthToken"
+    $UriTokenCheck = "https://$RGMServer/api/v2/token"
     try {
         $null = Invoke-RestMethod -Uri $UriTokenCheck -Method GET -Headers $script:Header
     }
@@ -96,17 +97,17 @@ function Invoke-RGMRestMethod {
             Get-RGMApiToken
             Write-Verbose $($Header | ConvertTo-Json)
         }
-        elseif ($OneTimeToken) {
+        elseif ($Token) {
             Write-Output "The OnTimeToken is not valid`nEnd of script"
             Break;
         }
         else {
-            Write-Output "There is an unexpected error (no password or no OneTimeToken provided)`nEnd of script"
+            Write-Output "There is an unexpected error (no password or no Token provided)`nEnd of script"
             Break;
         }
     }
     try {
-        if ($Methode -eq "Get") {
+        if ($Methode.ToUpper() -eq "GET") {
             return (Invoke-RestMethod -Uri $Uri -Method Get -Headers $script:Header)
         }
         else {
@@ -141,20 +142,20 @@ function New-RGMHost {
     } | ConvertTo-Json
     Write-Verbose $CreateHostBody
 
-    $UriCreateHost = "https://$RGMServer/rgmapi/createHost"
+    $UriCreateHost = "https://$RGMServer/api/v2/host"
 
-    $NewHost = Invoke-RGMRestMethod -Uri $UriCreateHost -Method Post -Body $CreateHostBody 
+    $NewHost = Invoke-RGMRestMethod -Uri $UriCreateHost -Method POST -Body $CreateHostBody 
     if ($NoExportConfig) {
         Write-Verbose "no export config!"
     }
     else {
         $ExportConfigBody = @{
-            "jobName" = "Nagios Export"
+            "jobName" = "Incremental Nagios Export"
         } | ConvertTo-Json
         Write-Verbose "Launch ExportConfig"
 
-        $UriExportConfig = "https://$RGMServer/rgmapi/exportConfiguration"
-        $ExportConfig = Invoke-RGMRestMethod -Uri $UriExportConfig -Method Post -Body $ExportConfigBody
+        $UriExportConfig = "https://$RGMServer/api/v2/nagios/export"
+        $ExportConfig = Invoke-RGMRestMethod -Uri $UriExportConfig -Method POST -Body $ExportConfigBody
         Write-Verbose $($ExportConfig | Out-String)
     }
 
