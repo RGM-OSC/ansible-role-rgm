@@ -50,6 +50,14 @@
   when:
   - find_httpd_conf_d.matched > 0
   - http_conf.path | basename in apache_httpd_default_conf_to_disable
+  - http_conf.size > 50
+
+- name: create httpd empty config files to avoid httpd package upgrade to recreate disabled files
+  copy:
+    content: |
+      # Disabled by RGM installer Ansible role
+    dest: "/etc/httpd/conf.d/{{ item }}"
+  loop: "{{ apache_httpd_default_conf_to_disable }}"
 
 - name: test if original fcgid.conf file exists
   stat:
