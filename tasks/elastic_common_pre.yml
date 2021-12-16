@@ -68,12 +68,15 @@
   - { regex: '^.*10-:-XX:\+UseG1GC$',                                 line: '10-:-XX:+UseG1GC',                                  after: '^#+ G1GC Configuration$' }
   - { regex: '^.*10-:-XX:G1ReservePercent=\d+$',                      line: '10-:-XX:G1ReservePercent=25',                       after: '^.*-XX:\+UseG1GC$' }
   - { regex: '^.*10-:-XX:InitiatingHeapOccupancyPercent=\d+$',        line: '10-:-XX:InitiatingHeapOccupancyPercent=30',         after: '^.*-XX:\+UseG1GC$' }
-  - { regex: '^# JMX',                                                line: '# JMX',                                             after: 'EOF' }
-  - { regex: '^.*-Dcom.sun.management.jmxremote$',                    line: '-Dcom.sun.management.jmxremote',                    after: '^# JMX$' }
-  - { regex: '^.*-Dcom.sun.management.jmxremote.port=\d+$',           line: '-Dcom.sun.management.jmxremote.port=10001',         after: '^-Dcom.sun.management.jmxremote.*$' }
-  - { regex: '^.*-Dcom.sun.management.jmxremote.rmi.port=\d+$',       line: '-Dcom.sun.management.jmxremote.rmi.port=10002',     after: '^-Dcom.sun.management.jmxremote.*$' }
-  - { regex: '^.*-Dcom.sun.management.jmxremote.ssl=false$',          line: '-Dcom.sun.management.jmxremote.ssl=false',          after: '^-Dcom.sun.management.jmxremote.*$' }
-  - { regex: '^.*-Dcom.sun.management.jmxremote.authenticate=false$', line: '-Dcom.sun.management.jmxremote.authenticate=false', after: '^-Dcom.sun.management.jmxremote.*$' }
+#  - { regex: '^# JMX',                                                line: '# JMX',                                             after: 'EOF' }
+#  - { regex: '^.*-Dcom.sun.management.jmxremote$',                    line: '-Dcom.sun.management.jmxremote',                    after: '^# JMX$' }
+#  - { regex: '^.*-Dcom.sun.management.jmxremote.port=\d+$',           line: '-Dcom.sun.management.jmxremote.port=10001',         after: '^-Dcom.sun.management.jmxremote.*$' }
+#  - { regex: '^.*-Dcom.sun.management.jmxremote.host=\d+$',           line: '-Dcom.sun.management.jmxremote.host=localhost',     after: '^-Dcom.sun.management.jmxremote.*$' }
+#  - { regex: '^.*-Dcom.sun.management.jmxremote.rmi.port=\d+$',       line: '-Dcom.sun.management.jmxremote.rmi.port=10002',     after: '^-Dcom.sun.management.jmxremote.*$' }
+#  - { regex: '^.*-Dcom.sun.management.jmxremote.ssl=false$',          line: '-Dcom.sun.management.jmxremote.ssl=false',          after: '^-Dcom.sun.management.jmxremote.*$' }
+#  - { regex: '^.*-Dcom.sun.management.jmxremote.authenticate=false$', line: '-Dcom.sun.management.jmxremote.authenticate=false', after: '^-Dcom.sun.management.jmxremote.*$' }
+  - { regex: '^# LOG4J2 CVE',                                         line: '# LOG4J2 CVE',                                      after: 'EOF' }
+  - { regex: '^-Dlog4j2.formatMsgNoLookups=true',                     line: '-Dlog4j2.formatMsgNoLookups=true',                  after: 'EOF' }
   register: elasticsearch_conf_jvm
   notify: service_restart_elasticsearch
 
