@@ -54,6 +54,8 @@ ssh_hardening: True
 
 # Maximum allowed JVM heap size value (in MB)
 max_jvm_heapsize: 8
+# enable JMX debuging for ES JVM
+es_jvm_jmx: False
 
 es_shards: 1
 es_shards_replicas: 0
