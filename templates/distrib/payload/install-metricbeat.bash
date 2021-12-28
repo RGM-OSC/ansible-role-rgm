@@ -21,7 +21,7 @@ fi
 
 api_check_auth() {
     RCHTTP="$(curl -s -k -o /dev/null -w "%{http_code}" \
-        -H 'Content-Type: application/json' -H "Authorization: Bearer${1}" \
+        -H 'Content-Type: application/json' -H "Authorization: Bearer ${1}" \
         "https://${RGMSRVR}/api/v2/token")"
     if [ $? -ne 0 ]; then
         return 0
@@ -80,7 +80,7 @@ if [ "$RCHTTP" != '200' ] && [ -n "$RGMAPI_USER" ] && [ -n "$RGMAPI_PASSWD" ]; t
         --data-urlencode "username=${RGMAPI_USER}" \
         --data-urlencode "password=${RGMAPI_PASSWD}" \
         "https://${RGMSRVR}/api/v2/token" |
-        grep -Po '"token":.*?[^\\]",' | perl -pe 's/"token"://; s/"//; s/",$//')"
+        grep -Po '"token":.*?[^\\]",' | awk '{print $2}' | cut -d ',' -f 1 | xargs)"
     api_check_auth "$RGMAPI_TOKEN"
     RCHTTP=$?
 fi
@@ -194,7 +194,7 @@ fi
 # call RGM API createhost
 CURLTMP=$(mktemp)
 RCHTTP="$(curl -s -k -XPOST -o "$CURLTMP" -w "%{http_code}" \
-    -H 'Content-Type: application/json' -H "Authorization: Bearer${RGMAPI_TOKEN}" \
+    -H 'Content-Type: application/json' -H "Authorization: Bearer ${RGMAPI_TOKEN}" \
     "https://${RGMSRVR}/api/v2/host" \
     -d "{\"templateHostName\": \"${RGM_HOST_TMPL}\", \
         \"hostName\": \"$(hostname -f)\", \
@@ -207,7 +207,7 @@ if [ "$RCHTTP" != 200 ]; then
 else
     if [ $EXPORTCONFIG -gt 0 ]; then
         RCHTTP="$(curl -s -k -XPOST -o "$CURLTMP" -w "%{http_code}" \
-            -H 'Content-Type: application/json' -H "Authorization: Bearer${RGMAPI_TOKEN}" \
+            -H 'Content-Type: application/json' -H "Authorization: Bearer ${RGMAPI_TOKEN}" \
             "https://${RGMSRVR}/api/v2/nagios/export" \
             -d '{"jobName": "Incremental Nagios Export"}')"
         if [ "$RCHTTP" != 200 ]; then
