@@ -10,7 +10,7 @@ RGM_HOST_ALIAS="$(hostname -s)"
 EXPORTCONFIG=1
 RGMAPI_USER=
 RGMAPI_PASSWD=
-RGMAPI_OTT=
+RGMAPI_TOKEN=
 PWD="$(pwd)"
 RC=1
 
@@ -21,8 +21,8 @@ fi
 
 api_check_auth() {
     RCHTTP="$(curl -s -k -o /dev/null -w "%{http_code}" \
-        -H 'Content-Type: application/json' -H "token: ${1}" \
-        "https://${RGMSRVR}/rgmapi/checkAuthToken")"
+        -H 'Content-Type: application/json' -H "Authorization: Bearer ${1}" \
+        "https://${RGMSRVR}/api/v2/token")"
     if [ $? -ne 0 ]; then
         return 0
     else
@@ -44,7 +44,7 @@ Usage: $(basename "$0") -u <RGMAPI user> -p <RGMAPI password> | -o <RPMAPI one-t
 Arguments:
   -u <user>              : RGM API user with admin privileges
   -p <password>          : RGM API password
-  -o <one-time token>    : one-time usage token
+  -o <token>             : RGM TOKEN if methode used
   -s <RGM host>          : Optional RGM host IP or FQDN (default to RGM server used to download this script)
   -t <RGM host template> : Optional RGM Host Template to apply to this host. default to 'RGM_LINUX_ES'
   -a <RGM host alias>    : Optional RGM Host Alias. Defaults to $(hostname -s)
@@ -60,7 +60,7 @@ while getopts hdu:p:o:s:t:a: arg; do
         d) EXPORTCONFIG=0;;
         u) RGMAPI_USER="$OPTARG";;
         p) RGMAPI_PASSWD="$OPTARG";;
-        o) RGMAPI_OTT="$OPTARG";;
+        o) RGMAPI_TOKEN="$OPTARG";;
         s) RGMSRVR="$OPTARG";;
         t) RGM_HOST_TMPL="$OPTARG";;
         a) RGM_HOST_ALIAS="$OPTARG";;
@@ -70,18 +70,18 @@ done
 
 # ensure we can get RGM API Token
 RCHTTP=
-if [ -n "$RGMAPI_OTT" ]; then
-    #RCHTTP="$(api_check_auth "$RGMAPI_OTT")"
-    api_check_auth "$RGMAPI_OTT"
+if [ -n "$RGMAPI_TOKEN" ]; then
+    #RCHTTP="$(api_check_auth "$RGMAPI_TOKEN")"
+    api_check_auth "$RGMAPI_TOKEN"
     RCHTTP=$?
 fi
 if [ "$RCHTTP" != '200' ] && [ -n "$RGMAPI_USER" ] && [ -n "$RGMAPI_PASSWD" ]; then
-    RGMAPI_OTT="$(curl -s -k -G -H 'Content-Type: application/json' \
+    RGMAPI_TOKEN="$(curl -s -k POST \
         --data-urlencode "username=${RGMAPI_USER}" \
         --data-urlencode "password=${RGMAPI_PASSWD}" \
-        "https://${RGMSRVR}/rgmapi/getAuthToken" |
-        grep RGMAPI_TOKEN | awk '{print $2}' | xargs)"
-    api_check_auth "$RGMAPI_OTT"
+        "https://${RGMSRVR}/api/v2/token" |
+        grep -Po '"token":.*?[^\\]",' | awk '{print $2}' | cut -d ',' -f 1 | xargs)"
+    api_check_auth "$RGMAPI_TOKEN"
     RCHTTP=$?
 fi
 if [ "$RCHTTP" != '200' ]; then
@@ -123,7 +123,7 @@ if [ "$OSTYPE" == 'redhat' ]; then
     fi
     curl -s -O -k "${DOWNLOADCFG}"
 fi
-if [ "$OSTYPE" == 'debian' ] | [ "$OSTYPE" == 'ubuntu' ]; then
+if [ "$OSTYPE" == 'debian' ] || [ "$OSTYPE" == 'ubuntu' ]; then
     BINFILE="metricbeat-oss-latest-amd64.deb"
     if dpkg -V metricbeat &> /dev/null; then
         echo "metricbeat package already installed on this host"
@@ -194,8 +194,8 @@ fi
 # call RGM API createhost
 CURLTMP=$(mktemp)
 RCHTTP="$(curl -s -k -XPOST -o "$CURLTMP" -w "%{http_code}" \
-    -H 'Content-Type: application/json' -H "token: ${RGMAPI_OTT}" \
-    "https://${RGMSRVR}/rgmapi/createHost" \
+    -H 'Content-Type: application/json' -H "Authorization: Bearer ${RGMAPI_TOKEN}" \
+    "https://${RGMSRVR}/api/v2/host" \
     -d "{\"templateHostName\": \"${RGM_HOST_TMPL}\", \
         \"hostName\": \"$(hostname -f)\", \
         \"hostIp\": \"${CLI_ADDR}\", \
@@ -207,9 +207,9 @@ if [ "$RCHTTP" != 200 ]; then
 else
     if [ $EXPORTCONFIG -gt 0 ]; then
         RCHTTP="$(curl -s -k -XPOST -o "$CURLTMP" -w "%{http_code}" \
-            -H 'Content-Type: application/json' -H "token: ${RGMAPI_OTT}" \
-            "https://${RGMSRVR}/rgmapi/exportConfiguration" \
-            -d '{"jobName": "Nagios Export"}')"
+            -H 'Content-Type: application/json' -H "Authorization: Bearer ${RGMAPI_TOKEN}" \
+            "https://${RGMSRVR}/api/v2/nagios/export" \
+            -d '{"jobName": "Incremental Nagios Export"}')"
         if [ "$RCHTTP" != 200 ]; then
             cat "$CURLTMP"
             echo ''
