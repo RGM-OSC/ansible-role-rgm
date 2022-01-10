@@ -93,7 +93,7 @@ fi
 OSTYPE=
 OSVERS=
 if [ -e /etc/redhat-release ]; then
-    if grep -P '^(CentOS|RedHat|Red Hat|Rocky)' /etc/redhat-release &> /dev/null; then
+    if grep -P '^(CentOS|RedHat|Red Hat|Rocky|AlmaLinux)' /etc/redhat-release &> /dev/null; then
         OSTYPE='redhat'
         OSVERS=$(sed 's/.*release \([0-9]\+\).*/\1/' /etc/redhat-release)
     fi
