@@ -133,7 +133,10 @@
 
 - name: set cron job for curator
   copy:
-    content: "10 0 * * * root /usr/bin/curator --config /etc/elasticsearch/curator.yml /etc/elasticsearch/actions.yml > /dev/null"
+    content: |
+      # Ansible managed
+      10 0 * * * root /usr/bin/curator --config /etc/elasticsearch/curator.yml /etc/elasticsearch/actions.yml > /dev/null
+      # LF which change the life
     dest: /etc/cron.d/elastic_curator
     owner: root
     group: root
