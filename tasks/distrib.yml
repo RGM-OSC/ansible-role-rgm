@@ -117,3 +117,8 @@
     mode: 0640
   register: oneliner_sql
   notify: insert SQL procedures on rgmweb DB
+
+- name: install agent metricbeat distribution
+  ansible.builtin.package:
+    name: rgm-distrib-beats.noarch
+    state: latest
