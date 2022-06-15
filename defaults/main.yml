@@ -80,7 +80,6 @@ xinetd_livestatus_port: 14176
 
 ## Elastic beats
 # Windows Beats installation base patch
-winbeats_base_path: 'C:\Program Files'
 metricbeat_polling_period: 90s
 # global metric value configuration
 d_metric_sys_core_period: '2m'

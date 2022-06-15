@@ -319,15 +319,6 @@
   tags: ntp
 
 
-### RGM distribution configuration
-- name: configure RGM distribution
-  include_tasks:
-    file: distrib.yml
-    apply:
-      tags: distrib
-  tags: distrib
-
-
 ### http/php base configuration
 - name: configure apache/php
   include_tasks:
