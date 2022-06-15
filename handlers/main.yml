@@ -87,15 +87,3 @@
     name: xinetd
     state: restarted
 
-- name: win_service_restart_metricbeat
-  win_service:
-    name: metricbeat
-    state: restarted
-
-- name: insert SQL procedures on rgmweb DB
-  shell: mysql rgmweb < /var/lib/rgm/rgmweb/sql/one-liners.sql
-  args:
-    executable: /bin/bash
-  register: oneliner_sql_exec
-  changed_when: oneliner_sql_exec.rc == 1
-  failed_when: oneliner_sql_exec.rc == 2
