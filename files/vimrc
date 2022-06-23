@@ -11,12 +11,22 @@ set backspace=indent,eol,start
 set tabstop=2
 set shiftwidth=2
 
-set autoindent  
-set smartindent  
-set nowrap  
+set autoindent
+set smartindent
+set nowrap
+set expandtab
+set paste
 
 set bg=dark
 set ru
 set modeline
+
+set nonumber
+noremap <silent> <F2> :set number!<CR>
+
 set pastetoggle=<F3>
+
+" Caractères spéciaux
+noremap <silent> <F4> :set list!<CR>
+
 syntax on
