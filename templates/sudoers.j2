@@ -2,6 +2,9 @@
 #
 # RGM sudoers
 
+# No TTY for httpd service
+Defaults:{{ rgmweb_user }} !requiretty,use_pty,umask=0077
+
 {{ rgmweb_user }} ALL=NOPASSWD:\
     /bin/systemctl * snmptt,\
     /bin/systemctl * snmptrapd,\
@@ -15,4 +18,3 @@
     /bin/systemctl * metricbeat,\
     /bin/systemctl * kibana,\
     /bin/systemctl * nagflux
-
