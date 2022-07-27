@@ -520,8 +520,8 @@
       method: POST
       body_format: form-urlencoded
       body:
-        username: {{ rgm_admin_user }}
-        password: {{ rgm_admin_password }}
+        username: "{{ rgm_admin_user }}"
+        password: "{{ rgm_admin_password }}"
       validate_certs: no
       use_proxy: no
       status_code: [200, 201]
