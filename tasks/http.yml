@@ -13,9 +13,9 @@
 ## add apache user to rgm group
 
 - name: "add {{ rgm_group }} to apache user"
-  user:
+  ansible.builtin.user:
     name: apache
-    groups: " {{ rgm_group }}"
+    groups: "{{ rgm_group }}"
     append: yes
 
 ## php configuration
