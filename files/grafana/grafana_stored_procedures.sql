@@ -43,12 +43,14 @@ BEGIN
 
 	INSERT INTO `grafana`.`user` SET
 		`login` = username,
+		`version` = 0,
 		`email` = useremail,
 		`name` = fullname,
 		`org_id` = 1,
 		`is_admin` = is_grpadmin,
 		`email_verified` = TRUE,
-		`created` = NOW();
+		`created` = NOW(),
+        `updated` = NOW();
 	SET @userid = (SELECT LAST_INSERT_ID());
 	SET @createddate = (SELECT created FROM `grafana`.`user` WHERE `id` = @userid);
 	IF @userid IS NOT NULL THEN
