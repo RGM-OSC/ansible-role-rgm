@@ -63,7 +63,8 @@ BEGIN
 	END IF;
 
 	-- adds default dashboard
-	SET @dashid = (SELECT id FROM grafana.dashboard WHERE title = 'Multi-System metrics');
+	-- Can't presume the default dashboard from its name, so limit to the first row for default value
+	SET @dashid = (SELECT id FROM grafana.dashboard WHERE title = 'Multi-System metrics' LIMIT 1);
 	IF (SELECT COUNT(`id`) FROM `grafana`.`star` WHERE `user_id` = @userid AND `dashboard_id` = @dashid) = 0 THEN
 		INSERT INTO  `grafana`.`star` SET `user_id` = @userid, `dashboard_id` = @dashid;
 	END IF;
