@@ -1,0 +1,50 @@
+---
+- name: "Elastic | Ensure ElasticStack is installed"
+  tags:
+    - packages
+  ansible.builtin.yum:
+    update_cache: false
+    name: "{{ packages.elastic }}"
+    state: present
+
+- name: "Elastic | Clean elasticsearch sto"
+  when:
+    - force_delete_es is defined
+    - force_delete_es
+  block:
+    - name: "Elastic | Ensure elasticsearch is stopped"
+      ansible.builtin.systemd:
+        name: elasticsearch
+        state: stopped
+
+    - name: "Elastic | Force ES sto deletion"
+      ansible.builtin.file:
+        path: "/var/lib/elasticsearch/nodes"
+        state: absent
+
+- name: "Elastic | Create elastic backup repo directory"
+  ansible.builtin.file:
+    path: "/srv/rgm/elastic"
+    owner: "elasticsearch"
+    group: "{{ rgm_group }}"
+    mode: "0750"
+    state: directory
+    recurse: true
+
+- name: "Elastic | Import elasticsearch postinstall tasks"
+  ansible.builtin.import_tasks: elastic/elastic_postinstall.yml
+
+- name: "Elastic | Import elasticsearch configuration tasks"
+  ansible.builtin.import_tasks: elastic/elastic_configure.yml
+
+- name: "Elastic | Import elastic postdeploy tasks"
+  ansible.builtin.import_tasks: elastic/elastic_postdeploy.yml
+
+- name: "Elastic | Ensure elasticsearch is enabled and started"
+  ansible.builtin.systemd:
+    name: elasticsearch
+    enabled: true
+    state: started
+
+- name: "Elastic | Import elasticsearch curator tasks"
+  ansible.builtin.import_tasks: elastic/elastic_curator.yml

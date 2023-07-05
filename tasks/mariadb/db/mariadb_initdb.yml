@@ -1,0 +1,31 @@
+---
+- name: "MariaDB | InitDB | Initialize databases"
+  loop:
+    - { name: "{{ db_grafana }}",   user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" } # noqa yaml[commas]
+    - { name: "{{ db_nagvis }}",    user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" } # noqa yaml[commas]
+    - { name: "{{ db_lilac }}",     user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" } # noqa yaml[commas]
+    - { name: "{{ db_lilac }}_tmp", user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" } # noqa yaml[commas]
+    - { name: "{{ db_notifier }}",  user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" } # noqa yaml[commas]
+    - { name: "{{ db_thruk_log }}", user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" } # noqa yaml[commas]
+  ansible.builtin.include_tasks:
+    file: mariadb/db/mariadb_processdb.yml
+    apply:
+      tags:
+        - install
+        - rgm_install
+        - mariadb
+        - rgm_mariadb
+        - grafana
+        - rgm_grafana
+        - nagvis
+        - rgm_nagvis
+        - lilac
+        - rgm_lilac
+        - thruk
+        - rgm_thruk
+        - notifier
+        - rgm_notifier
+      vars:
+        db_name: "{{ item.name }}"
+        db_user: "{{ item.user }}"
+        db_pwd: "{{ item.pwd }}"

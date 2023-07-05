@@ -1,0 +1,74 @@
+---
+- name: "Ensure RGM GPG key is installed"
+  ansible.builtin.get_url:
+    dest: /etc/pki/rpm-gpg/RPM-GPG-KEY-rgm
+    url: "https://installer.rgm-cloud.io/RPM-GPG-KEY-rgm"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+
+- name: "Add RGM repos for RGM Community"
+  loop:
+    - name: 'rgm-community-base'
+      descr: 'RGM Community - Base'
+      url: 'https://community.repo.rgm-cloud.io/rgm/latest/os/x86_64/'
+    - name: 'rgm-community-updates'
+      descr: 'RGM Community - Updates'
+      url: 'https://community.repo.rgm-cloud.io/rgm/latest/updates/x86_64/'
+  ansible.builtin.yum_repository:
+    name: "{{ item.name }}"
+    description: "{{ item.descr }}"
+    file: rgm
+    baseurl: "{{ item.url }}"
+    gpgcheck: true
+    enabled: true
+    sslverify: true
+    keepcache: false
+    gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rgm
+
+- name: "Include ES common preliminary tasks"
+  ansible.builtin.include_tasks:
+    file: elastic/elastic.yml
+
+- name: "Configure elasticsearch for cluster mode"
+  notify: "Service restart elasticsearch"
+  register: elasticsearch_conf
+  ansible.builtin.template:
+    src: ../../templates/elastic/elasticsearch-cluster.yml.j2
+    dest: "/etc/elasticsearch/elasticsearch.yml"
+    owner: "root"
+    group: "elasticsearch"
+    mode: "0644"
+
+- name: "Configure firwalld trusted zone"
+  loop: "{{ groups['rgm'] }}"
+  ansible.posix.firewalld:
+    zone: trusted
+    source: "{{ hostvars[item].ansible_default_ipv4.address }}"
+    permanent: true
+    immediate: true
+    state: enabled
+
+- name: "Configure firwalld for elastic cluster mode"
+  loop:
+    - '9200/tcp'
+    - '9300/tcp'
+  ansible.posix.firewalld:
+    zone: trusted
+    port: "{{ item }}"
+    permanent: true
+    immediate: true
+    state: enabled
+
+- name: "Include ES common post tasks"
+  ansible.builtin.include_tasks:
+    file: elastic_common_post.yml
+
+- name: "Check Apache HTTPd server configured for RGM"
+  register: stat_httpd_rgm
+  ansible.builtin.stat:
+    path: /etc/httpd/conf.d/rgmweb.conf
+
+# - include_tasks:
+#     file: elastic_hq.yml
+#   when: stat_httpd_rgm.stat.exists

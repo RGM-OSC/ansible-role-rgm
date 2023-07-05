@@ -1,0 +1,25 @@
+---
+- name: "MariaDB | Install | Ensure MariaDB is installed"
+  tags:
+    - packages
+    - rgm_packages
+  ansible.builtin.yum:
+    update_cache: false
+    name: "{{ packages.mariadb }}"
+
+- name: "MariaDB | Install | Ensure MariaDB is up and running"
+  ansible.builtin.systemd:
+    name: mariadb
+    enabled: true
+    state: started
+
+- name: "MariaDB | Install | Import root user configuration tasks"
+  ansible.builtin.import_tasks: mariadb/users/mariadb_root.yml
+
+- name: "MariaDB | Install | Ensure we can connect to MariaDB"
+  community.mysql.mysql_info:
+    config_file: "/root/.my.cnf"
+    filter: version
+
+- name: "MariaDB | Install | Import postinstall tasks"
+  ansible.builtin.import_tasks: mariadb/mariadb_postinstall.yml

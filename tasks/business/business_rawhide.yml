@@ -1,0 +1,26 @@
+---
+- name: "Business | Rawhide | Disable stable RGMB repositories"
+  loop:
+    - { filename: 'rgmb', section: 'rgm-business-stable' }
+  notify: "Yum regenerate cache"
+  community.general.ini_file:
+    path: "/etc/yum.repos.d/{{ item.path }}.repo"
+    section: "{{ item.section }}"
+    option: "enabled"
+    value: "0"
+    owner: "root"
+    group: "root"
+    mode: "0640"
+
+- name: "Business | Rawhide | Enable rawhide RGMB repositories"
+  loop:
+    - { filename: 'rgmb', section: 'rgm-business-rawhide' }
+  notify: "Yum regenerate cache"
+  community.general.ini_file:
+    path: "/etc/yum.repos.d/{{ item.path }}.repo"
+    section: "{{ item.section }}"
+    option: "enabled"
+    value: "1"
+    owner: "root"
+    group: "root"
+    mode: "0640"

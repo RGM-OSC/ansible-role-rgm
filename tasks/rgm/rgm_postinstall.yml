@@ -1,0 +1,9 @@
+---
+- name: "RGM | Postinstall | Ensure config symlink is present"
+  ignore_errors: true
+  ansible.builtin.file:
+    src: /etc/rgm
+    path: "{{ rgm_root_path }}/config"
+    owner: "root"
+    group: "root"
+    state: link

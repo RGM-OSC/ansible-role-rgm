@@ -1,0 +1,24 @@
+---
+- name: "Nagios | Create nagios SSH key"
+  become: true
+  become_user: "nagios"
+  ansible.builtin.command: ssh-keygen -t rsa -b 2048 -C "RGM Nagios ssh key on {{ ansible_hostname }}" -f /home/nagios/.ssh/id_rsa -N '' -q
+  args:
+    chdir: /home/nagios
+    creates: /home/nagios/.ssh/id_rsa
+
+- name: "Nagios | Ensure plugins symlink are present" # noqa risky-shell-pipe
+  ansible.builtin.shell: ln -s $(rpm -ql nagios-plugins-rgm | head -1) rgm
+  args:
+    chdir: "{{ rgm_root_path }}/nagios/plugins"
+    creates: "{{ rgm_root_path }}/nagios/plugins/rgm"
+
+- name: "Nagios | Create temporary directory for non-volatile Nagios checks"
+  loop:
+    - /var/tmp/check_esx
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ nagios_user }}"
+    group: "{{ rgm_group }}"
+    mode: "0750"

@@ -1,0 +1,84 @@
+---
+- name: "Elastic | Postdeploy | Configure kibana"
+  loop:
+    - { regex: '^(#\s*)?server.port',                         line: 'server.port: 5601' } # noqa yaml[commas]
+    - { regex: '^(#\s*)?server.host',                         line: 'server.host: "localhost"' } # noqa yaml[commas]
+    - { regex: '^(#\s*)?server.basePath',                     line: 'server.basePath: "/kibana"' } # noqa yaml[commas]
+    - { regex: '^(#\s*)?server.rewriteBasePath',              line: 'server.rewriteBasePath: true' } # noqa yaml[commas]
+    - { regex: '^(#\s*)?kibana.defaultAppId',                 line: 'kibana.defaultAppId: "discover"' } # noqa yaml[commas]
+    - { regex: '^(#\s*)?newsfeed.enabled',                    line: 'newsfeed.enabled: false' } # noqa yaml[commas]
+    - { regex: '^(#\s*)?security.showInsecureClusterWarning', line: 'security.showInsecureClusterWarning: false' } # noqa yaml[commas]
+  notify: "Service restart kibana"
+  ansible.builtin.lineinfile:
+    path: "/etc/kibana/kibana.yml"
+    regexp: "{{ item.regex }}"
+    line: "{{ item.line }}"
+
+- name: "Elastic | Postdeploy | Configure metricbeat"
+  loop:
+    - { src: 'metricbeat',    dst: 'metricbeat' } # noqa yaml[commas]
+    - { src: 'module_apache', dst: 'modules.d/apache' } # noqa yaml[commas]
+    - { src: 'module_kibana', dst: 'modules.d/kibana' } # noqa yaml[commas]
+    - { src: 'module_mysql',  dst: 'modules.d/mysql' } # noqa yaml[commas]
+    - { src: 'module_system', dst: 'modules.d/system' } # noqa yaml[commas]
+  register: metricbeat_config
+  notify: "Service restart metricbeat"
+  ansible.builtin.template:
+    src: "metricbeat/{{ item.src }}.yml.j2"
+    dest: "/etc/metricbeat/{{ item.dst }}.yml"
+    owner: "root"
+    group: "root"
+    mode: "0640"
+
+- name: "Elastic | Postdeploy | Configure filebeat"
+  loop:
+    - { src: 'filebeat',    dst: 'filebeat' } # noqa yaml[commas]
+    - { src: 'system',      dst: 'modules.d/system' } # noqa yaml[commas]
+    - { src: 'apache',      dst: 'modules.d/apache' } # noqa yaml[commas]
+  register: filebeat_config
+  notify: "Service restart filebeat"
+  ansible.builtin.template:
+    src: "filebeat/{{ item.src }}.yml.j2"
+    dest: "/etc/filebeat/{{ item.dst }}.yml"
+    owner: "root"
+    group: "root"
+    mode: "0640"
+
+- name: "Elastic | Postdeploy | Ensure metricbeat and kibana are running"
+  loop:
+    - kibana
+    - metricbeat
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+    masked: false
+
+- name: "Elastic | Postdeploy | Enable and start filebeat only if requested" # noqa no-handler
+  ansible.builtin.systemd:
+    name: filebeat
+    state: "{{ filebeat_enabled | ternary('started', 'stopped') }}"
+    enabled: "{{ filebeat_enabled }}"
+    masked: false
+
+- name: "Elastic | Postdeploy | Setup elasticsearch indexes and dashboards"
+  when: elasticsearch_conf.changed or elasticsearch_conf_jvm.changed or metricbeat_config.changed or filebeat_config.changed # noqa yaml[line-length]
+  block:
+    - name: "Elastic | Postdeploy | Force elasticsearch and kibana to be restarted to finalize metricbeat configuration"
+      ansible.builtin.meta: flush_handlers
+
+    - name: "Elastic | Postdeploy | Setup metricbeat indexes and dashboards" # noqa no-handler
+      retries: 10
+      delay: 20
+      register: metricbeat_setup
+      until: metricbeat_setup.rc == 0
+      when: metricbeat_config.changed
+      ansible.builtin.command: metricbeat setup -c /etc/metricbeat/metricbeat.yml -path.home /usr/share/metricbeat -path.config /etc/metricbeat -path.data /var/lib/metricbeat -path.logs /var/log/metricbeat # noqa yaml[line-length]
+
+    - name: "Elastic | Postdeploy | Setup filebeat indexes and dashboards" # noqa no-handler
+      retries: 10
+      delay: 20
+      register: filebeat_setup
+      until: filebeat_setup.rc == 0
+      when: filebeat_config.changed
+      ansible.builtin.command: filebeat setup  --dashboards --index-management --machine-learning

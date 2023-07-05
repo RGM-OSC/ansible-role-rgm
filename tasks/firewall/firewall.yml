@@ -1,0 +1,29 @@
+---
+- name: "Firewall | Ensure firewalld is enabled and running"
+  ansible.builtin.systemd:
+    name: firewalld
+    enabled: true
+    masked: false
+    state: started
+
+- name: "Firewall | Configure firewalld services"
+  loop:
+    - { srv: 'snmp',          state: 'enabled' } # noqa yaml[commas]
+    - { srv: 'ssh',           state: 'enabled' } # noqa yaml[commas]
+    - { srv: 'http',          state: 'enabled' } # noqa yaml[commas]
+    - { srv: 'https',         state: 'enabled' } # noqa yaml[commas]
+    - { srv: 'dhcpv6-client', state: 'disabled' } # noqa yaml[commas]
+  notify: "Service restart firewalld"
+  ansible.posix.firewalld:
+    service: "{{ item.srv }}"
+    permanent: true
+    state: "{{ item.state }}"
+
+- name: "Firewall | Configure firewalld explicit ports"
+  loop:
+    - "68/udp"
+  notify: "Service restart firewalld"
+  ansible.posix.firewalld:
+    port: "{{ item }}"
+    permanent: true
+    state: enabled

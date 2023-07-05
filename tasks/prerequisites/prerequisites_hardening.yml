@@ -1,0 +1,55 @@
+---
+- name: "Prerequisites | Hardening | Kernel hardening (sysctl) following ANSII recomendations"
+  register: sysctl_ansii
+  ansible.builtin.copy:
+    src: sysctl_ansii.conf
+    dest: "/etc/sysctl.d/ansii-fr.conf"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+
+- name: "Prerequisites | Hardening | Reload sysctl" # noqa no-handler
+  when: sysctl_ansii.changed
+  ansible.builtin.service:
+    name: systemd-sysctl
+    state: restarted
+
+- name: "Prerequisites | Hardening | Set swappiness (sysctl)"
+  ansible.posix.sysctl:
+    name: vm.swappiness
+    value: "{{ sysctl_swappiness | string }}"
+    state: present
+    sysctl_file: "/etc/sysctl.d/98-swappiness.conf"
+    reload: true
+
+- name: "Prerequisites | Hardening | SSH Hardening"
+  when: ssh_hardening
+  block:
+    - name: "Prerequisites | Hardening | Disable weak SSH ECDSA host keys"
+      loop:
+        - { file: ssh_host_ecdsa_key,     mode: '0400' } # noqa yaml[commas]
+        - { file: ssh_host_ecdsa_key.pub, mode: '0644' } # noqa yaml[commas]
+      ansible.builtin.copy:
+        content: ''
+        dest: "/etc/ssh/{{ item.file }}"
+        owner: root
+        group: root
+        mode: "{{ item.mode }}"
+
+    - name: "Prerequisites | Hardening | SSH daemon hardening"
+      loop:
+        - { regex: '^(#\s*)?PermitEmptyPasswords',         line: "PermitEmptyPasswords no" } # noqa yaml[commas]
+        - { regex: '^(#\s*)?PermitRootLogin',              line: "PermitRootLogin without-password" } # noqa yaml[commas]
+        - { regex: '^(#\s*)?StrictModes',                  line: "StrictModes yes" } # noqa yaml[commas]
+        - { regex: '^HostKey /etc/ssh/ssh_host_ecdsa_key', line: "#HostKey /etc/ssh/ssh_host_ecdsa_key" } # noqa yaml[commas]
+        - { regex: '^(#\s*)?Ciphers ',                     line: "Ciphers aes128-ctr,aes192-ctr,aes256-ctr" } # noqa yaml[commas]
+        - { regex: '^(#\s*)?MACs ',                        line: "MACs hmac-sha2-512,hmac-sha2-256,hmac-ripemd160" } # noqa yaml[commas]
+        - { regex: '^(#\s*)?KexAlgorithms ',               line: "KexAlgorithms diffie-hellman-group-exchange-sha256" } # noqa yaml[commas]
+        - { regex: '^(#\s*)?RekeyLimit ',                  line: "RekeyLimit default 1200" } # noqa yaml[commas]
+        - { regex: '^(#\s*)?TCPKeepAlive ',                line: "TCPKeepAlive yes" } # noqa yaml[commas]
+        - { regex: '^(#\s*)?MaxSessions ',                 line: "MaxSessions 10" } # noqa yaml[commas]
+      ansible.builtin.lineinfile:
+        path: "/etc/ssh/sshd_config"
+        regexp: "{{ item.regex }}"
+        line: "{{ item.line }}"
+        insertafter: '^(#\s*)?UsePAM '

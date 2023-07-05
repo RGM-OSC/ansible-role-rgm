@@ -1,0 +1,34 @@
+---
+- name: "Prometheus | Configure | Configure prometheus service"
+  loop:
+    - { regex: '^(#\s*)?PROMETHEUS_WEB_URL=', line: "PROMETHEUS_WEB_URL='--web.external-url=https://localhost/prometheus'" } # noqa yaml[commas] yaml[line-length]
+    - { regex: '^(#\s*)?PROMETHEUS_LISTEN=',  line: "PROMETHEUS_LISTEN='--web.listen-address=127.0.0.1:9090'" } # noqa yaml[commas]
+    - { regex: '^(#\s*)?PROMETHEUS_STORAGE=', line: "PROMETHEUS_STORAGE='--storage.tsdb.path=/var/lib/prometheus/data --storage.tsdb.retention.time=12h'" } # noqa yaml[commas] yaml[line-length]
+  notify: "Service restart prometheus"
+  ansible.builtin.lineinfile:
+    path: "/etc/sysconfig/promotheus/prometheus"
+    regexp: "{{ item.regex }}"
+    line: "{{ item.line }}"
+
+
+- name: "Prometheus | Configure | Set prometheus config file"
+  notify: "Service restart prometheus"
+  ansible.builtin.template:
+    src: prometheus/prometheus.yml.j2
+    dest: /etc/prometheus/prometheus.yml
+    owner: "root"
+    group: "prometheus"
+    mode: "0640"
+
+- name: "Prometheus | Configure | Enable prometheus module for metricbeat"
+  notify: "Service restart metricbeat"
+  ansible.builtin.command: mv /etc/metricbeat/modules.d/prometheus.yml.disabled /etc/metricbeat/modules.d/prometheus.yml
+  args:
+    creates: /etc/metricbeat/modules.d/prometheus.yml
+
+- name: "Prometheus | Configure | Change metricbeat's prom listener location"
+  ansible.builtin.lineinfile:
+    path: "/etc/metricbeat/modules.d/prometheus.yml"
+    backrefs: true
+    regexp: '^(\s+)metrics_path:.*'
+    line: '\1metrics_path: /prometheus/metrics'

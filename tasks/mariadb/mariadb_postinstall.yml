@@ -1,0 +1,29 @@
+---
+- name: "Create mariadb internal RO account"
+  community.mysql.mysql_user:
+    config_file: "/root/.my.cnf"
+    name: "{{ mariadb_ro_user }}"
+    host: "localhost"
+    password: "{{ mariadb_ro_pwd }}"
+    priv: '*.*:PROCESS,SELECT'
+    append_privs: true
+    login_user: "root"
+    state: present
+
+- name: "MariaDB | Postinstall | Remove uneless databases"
+  loop:
+    - test
+  community.mysql.mysql_db:
+    config_file: "/root/.my.cnf"
+    name: "{{ item }}"
+    state: absent
+
+- name: "MariaDB | Postinsall | Remove all anonymous user accounts"
+  community.mysql.mysql_user:
+    config_file: "/root/.my.cnf"
+    name: ''
+    host_all: true
+    state: absent
+
+- name: "MariaDB | Postinstall | Import DB deployment tasks"
+  ansible.builtin.import_tasks: mariadb/db/mariadb_initdb.yml

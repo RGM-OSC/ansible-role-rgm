@@ -1,0 +1,35 @@
+---
+- name: "MariaDB | Backup | Stat backup configuration file"
+  register: mariadb_backup_conf
+  ansible.builtin.stat:
+    path: /root/.my-backup.cnf
+
+- name: "MariaDB | Backup | Declare backup account"
+  when: not mariadb_backup_conf.stat.exists
+  block:
+    - name: "MariaDB | Backup | Generate random backup password"
+      no_log: true
+      ansible.builtin.set_fact:
+        mariadb_backup_password: "{{ lookup('password', '/dev/null length=48 chars=ascii_letters,digits,-,_,!,.,*') }}"
+
+    - name: "MariaDB | Backup | Create and grant {{ mariadb_backup_username }} user to backup database" # noqa name[template]
+      no_log: true
+      community.mysql.mysql_user:
+        host: localhost
+        name: "{{ mariadb_backup_username }}"
+        password: "{{ mariadb_backup_password }}"
+        priv: '*.*:SELECT,LOCK TABLES,USAGE'
+        login_user: "root"
+        state: present
+
+    - name: "MariaDB | Backup | Set .my-backup.cnf for backup user"
+      no_log: true
+      vars:
+        mariadbuser: '{{ mariadb_backup_username }}'
+        mariadbpasswd: "{{ mariadb_backup_password }}"
+      ansible.builtin.template:
+        src: mariadb/my.cnf.j2
+        dest: /root/.my-backup.cnf
+        owner: "root"
+        group: "root"
+        mode: "0600"

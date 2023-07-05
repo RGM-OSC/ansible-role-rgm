@@ -1,0 +1,15 @@
+---
+- name: "Notifier | Configure | Deploy DBI configuration file"
+  loop:
+    - { option: 'server', value: '127.0.0.1' }
+    - { option: 'database', value: "{{ db_notifier }}" }
+    - { option: 'user', value: "{{ mariadb_user }}" }
+    - { option: 'password', value: "{{ mariadb_pwd }}" }
+  community.general.ini_file:
+    path: /srv/rgm/notifier/etc/dbi.ini
+    section: dbi
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    owner: "root"
+    group: "{{ rgm_group }}"
+    mode: "0640"

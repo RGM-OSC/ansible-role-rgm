@@ -1,0 +1,17 @@
+---
+- name: "MariaDB | DB | ProcessDB | Ensure {{ db_name }} database exists" # noqa name[template]
+  register: mysql_db_created
+  community.mysql.mysql_db:
+    name: "{{ db_name }}"
+    state: present
+
+- name: "MariaDB | DB | ProcessDB | Grant {{ db_user }} user to {{ db_name }} database" # noqa name[template] no-handler
+  when: mysql_db_created.changed
+  community.mysql.mysql_user:
+    host: localhost
+    name: "{{ db_user }}"
+    password: "{{ db_pwd }}"
+    priv: "{{ db_name }}.*:ALL"
+    append_privs: true
+    login_user: root
+    state: present

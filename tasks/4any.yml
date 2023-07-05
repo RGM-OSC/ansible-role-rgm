@@ -2,78 +2,82 @@
 # tasks file for 4any
 # vim: bs=2 sw=2 expandtab:
 
-- name: check 4any asserts
-  assert:
+- name: "Check 4any asserts"
+  ansible.builtin.assert:
     that:
-    - forany_rgmapi_username is defined
-    - forany_rgmapi_username |length > 0
-    - forany_rgmapi_password is defined
-    - forany_rgmapi_password |length > 0
-    - xinetd_livestatus_port is defined
-    - xinetd_livestatus_port > 1024 and xinetd_livestatus_port < 65535
-    - rgm_central_host is defined
+      - forany_rgmapi_username is defined
+      - forany_rgmapi_username |length > 0
+      - forany_rgmapi_password is defined
+      - forany_rgmapi_password |length > 0
+      - xinetd_livestatus_port is defined
+      - xinetd_livestatus_port > 1024 and xinetd_livestatus_port < 65535
+      - rgm_central_host is defined
 
-- name: retrieve haproxy IP address
-  command: grep -P '^[\d\.]+\s+haproxy$' /etc/hosts
+- name: "Retrieve haproxy IP address"
   register: haproxy_out
   failed_when: haproxy_out.rc != 0
   changed_when: haproxy_out.rc != 0
+  ansible.builtin.command: grep -P '^[\d\.]+\s+haproxy$' /etc/hosts
 
-- name: set haproxy IP address fact
-  set_fact:
+
+- name: "Set haproxy IP address fact"
+  ansible.builtin.set_fact:
     haproxy_ipaddr: "{{ haproxy_out.stdout | regex_search('^[\\d\\.]+') }}"
 
-- name: ensure xinetd daemon is installed
-  yum:
+- name: "Ensure xinetd daemon is installed"
+  ansible.builtin.yum:
     name: xinetd
-    state: latest
+    state: present
 
-- name: set livestatus xinetd configuration
-  template:
+- name: "Set livestatus xinetd configuration"
+  notify: "Service restart xinetd"
+  ansible.builtin.template:
     src: xinetd_livestatus.j2
-    dest: /etc/xinetd.d/livestatus
-    owner: root
-    group: root
-    mode: 0644
-  notify: service_restart_xinetd
+    dest: "/etc/xinetd.d/livestatus"
+    owner: "root"
+    group: "root"
+    mode: "0644"
 
-- name: configure firewalld services
-  firewalld:
+- name: "Configure firewalld services"
+  notify: "Service restart firewalld"
+  tags:
+    - firewall
+    - rgm_firewall
+  ansible.posix.firewalld:
     port: "{{ xinetd_livestatus_port }}/tcp"
-    permanent: yes
+    permanent: true
     state: enabled
 
-  notify: service_restart_firewalld
-
-- name: ensure xinetd daemon is enabled and running
-  systemd:
+- name: "Ensure xinetd daemon is enabled and running"
+  ansible.builtin.systemd:
     name: xinetd
-    enabled: yes
+    enabled: true
     state: started
 
-- name: check if 4any RGMAPI user exists
-  shell: mysql {{ db_rgmweb }} --batch -e "SELECT * FROM users WHERE user_id='2' \G" | grep -v '^\*\+' | awk '{print $1 " " $2}'
+- name: "Check if 4any RGMAPI user exists" # noqa risky-shell-pipe
   register: forany_apiuser
   changed_when: forany_apiuser.stdout == ''
+  ansible.builtin.shell: mysql {{ db_rgmweb }} --batch -e "SELECT * FROM users WHERE user_id='2' \G" | grep -v '^\*\+' | awk '{print $1 " " $2}'
 
-- block:
-  - name: set facts from SQL output
-    set_fact:
-      parameter: "{{ sqlout | default({}) | combine ( { item.split(':')[0]: item.split(':')[1] } ) }}"
-    with_items: "{{test.stdout_lines}}"
-
-  - name: update 4any RGMAPI user
-    command: |
-      mysql --batch --skip-column-names {{ db_rgmweb }} --execute="UPDATE users SET \
-      user_passwd='{{ forany_rgmapi_password | hash('md5') }}' WHERE user_id='{{ sqlout.user_id }} '"
-    when: forany_rgmapi_password | hash('md5') != sqlout.user_passwd
- 
+- name: "Connfigure 4Any database user"
   when: not forany_apiuser.changed
+  block:
+    - name: "Set facts from SQL output"
+      loop: "{{ test.stdout_lines }}"
+      ansible.builtin.set_fact:
+        parameter: "{{ sqlout | default({}) | combine({item.split(':')[0]: item.split(':')[1]}) }}"
 
-- name: insert 4any RGMAPI user
-  command: |
+    - name: "Update 4any RGMAPI user"
+      when: forany_rgmapi_password | hash('md5') != sqlout.user_passwd
+      ansible.builtin.command: |
+        mysql --batch --skip-column-names {{ db_rgmweb }} --execute="UPDATE users SET \
+        user_passwd='{{ forany_rgmapi_password | hash('md5') }}' WHERE user_id='{{ sqlout.user_id }} '"
+
+
+- name: "Insert 4any RGMAPI user"
+  when: forany_apiuser.changed
+  ansible.builtin.command: |
     mysql --batch --skip-column-names {{ db_rgmweb }} --execute="INSERT INTO users \
     (user_id, group_id, user_name, user_descr, user_passwd, user_type, user_limitation, user_language, user_email) \
     VALUES (2, 1, '{{ forany_rgmapi_username }}', '{{ forany_rgmapi_userdesc }}', \
     '{{ forany_rgmapi_password | hash('md5') }}', 0, 0, 0, '{{ forany_rgmapi_email }}');"
-  when: forany_apiuser.changed

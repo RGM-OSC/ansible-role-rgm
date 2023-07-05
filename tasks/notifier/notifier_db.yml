@@ -1,0 +1,17 @@
+---
+- name: "Notifier | DB | Check if notifier schema is filled"
+  register: notifier_schema
+  ignore_errors: true
+  community.mysql.mysql_query:
+    config_file: "/root/.my.cnf"
+    login_db: "{{ db_notifier }}"
+    query: "SELECT COUNT(*) from configs"
+
+- name: "Notifier | DB | Inject default notifier schema"
+  when: notifier_schema.failed
+  register: notifier_schema_inject
+  changed_when: notifier_schema_inject.rc == 1
+  failed_when: notifier_schema_inject.rc == 2
+  ansible.builtin.shell: "mysql {{ db_notifier }} < /usr/share/doc/notifier/sql/notifier.sql"
+  args:
+    executable: /bin/bash

@@ -1,0 +1,74 @@
+---
+- name: "HTTP | Configure | Add {{ rgm_group }} to apache user" # noqa name[template]
+  ansible.builtin.user:
+    name: apache
+    groups: "{{ rgm_group }}"
+    append: true
+
+## php configuration
+- name: "HTTP | Configure | Configure php.ini file" # noqa risky-file-permissions
+  loop:
+    - { section: 'Date', option: 'date.timezone',      value: 'Europe/Paris' } # noqa yaml[commas]
+    - { section: 'PHP',  option: 'memory_limit',       value: '256M' } # noqa yaml[commas]
+    - { section: 'PHP',  option: 'max_execution_time', value: '300' } # noqa yaml[commas]
+    - { section: 'PHP',  option: 'error_reporting',    value: 'E_ERROR' } # noqa yaml[commas]
+    - { section: 'PHP',  option: 'expose_php',         value: 'Off' } # noqa yaml[commas]
+  notify: "Service reload http"
+  community.general.ini_file:
+    path: /etc/php.ini
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+
+## apache configuration
+- name: "HTTP | Configure | List enabled httpd configs"
+  register: find_httpd_conf_d
+  ansible.builtin.find:
+    path: /etc/httpd/conf.d
+    patterns: '*.conf'
+
+- name: "HTTP | Configure | Ensure default httpd config files are disabled"
+  loop: "{{ find_httpd_conf_d.files }}"
+  loop_control:
+    loop_var: http_conf
+  when:
+    - find_httpd_conf_d.matched > 0
+    - http_conf.path | basename in apache_httpd_default_conf_to_disable
+    - http_conf.size > 50
+  ansible.builtin.command: "mv {{ http_conf.path }} {{ http_conf.path }}.distrib"
+
+- name: "HTTP | Configure | Create httpd empty config files to avoid httpd package upgrade to recreate disabled files"
+  loop: "{{ apache_httpd_default_conf_to_disable }}"
+  ansible.builtin.copy:
+    content: |
+      # Disabled by RGM installer Ansible role
+    dest: "/etc/httpd/conf.d/{{ item }}"
+    owner: "root"
+    group: "root"
+    mode: "0640"
+
+- name: "HTTP | Configure | Test if original fcgid.conf file exists"
+  register: stat_fcgid_conf
+  ansible.builtin.stat:
+    path: /etc/httpd/conf.d/fcgid.conf
+
+- name: "HTTP | Configure | Move fcgid.conf to 01_fcgid.conf"
+  when: stat_fcgid_conf.stat.exists
+  ansible.builtin.command: mv /etc/httpd/conf.d/fcgid.conf /etc/httpd/conf.d/01_fcgid.conf
+
+- name: "HTTP | Configure | Install RGM httpd config files"
+  with_items:
+    - { src: '00_hardening.conf',  dst: '00_hardening.conf'} # noqa yaml[commas]
+    - { src: 'ssl.conf',           dst: '10_ssl.conf'} # noqa yaml[commas]
+    - { src: 'zz_elastic_hq.conf', dst: 'zz_elastic_hq.conf.disabled'} # noqa yaml[commas]
+  notify: "Service reload http"
+  ansible.builtin.template:
+    src: "httpd/{{ item.src }}.j2"
+    dest: "/etc/httpd/conf.d/{{ item.dst }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+
+## restart apache now as we'll use RGM API later on role
+- name: 'HTTP | Configure | Flush handlers'
+  ansible.builtin.meta: flush_handlers

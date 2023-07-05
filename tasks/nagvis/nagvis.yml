@@ -1,0 +1,32 @@
+---
+- name: "Nagvis | Configure nagvis" # noqa risky-file-permissions
+  with_items:
+    - { section: 'backend_live_1', option: 'socket', value: 'unix:/srv/rgm/nagios/var/log/rw/live' } # noqa yaml[commas]
+    - { section: 'auth_mysql',     option: 'dbhost', value: '127.0.0.1' } # noqa yaml[commas]
+    - { section: 'auth_mysql',     option: 'dbport', value: '3306' } # noqa yaml[commas]
+    - { section: 'auth_mysql',     option: 'dbname', value: "{{ db_nagvis }}" } # noqa yaml[commas]
+    - { section: 'auth_mysql',     option: 'dbuser', value: "{{ mariadb_user }}" } # noqa yaml[commas]
+    - { section: 'auth_mysql',     option: 'dbpass', value: "{{ mariadb_pwd }}" } # noqa yaml[commas]
+  community.general.ini_file:
+    path: "{{ rgm_root_path }}/nagvis/etc/nagvis.ini.php"
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+
+- name: "Nagvis | Deploy mysql db schema init script"
+  ansible.builtin.template:
+    src: nagvis/init_sql.php.j2
+    dest: "{{ rgm_root_path }}/nagvis/share/frontend/nagvis-js/init_sql.php"
+    owner: "root"
+    group: "apache"
+    mode: "0640"
+
+- name: "Nagvis | Force nagvis mysql schema initialization"
+  become: true
+  become_user: "apache"
+  register: nagvis_init_sql
+  changed_when: nagvis_init_sql.rc > 0
+  failed_when: nagvis_init_sql.rc > 1
+  ansible.builtin.command: "php {{ rgm_root_path }}/nagvis/share/frontend/nagvis-js/init_sql.php"
+  args:
+    chdir: "{{ rgm_root_path }}/nagvis/share/frontend/nagvis-js"

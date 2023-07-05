@@ -1,0 +1,42 @@
+---
+- name: "Prometheus | Postinstall | Create prometheus tree"
+  loop:
+    - "{{ rgm_root_path }}/prometheus"
+    - "{{ rgm_root_path }}/prometheus/bin"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "root"
+    group: "{{ rgm_group }}"
+    mode: "0755"
+
+- name: "Prometheus | Postinsall | Link prometheus to /etc"
+  ansible.builtin.file:
+    src: "/etc/prometheus"
+    dest: "{{ rgm_root_path }}/prometheus/etc"
+    owner: "root"
+    group: "root"
+    state: link
+
+# FIXME : packager influxdb_exporter, ou mieux, voir si ça a été backporter dans influxdb lui-même...
+- name: "Prometheus | Postinstall | Get Prometheus InfluxDB exporter from Github"
+  ansible.builtin.get_url:
+    url: "https://github.com/carlpett/influxdb_stats_exporter/releases/download/v0.1.1/influx_stats_exporter_linux_amd64"
+    dest: "{{ rgm_root_path }}/prometheus/bin/influxdb_exporter"
+    owner: "{{ rgm_user }}"
+    group: "{{ rgm_group }}"
+    mode: "0755"
+
+- name: "Prometheus | Postinstall | Install InfluxDB exporter sysconfig"
+  notify: "Service restart influxdb exporter"
+  loop:
+    - src: influxdb_exporter.sysconfig.j2
+      dst: /etc/sysconfig/promotheus/influxdb_exporter
+    - src: influxdb_exporter.service.j2
+      dst: /etc/systemd/system/influxdb_exporter.service
+  ansible.builtin.template:
+    src: "prometheus/{{ item.src }}"
+    dest: "{{ item.dst }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"

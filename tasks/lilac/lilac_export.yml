@@ -1,0 +1,39 @@
+---
+- name: "Lilac | Export | Update hostname on {{ db_lilac }} config for RGM host entry" # noqa name[template]
+  tags:
+    - rgmexport
+  community.mysql.mysql_query:
+    config_file: '/root/.my.cnf'
+    login_db: "{{ db_lilac }}"
+    query: "UPDATE nagios_host SET name = '{{ ansible_hostname }}' WHERE id = 1;"
+
+- name: "Lilac | Export | Get a valid RGMAPI token"
+  register: auth_rgmapi
+  tags:
+    - rgmexport
+  ansible.builtin.uri:
+    url: "https://localhost/api/v2/token"
+    method: POST
+    body_format: form-urlencoded
+    body:
+      username: "{{ rgm_admin_user }}"
+      password: "{{ rgm_admin_password }}"
+    validate_certs: false
+    use_proxy: false
+    status_code: [200, 201]
+
+- name: "Lilac | Export | Export Lilac configuration"
+  when: auth_rgmapi is succeeded
+  notify: "Service reload nagios"
+  tags:
+    - rgmexport
+  ansible.builtin.uri:
+    url: "https://localhost/api/v2/nagios/export"
+    method: POST
+    body_format: json
+    body: '{ "jobName": "Nagios Export" }'
+    headers:
+      Authorization: "Bearer {{ auth_rgmapi.json.token }}"
+    validate_certs: false
+    use_proxy: false
+    status_code: [200, 201]

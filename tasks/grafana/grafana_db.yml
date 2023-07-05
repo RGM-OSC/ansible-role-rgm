@@ -1,0 +1,18 @@
+---
+- name: "Grafana | DB | Copy Grafana SQL procedures"
+  register: granafa_sql_procs
+  ansible.builtin.copy:
+    src: grafana/grafana_stored_procedures.sql
+    dest: /etc/grafana/rgm_procedures.sql
+    owner: "root"
+    group: "root"
+    mode: "0644"
+
+- name: "Grafana | DB | Insert SQL procedures on Grafana DB" # noqa no-handler
+  register: granafa_sql_exec
+  changed_when: granafa_sql_exec.rc == 1
+  failed_when: granafa_sql_exec.rc == 2
+  when: granafa_sql_procs.changed
+  ansible.builtin.shell: mysql grafana < /etc/grafana/rgm_procedures.sql
+  args:
+    executable: /bin/bash

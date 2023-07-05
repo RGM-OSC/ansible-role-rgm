@@ -1,0 +1,32 @@
+---
+- name: "Grafana | Ensure Grafana and dependencies are installed"
+  ansible.builtin.yum:
+    update_cache: true
+    name: "{{ packages.influx_grafana }}"
+    state: present
+
+- name: "Grafana | Import configure tasks"
+  ansible.builtin.import_tasks: grafana/grafana_configure.yml
+
+- name: "Grafana | Ensure grafana service is running"
+  register: grafana_first_start
+  ansible.builtin.systemd:
+    name: grafana-server
+    enabled: true
+    state: started
+
+- name: "Grafana | Restart grafana service if config changed"
+  when: grafana_ini_changed.changed and not grafana_first_start.changed
+  ansible.builtin.systemd:
+    name: grafana-server
+    enabled: true
+    state: restarted
+
+- name: "Grafana | Import postdeploy tasks"
+  ansible.builtin.import_tasks: grafana/grafana_postdeploy.yml
+
+- name: "Grafana | Import Grafana DB tasks"
+  ansible.builtin.import_tasks: grafana/grafana_db.yml
+
+- name: "Grafana | Set 'Multi-System metrics' as default dashboard for admin user"
+  ansible.builtin.command: "/srv/rgm/grafana/scripts/grafana_star.sh -b 'Multi-System metrics' -u 'admin' -d"

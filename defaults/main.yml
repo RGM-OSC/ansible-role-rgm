@@ -42,20 +42,20 @@ db_thruk_log: 'thruk_log_cache'
 db_lilac_schema_version: '61'
 
 ntp_servers:
-- '0.pool.ntp.org'
-- '1.pool.ntp.org'
-- '2.pool.ntp.org'
-- '3.pool.ntp.org'
+  - '0.pool.ntp.org'
+  - '1.pool.ntp.org'
+  - '2.pool.ntp.org'
+  - '3.pool.ntp.org'
 
 # SSH hardening is enabled by default
-ssh_hardening: True
+ssh_hardening: true
 
-### Elasticsearch related defaults
+### Elasticsearch related defaults
 
 # Maximum allowed JVM heap size value (in MB)
 max_jvm_heapsize: 8
 # enable JMX debuging for ES JVM
-es_jvm_jmx: False
+es_jvm_jmx: false
 
 es_shards: 1
 es_shards_replicas: 0
@@ -71,9 +71,9 @@ grafana_http_port: '3000'
 grafana_domain: 'localhost'
 grafana_root_url: '/grafana'
 grafana_rgm_dashboards: "{{ rgm_root_path }}/grafana/dashboards"
-grafana_install_plugins_core: True
-grafana_install_plugins_contrib: False
-grafana_apply_patches: True
+grafana_install_plugins_core: true
+grafana_install_plugins_contrib: false
+grafana_apply_patches: true
 
 # xinetd livestatus binding port
 xinetd_livestatus_port: 14176

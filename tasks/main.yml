@@ -1,567 +1,209 @@
 ---
-# main tasks file for ansible-role-rgm
-# vim: bs=2 sw=2 expandtab:
+- name: "Import prerequisites tasks"
+  ansible.builtin.import_tasks: prerequisites/prerequisites.yml
 
-- block:
+- name: "Import business tasks"
+  ansible.builtin.import_tasks: business/business.yml
 
-  - name: configure outgoing proxy if required
-    lineinfile:
-      path: /etc/environment
-      regexp: "^{{ item.key }}=.*"
-      line: "{{ item.key }}=\"{{ item.value }}\""
-      insertafter: EOF
-      owner: root
-      group: root
-      mode: 0644
-      seuser: system_u
-      serole: object_r
-      setype: etc_t
-      selevel: s0
-    with_items:
-    - { key: 'http_proxy', value: "http://{{ proxy_host }}:{{ proxy_port }}/"}
-    - { key: 'https_proxy', value: "http://{{ proxy_host }}:{{ proxy_port }}/"}
-    - { key: 'no_proxy', value: "localhost,127.0.0.0/8"}
+- name: "Flush handlers for yum modifications"
+  ansible.builtin.meta: flush_handlers
 
-  - name: configure proxy for yum
-    lineinfile:
-      path: /etc/yum.conf
-      regexp: '^proxy=.*'
-      line: "proxy=http://{{ proxy_host }}:{{ proxy_port }}"
-      insertafter: '^[main]$'
-
-  when: proxy_host is defined
-
-- name: check if RGM Business private key is present
-  stat:
-    path: "/etc/pki/tls/private/{{ rgm_business_registration_id }}.key"
-  when:
-  - rgm_business_registration_id is iterable
-  - rgm_business_registration_id | length > 0
-  register: stat_rgm_business_key
-  tags: always
-
-- name: set RGM Business RPM repository to be activated
-  set_fact:
-    enable_rgm_repo_business: true
-  when:
-  - stat_rgm_business_key is defined
-  - stat_rgm_business_key.stat is defined
-  - stat_rgm_business_key.stat.exists
-  tags: always
-
-# override_rhsm
-- name: override RHSM to exclude RGM packages also provided by EPEL
-  command: "subscription-manager repo-override --repo={{ rhsm_epel_repo }} --add='exclude:nagios* elasticsearch* metricbeat* kibana* grafana* influxdb* snmptt'"
-  when:
-  - rhsm_epel_repo is defined
-  - rhsm_epel_repo | length > 0
-
-# As nagios 4 is present in EPEL repo, disable nagios from EPEL
-- name: exclude nagios from EPEL repo
-  ini_file:
-    path: /etc/yum.repos.d/epel.repo
-    section: "{{ item }}"
-    option: exclude
-    value: 'nagios* elasticsearch* metricbeat* kibana* grafana* influxdb* snmptt'
-  with_items:
-  - epel
-  - epel-debuginfo
-  - epel-source
-  register: update_epel_repo
-  tags: packages
-
-- name: update RGM repositories if required
-  yum_repository:
-    name: "{{ item.key }}"
-    description: "{{ item['value']['description'] }}"
-    file: rgm
-    baseurl: "{{ item['value']['baseurl'] }}"
-    gpgcheck: "{{ item['value']['gpgcheck'] }}"
-    enabled: "{{ item['value']['enabled'] }}"
-    keepcache: "{{ item['value']['cache'] | default(false)}}"
-    gpgkey: "{{ item['value']['gpgkey'] | default('file://' + rgm_gpg_key) }}"
-    sslverify: "{{ item['value']['sslverify'] | default(omit) }}"
-    sslclientcert: "{{ item['value']['sslclientcert'] | default(omit) }}"
-    sslclientkey: "{{ item['value']['sslclientkey'] | default(omit) }}"
-  loop: "{{ rgm_repositories | dict2items }}"
-  register: update_rgm_repo
-  tags: always
-
-- name: install "rawhide" RGM repositories if requested
-  yum_repository:
-    name: "{{ item.key }}"
-    description: "{{ item['value']['description'] }}"
-    file: rgm-rawhide
-    baseurl: "{{ item['value']['baseurl'] }}"
-    gpgcheck: "{{ item['value']['gpgcheck'] }}"
-    enabled: "{{ item['value']['enabled'] }}"
-    keepcache: "{{ item['value']['cache'] | default(false)}}"
-    gpgkey: "{{ item['value']['gpgkey'] | default('file://' + rgm_gpg_key) }}"
-    sslverify: "{{ item['value']['sslverify'] | default(omit) }}"
-    sslclientcert: "{{ item['value']['sslclientcert'] | default(omit) }}"
-    sslclientkey: "{{ item['value']['sslclientkey'] | default(omit) }}"
-  loop: "{{ rgm_repositories_rawhide | dict2items }}"
-  when: enable_rawhide
-
-- name: force yum clean & make cache
-  command: yum clean all
-  args:
-    warn: no
-  when: update_epel_repo.changed or update_rgm_repo.changed
-  tags: packages
-
-### selinux
-# todo: configure RGM to work smoothly *with* selinux enabled
-- name: disable SELinux
-  selinux:
-    state: disabled
-
-### MariaDB base configuration
-- name: install and configure mariadb
-  include_tasks:
-    file: mariadb_prep.yml
-    apply:
-      tags: mariadb
+- name: "Import SELinux tasks"
   tags:
-  - mariadb
-  - grafana
-  - nagvis
+    - always
+  ansible.builtin.import_tasks: selinux/selinux.yml
+
+- name: "Import MariaDB install and preconfigure tasks"
+  tags:
+    - install
+    - rgm_install
+    - mariadb
+    - rgm_mariadb
+    - grafana
+    - rgm_grafana
+    - nagvis
+    - rgm_nagvis
+    - lilac
+    - rgm_lilac
+    - thruk
+    - rgm_thruk
+    - notifier
+    - rgm_notifier
+  block:
+    - name: "Import MariaDB install tasks"
+      ansible.builtin.import_tasks: mariadb/mariadb_install.yml
 
 ### installs RGM packages & dependencies
-- name: install RGM packages (it may take some time...)
-  yum:
-    update_cache: "{{ not(update_epel_repo.changed) }}"
-    name: "{{ packages_system + packages_mariadb + packages_apache + packages_elastic + packages_influx_grafana + packages_prometheus + packages_rgm + packages_partners + extra_packages }}"
-    state: latest
-  retries: 10
-  delay: 2
-  register: yum_result
-  until: yum_result.rc == 0
-  tags: packages
-
-- name: SQL post-configuration
-  include_tasks:
-    file: mariadb_post.yml
-    apply:
-      tags: mariadb
+- name: "Import RGM packages installations tasks"
   tags:
-  - mariadb
+    - install
+    - rgm_install
+    - packages
+    - rgm_packages
+  ansible.builtin.import_tasks: rgm/rgm_packages.yml
 
+- name: "Import RGM postinstall tasks"
+  tags:
+    - install
+    - rgm_install
+  ansible.builtin.import_tasks: rgm/rgm_postinstall.yml
 
-### ensure ping capabilities are enabled
-- name: set capabilities
-  capabilities:
-    path: "{{ item.path }}"
-    capability: "{{ item.caps }}"
-    state: present
-  with_items:
-  - { path: '/usr/bin/ping', caps: 'cap_net_admin,cap_net_raw+p' }
+- name: "Import Lilac DB deployment tasks"
+  tags:
+    - install
+    - rgm_install
+    - lilac
+    - rgm_lilac
+  ansible.builtin.import_tasks: lilac/lilac_db.yml
 
-### firewalld configuration
-- name: ensure firewalld is enabled and running
-  systemd:
-    name: firewalld
-    enabled: yes
-    masked: no
-    state: started
+- name: "Import Notifier DB deployment tasks"
+  tags:
+    - install
+    - rgm_install
+    - notifier
+    - rgm_notifier
+  ansible.builtin.import_tasks: notifier/notifier_db.yml
 
-- name: configure firewalld services
-  firewalld:
-    service: "{{ item.srv }}"
-    permanent: yes
-    state: "{{ item.state }}"
-  with_items:
-  - { srv: 'snmp',          state: 'enabled' }
-  - { srv: 'ssh',           state: 'enabled' }
-  - { srv: 'http',          state: 'enabled' }
-  - { srv: 'https',         state: 'enabled' }
-  - { srv: 'dhcpv6-client', state: 'disabled' }
-  notify: service_restart_firewalld
+- name: "Import MariaDB backup account tasks"
+  tags:
+    - install
+    - rgm_install
+  ansible.builtin.import_tasks: mariadb/backup/mariadb_backup.yml
 
-- name: configure firewalld explicit ports
-  firewalld:
-    port: "{{ item }}"
-    permanent: yes
-    state: enabled
-  with_items:
-  - 68/udp
-  notify: service_restart_firewalld
+- name: "Import firewall tasks"
+  tags:
+    - install
+    - rgm_install
+    - firewall
+    - rgm_firewall
+  ansible.builtin.import_tasks: firewall/firewall.yml
 
-- name: create Ansible tmp dirs for alternate users
-  file:
+- name: "Create Ansible tmp dirs for alternate users"
+  loop:
+    - "{{ rgmweb_user }}"
+    - nagios
+  tags:
+    - install
+    - rgm_install
+    - users
+    - rgm_users
+  ansible.builtin.file:
     path: "/tmp/.ansible-{{ item }}/tmp"
     state: directory
-    recurse: yes
+    recurse: true
     owner: "{{ item }}"
     group: "{{ rgm_group }}"
-    mode: 0700
-  with_items:
-  - "{{ rgmweb_user }}"
-  - nagios
+    mode: "0700"
 
-- name: put default vimrc file
-  copy:
-    src: vimrc
-    dest: "{{ item }}"
-    owner: root
-    group: root
-    mode: 0640
-  with_items:
-  - /root/.vimrc
-  - /etc/skel/.vimrc
+- name: "Import RGMA tasks"
+  tags:
+    - install
+    - rgm_install
+    - rgma
+  ansible.builtin.import_tasks: rgm/rgma.yml
 
-- name: set RGM motd
-  copy:
-    src: rgm_motd.sh
-    dest: /etc/profile.d/zzz_rgm.sh
-    owner: root
-    group: root
-    mode: 0755
+- name: "Import NTP configuration tasks"
+  tags:
+    - install
+    - rgm_install
+    - rgm_ntp
+  ansible.builtin.import_tasks: ntp/ntp.yml
 
-### sudoers base configuration
-- name: set sudoers config file
-  template:
-    src: sudoers.j2
-    dest: "/etc/sudoers.d/rgm"
-    owner: root
-    group: root
-    mode: 0400
-    seuser: system_u
-    serole: object_r
-    setype: etc_t
-    selevel: s0
+- name: "Import http tasks"
+  tags:
+    - install
+    - rgm_install
+    - http
+    - rgm_http
+  ansible.builtin.import_tasks: http/http.yml
 
-### default group & user
-- name: create RGM group
-  group:
-    name: "{{ rgm_group }}"
+- name: "Import elasticsearch tasks"
+  tags:
+    - install
+    - rgm_install
+    - elasticsearch
+    - rgm_elasticsearch
+  ansible.builtin.import_tasks: elastic/elastic.yml
 
-- name: check if rgma user already exists
-  getent:
-    database: passwd
-    key: "{{ rgma_user }}"
-    fail_key: no
+- name: "Import prometheus tasks"
+  tags:
+    - install
+    - rgm_install
+    - prometheus
+    - rgm_prometheus
+  ansible.builtin.import_tasks: prometheus/prometheus.yml
 
-- name: create random password for rgma user
-  set_fact:
-    rgma_user_password: "{{ lookup('password', '/dev/null length=16 chars=ascii_letters,digits,-,_,!,.,*') }}"
-  when: not getent_passwd | json_query(rgma_user)
-  no_log: True
+- name: "Import grafana tasks"
+  tags:
+    - install
+    - rgm_install
+    - grafana
+    - rgm_grafana
+  ansible.builtin.import_tasks: grafana/grafana.yml
 
-- name: create RGM users
-  user:
-    name: "{{ item.user }}"
-    home: "{{ item.home }}"
-    comment: "{{ item.comment }}"
-    shell: /bin/bash
-    group: "{{ item.group }}"
-    groups: "{{ item.groups }}"
-    append: yes
-    generate_ssh_key: yes
-    ssh_key_type: rsa
-    ssh_key_comment: "{{ item.comment }} key generated by Ansible on $HOSTNAME"
-    ssh_key_bits: 2048
-    ssh_key_file: .ssh/id_rsa
-    update_password: on_create
-    password: "{{ item.pwd | password_hash('sha512') }}"
-  with_items:
-  - { user: "{{ rgm_user }}",  pwd: "{{ rgm_user_password }}",  home: '/home/rgm', comment: 'RGM user',  group: "{{ rgm_group }}", groups: 'wheel' }
-  - { user: "{{ rgma_user }}", pwd: "{{ rgma_user_password }}", home: "{{ rgm_root_path }}/rgma", comment: 'RGMA user', group: "{{ rgm_group }}", groups: '' }
-  no_log: True
+- name: "Import nagios tasks"
+  tags:
+    - install
+    - rgm_install
+    - nagios
+    - rgm_nagios
+  ansible.builtin.import_tasks: nagios/nagios.yml
 
-- name: create html subdir for rgma user
-  file:
-    path: "{{ item.path }}"
-    state: directory
-    owner: "{{ item.owner | default(rgma_user, true) }}"
-    group: "{{ item.owner | default(rgm_group, true) }}"
-    mode: "{{ item.mode }}"
-    seuser: system_u
-    serole: object_r
-    setype: "{{ item.setype }}"
-    selevel: s0
-  with_items:
-  - path: "{{ rgm_root_path }}/rgma/"
-    mode: '0750'
-    setype: 'user_home_dir_t'
-  - path: "{{ rgm_root_path }}/rgma/html"
-    owner: apache
-    mode: '0770'
-    setype: 'httpd_sys_rw_content_t'
+- name: "Import nagvis tasks"
+  tags:
+    - install
+    - rgm_install
+    - nagvis
+    - rgm_nagvis
+  ansible.builtin.import_tasks: nagvis/nagvis.yml
 
-- name: touch authorized_keys for rgma user
-  copy:
-    dest: "{{ rgm_root_path }}/rgma/.ssh/authorized_keys"
-    content: ''
-    owner: "{{ rgma_user }}"
-    group: "{{ rgm_group }}"
-    mode: '0640'
-    seuser: system_u
-    serole: object_r
-    setype: ssh_home_t
-    force: no
+- name: "Import notifier configure tasks"
+  tags:
+    - install
+    - rgm_install
+    - notifier
+    - rgm_notifier
+  ansible.builtin.import_tasks: notifier/notifier_configure.yml
 
-- name: ensure config symlink is present
-  file:
-    src: /etc/rgm
-    path: "{{ rgm_root_path }}/config"
-    owner: root
-    group: root
-    state: link
-  ignore_errors: yes
+- name: "Import nagflux tasks"
+  tags:
+    - install
+    - rgm_install
+    - nagflux
+    - rgm_nagflux
+  ansible.builtin.import_tasks: nagflux/nagflux.yml
 
-### configure chronyd
-- name: configure chrony daemon
-  include_tasks:
-    file:  ntp.yml
-    apply:
-      tags: ntp
-  tags: ntp
+- name: "Import lilac export tasks"
+  tags:
+    - install
+    - rgm_install
+    - lilac
+    - rgmexport
+    - rgm_lilac
+  ansible.builtin.import_tasks: lilac/lilac_export.yml
 
-
-### http/php base configuration
-- name: configure apache/php
-  include_tasks:
-    file: http.yml
-    apply:
-      tags: http
-  tags: http
-
-### configure Elastic Stack
-- name: configure elastic stack
-  include_tasks:
-    file: elastic.yml
-    apply:
-      tags: elastic
-  tags: elastic
-
-### configure Prometheus
-- name: configure prometheus
-  include_tasks:
-    file: prometheus.yml
-    apply:
-      tags: prometheus
-
-### Actually influxdb and nagflux are correctly pre-configured
-### out-of-the-box from their respective RPM package...
-### only Grafana needs some customization as the RPM package
-### comes untouched from upstream provided (Grafana Labs)
-- name: configure influxdb/nagflux/grafana/histou
-  include_tasks:
-    file: grafana.yml
-    apply:
-      tags: grafana
-  tags: grafana
-
-### various
-
-- name: kernel hardening (sysctl) following ANSII recomendations
-  copy:
-    src: sysctl_ansii.conf
-    dest: /etc/sysctl.d/ansii-fr.conf
-    owner: root
-    group: root
-    mode: 0644
-  register: sysctl_ansii
-
-- name: reload sysctl
-  service:
-    name: systemd-sysctl
-    state: restarted
-  when: sysctl_ansii.changed
-
-- name: set swappiness (sysctl)
-  sysctl:
-    name: vm.swappiness
-    value: "{{ sysctl_swappiness }}"
-    state: present
-    sysctl_file: "/etc/sysctl.d/98-swappiness.conf"
-    reload: yes
-
-### SSH hardening
-- block:
-  - name: disable weak SSH ECDSA host keys
-    copy:
-      content: ''
-      dest: "/etc/ssh/{{ item.file }}"
-      owner: root
-      group: root
-      mode: "{{ item.mode }}"
-    with_items:
-    - { file: ssh_host_ecdsa_key,     mode: '0400' }
-    - { file: ssh_host_ecdsa_key.pub, mode: '0644' }
-
-  - name: "SSH hardening"
-    lineinfile:
-      path: /etc/ssh/sshd_config
-      regexp: "{{ item.regex }}"
-      line: "{{ item.line }}"
-      insertafter: '^(#\s*)?UsePAM '
-    with_items:
-    - { regex: '^(#\s*)?PermitEmptyPasswords',         line: "PermitEmptyPasswords no" }
-    - { regex: '^(#\s*)?PermitRootLogin',              line: "PermitRootLogin without-password" }
-    - { regex: '^(#\s*)?StrictModes',                  line: "StrictModes yes" }
-    - { regex: '^HostKey /etc/ssh/ssh_host_ecdsa_key', line: "#HostKey /etc/ssh/ssh_host_ecdsa_key" }
-    - { regex: '^(#\s*)?Ciphers ',                     line: "Ciphers aes128-ctr,aes192-ctr,aes256-ctr" }
-    - { regex: '^(#\s*)?MACs ',                        line: "MACs hmac-sha2-512,hmac-sha2-256,hmac-ripemd160" }
-    - { regex: '^(#\s*)?KexAlgorithms ',               line: "KexAlgorithms diffie-hellman-group-exchange-sha256" }
-    - { regex: '^(#\s*)?RekeyLimit ',                  line: "RekeyLimit default 1200" }
-    - { regex: '^(#\s*)?TCPKeepAlive ',                line: "TCPKeepAlive yes" }
-    - { regex: '^(#\s*)?MaxSessions ',                 line: "MaxSessions 10" }
-  when: ssh_hardening
-
-### SSH keys
-- name: create nagios SSH key
-  command: ssh-keygen -t rsa -b 2048 -C "RGM Nagios ssh key on {{ ansible_hostname }}" -f /home/nagios/.ssh/id_rsa -N '' -q
-  args:
-    chdir: /home/nagios
-    creates: /home/nagios/.ssh/id_rsa
-  become: yes
-  become_user: nagios
-
-### Nagios configuration
-- name: ensure plugins symlink are present
-  shell: ln -s $(rpm -ql nagios-plugins-rgm | head -1) rgm
-  args:
-    chdir: "{{ rgm_root_path }}/nagios/plugins"
-    creates: "{{ rgm_root_path }}/nagios/plugins/rgm"
-
-- name: create temporary directory for non-volatile Nagios checks
-  file:
-    path: "{{ item }}"
-    state: directory
-    owner: "{{ nagios_user }}"
-    group: "{{ rgm_group }}"
-    mode: 0750
-  with_items:
-  - /var/tmp/check_esx
-
-### NagVis configuration
-- name: configure NagVis
-  ini_file:
-    path: "{{ rgm_root_path }}/nagvis/etc/nagvis.ini.php"
-    section: "{{ item.section }}"
-    option: "{{ item.option }}"
-    value: "{{ item.value }}"
-  with_items:
-  - { section: 'backend_live_1', option: 'socket', value: 'unix:/srv/rgm/nagios/var/log/rw/live' }
-  - { section: 'auth_mysql',     option: 'dbhost', value: '127.0.0.1' }
-  - { section: 'auth_mysql',     option: 'dbport', value: '3306' }
-  - { section: 'auth_mysql',     option: 'dbname', value: "{{ db_nagvis }}" }
-  - { section: 'auth_mysql',     option: 'dbuser', value: "{{ mariadb_user }}" }
-  - { section: 'auth_mysql',     option: 'dbpass', value: "{{ mariadb_pwd }}" }
-
-- name: put nagvis mysql db schema init script
-  template:
-    src: nagvis/init_sql.php.j2
-    dest: "{{ rgm_root_path }}/nagvis/share/frontend/nagvis-js/init_sql.php"
-    owner: root
-    group: apache
-    mode: 0640
-
-- name: force nagvis mysql schema initialization
-  command: "php {{ rgm_root_path }}/nagvis/share/frontend/nagvis-js/init_sql.php"
-  args:
-    chdir: "{{ rgm_root_path }}/nagvis/share/frontend/nagvis-js"
-  become: yes
-  become_user: apache
-  register: nagvis_init_sql
-  changed_when: nagvis_init_sql.rc > 0
-  failed_when: nagvis_init_sql.rc > 1
-
-
-### notifier configuration
-- name: configure notifier DBI ini file
-  ini_file:
-    path: /srv/rgm/notifier/etc/dbi.ini
-    section: dbi
-    option: "{{ item.option }}"
-    value: "{{ item.value }}"
-  with_items:
-  - { option: 'server', value: '127.0.0.1' }
-  - { option: 'database', value: "{{ db_notifier }}" }
-  - { option: 'user', value: "{{ mariadb_user }}" }
-  - { option: 'password', value: "{{ mariadb_pwd }}" }
-
-#- name: Reset cache file credential
-#  file:
-#    path : "{{ item }}"
-#    owner: apache
-#    group: apache
-#    mode: 0644
-#  with_fileglob: "{{ rgm_root_path }}/nagvis/var/nagvis-conf-*-cache"
-
-
-### nagflux specific
-
-- name: create nagios spool dir for nagvis
-  file:
-    path: /srv/rgm/nagflux/var/spool-nagios
-    owner: nagios
-    group: rgm
-    mode: 0770
-    state: directory
-
-### lilac export nagios config
-- name: check if hostname on {{ db_lilac }} db is correct
-  command: >
-    mysql --batch --skip-column-names {{ db_lilac }} --execute='SELECT name FROM nagios_host WHERE id = 1;'
-  register: lilac_rgm_host
-  changed_when: lilac_rgm_host.stdout != ansible_hostname
-
-- block:
-  - name: update hostname on {{ db_lilac }} config for RGM host entry
-    shell: echo "UPDATE nagios_host SET name = '$(hostname)' WHERE id = 1;" | mysql {{ db_lilac }}
-    tags: rgmexport
-
-  - name: get a valid RGMAPI token
-    uri:
-      url: "https://localhost/api/v2/token"
-      method: POST
-      body_format: form-urlencoded
-      body:
-        username: "{{ rgm_admin_user }}"
-        password: "{{ rgm_admin_password }}"
-      validate_certs: no
-      use_proxy: no
-      status_code: [200, 201]
-    register: auth_rgmapi
-    tags: rgmexport
-
-  - name: export Lilac configuration
-    uri:
-      url: "https://localhost/api/v2/nagios/export"
-      method: POST
-      body_format: json
-      body: '{ "jobName": "Nagios Export" }'
-      headers:
-        Authorization: "Bearer {{ auth_rgmapi.json.token }}"
-      validate_certs: no
-      use_proxy: no
-      status_code: [200, 201]
-    when: auth_rgmapi is succeeded
-    notify: service_reload_nagios
-    tags: rgmexport
-  when: lilac_rgm_host.changed
-
-### enable and start RGM services
-- name: enable RGM daemons
-  systemd:
+- name: "Enable RGM daemons"
+  loop: "{{ rgm_services }}"
+  tags:
+    - install
+    - rgm_install
+  ansible.builtin.systemd:
     name: "{{ item }}"
-    enabled: yes
-    masked: no
+    enabled: true
+    masked: false
     state: started
-  with_items: "{{ rgm_services }}"
 
-- name: update mlocate database
-  command: /usr/bin/updatedb -f "$nodevs"
+- name: "Update mlocate database"
+  ansible.builtin.command: /usr/bin/updatedb -f "$nodevs"
 
 ### 4any post-config
-- name: 4any post-configuration
-  include_tasks:
+- name: "4any post-configuration"
+  when: rgm_central_host is defined
+  tags:
+    - install
+    - rgm_install
+    - 4any
+  ansible.builtin.include_tasks:
     file: 4any.yml
     apply:
       tags: 4any
-  when: rgm_central_host is defined
-  tags: 4any
-  

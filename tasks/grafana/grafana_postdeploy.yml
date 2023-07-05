@@ -1,0 +1,24 @@
+---
+- name: "Grafana | Postdeploy | Install grafana core plugins"
+  loop: "{{ grafana_plugins_core }}"
+  retries: 3
+  delay: 2
+  register: grafana_plugins_core_installed
+  until: not grafana_plugins_core_installed.failed|bool
+  when: grafana_install_plugins_core|bool
+  notify: "Service restart grafana"
+  community.grafana.grafana_plugin:
+    name: "{{ item }}"
+    state: present
+
+- name: "Grafana | Postdeploy | Install grafana contrib plugins"
+  loop: "{{ grafana_plugins_contrib }}"
+  retries: 3
+  delay: 2
+  register: grafana_plugins_contrib_installed
+  until: not grafana_plugins_contrib_installed.failed|bool
+  when: grafana_install_plugins_contrib|bool
+  notify: "Service restart grafana"
+  community.grafana.grafana_plugin:
+    name: "{{ item }}"
+    state: present

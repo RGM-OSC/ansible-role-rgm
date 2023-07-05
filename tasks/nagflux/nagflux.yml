@@ -1,0 +1,8 @@
+---
+- name: "Nagflux | Create nagios spool dir for nagflux"
+  ansible.builtin.file:
+    path: "/srv/rgm/nagflux/var/spool-nagios"
+    owner: "nagios"
+    group: "rgm"
+    mode: "0770"
+    state: directory

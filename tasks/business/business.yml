@@ -1,0 +1,50 @@
+---
+- name: "Business | Check if RGM Business private key is present"
+  when:
+    - rgm_business_registration_id is iterable
+    - rgm_business_registration_id | length > 0
+  register: stat_rgm_business_key
+  tags:
+    - install
+    - business
+  ansible.builtin.stat:
+    path: "/etc/pki/tls/private/{{ rgm_business_registration_id }}.key"
+
+- name: "Business | Set RGM Business RPM repository to be activated"
+  when:
+    - stat_rgm_business_key is defined
+    - stat_rgm_business_key.stat is defined
+    - stat_rgm_business_key.stat.exists
+  tags:
+    - install
+    - business
+  block:
+    - name: "Business | Update facts for rgm business"
+      ansible.builtin.set_fact:
+        enable_rgm_repo_business: true
+
+    - name: "Business | Enable stable RGMB repositories"
+      loop:
+        - { filename: 'rgmb', section: 'rgm-business-stable' }
+      notify: "Yum regenerate cache"
+      community.general.ini_file:
+        path: "/etc/yum.repos.d/{{ item.path }}.repo"
+        section: "{{ item.section }}"
+        option: "enabled"
+        value: "1"
+        owner: "root"
+        group: "root"
+        mode: "0644"
+
+    - name: "Business | Install business packages"
+      tags:
+        - install
+        - business
+      ansible.builtin.yum:
+        state: present
+        name:
+          - rgm-business-base
+
+    - name: "Business | Import rawhide tasks"
+      when: enable_rawhide
+      ansible.builtin.import_tasks: business/business_rawhide.yml

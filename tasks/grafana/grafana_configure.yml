@@ -1,0 +1,76 @@
+---
+- name: "Grafana | Configure | Copy grafana patches"
+  loop:
+    - { mode: '0644', src: grafana/grafana_icon.svg, dest: /usr/share/grafana/public/img/grafana_icon.svg } # noqa yaml[commas]
+    - { mode: '0740', src: grafana/grafana_rgm.sh,   dest: /etc/grafana/grafana_rgm.sh } # noqa yaml[commas]
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+
+- name: "Grafana | Configure | Apply patches to align Grafana theme on RGM theme"
+  register: grafana_patch
+  failed_when: grafana_patch.rc == 255
+  changed_when: grafana_patch.rc > 0
+  when: grafana_apply_patches
+  ansible.builtin.command: /etc/grafana/grafana_rgm.sh
+
+- name: "Grafana | Configure | Configure grafana.ini file" # noqa risky-file-permissions
+  loop:
+    - { section: 'paths',              option: 'logs',                 value: '/var/log/grafana' } # noqa yaml[commas] yaml[line-length]
+    - { section: 'paths',              option: 'plugins',              value: '/var/lib/grafana/plugins' } # noqa yaml[commas] yaml[line-length]
+    - { section: 'server',             option: 'protocol',             value: 'http' } # noqa yaml[commas] yaml[line-length]
+    - { section: 'server',             option: 'http_addr',            value: "{{ grafana_http_addr }}" } # noqa yaml[commas] yaml[line-length]
+    - { section: 'server',             option: 'http_port',            value: "{{ grafana_http_port }}" } # noqa yaml[commas] yaml[line-length]
+    - { section: 'server',             option: 'domain',               value: "{{ grafana_domain }}" } # noqa yaml[commas] yaml[line-length]
+    - { section: 'server',             option: 'root_url',             value: "http://{{ grafana_domain }}{{ grafana_root_url }}/" } # noqa yaml[commas] yaml[line-length]
+    - { section: 'analytics',          option: 'reporting_enabled',    value: 'false' } # noqa yaml[commas] yaml[line-length]
+    - { section: 'analytics',          option: 'check_for_updates',    value: 'false' } # noqa yaml[commas] yaml[line-length]
+    - { section: 'database',           option: 'type',                 value: 'mysql' } # noqa yaml[commas] yaml[line-length]
+    - { section: 'database',           option: 'host',                 value: '127.0.0.1:3306' } # noqa yaml[commas] yaml[line-length]
+    - { section: 'database',           option: 'name',                 value: "{{ db_grafana }}" } # noqa yaml[commas] yaml[line-length]
+    - { section: 'database',           option: 'user',                 value: "{{ mariadb_user }}" } # noqa yaml[commas] yaml[line-length]
+    - { section: 'database',           option: 'password',             value: "{{ mariadb_pwd }}" } # noqa yaml[commas] yaml[line-length]
+    - { section: 'security',           option: 'admin_user',           value: 'admin' } # noqa yaml[commas] yaml[line-length]
+    - { section: 'security',           option: 'allow_embedding',      value: 'true' } # noqa yaml[commas] yaml[line-length]
+    - { section: 'users',              option: 'default_theme',        value: 'light' } # noqa yaml[commas] yaml[line-length]
+    - { section: 'auth',               option: 'disable_login_form',   value: 'true' } # noqa yaml[commas] yaml[line-length]
+    - { section: 'auth',               option: 'disable_signout_menu', value: 'true' } # noqa yaml[commas] yaml[line-length]
+    - { section: 'auth.anonymous',     option: 'enabled',              value: 'true' } # noqa yaml[commas] yaml[line-length]
+    - { section: 'auth.anonymous',     option: 'org_role',             value: 'Viewer' } # noqa yaml[commas] yaml[line-length]
+    - { section: 'auth.github',        option: 'enabled',              value: 'false' } # noqa yaml[commas] yaml[line-length]
+    - { section: 'auth.google',        option: 'enabled',              value: 'false' } # noqa yaml[commas] yaml[line-length]
+    - { section: 'auth.generic_oauth', option: 'enabled',              value: 'false' } # noqa yaml[commas] yaml[line-length]
+    - { section: 'auth.grafana_com',   option: 'enabled',              value: 'false' } # noqa yaml[commas] yaml[line-length]
+    - { section: 'auth.proxy',         option: 'enabled',              value: 'true' } # noqa yaml[commas] yaml[line-length]
+    - { section: 'auth.proxy',         option: 'header_name',          value: 'X-WEBAUTH-USER' } # noqa yaml[commas] yaml[line-length]
+    - { section: 'auth.proxy',         option: 'header_property',      value: 'username' } # noqa yaml[commas] yaml[line-length]
+    - { section: 'auth.proxy',         option: 'auto_sign_up',         value: 'false' } # noqa yaml[commas] yaml[line-length]
+    - { section: 'auth.basic',         option: 'enabled',              value: 'false' } # noqa yaml[commas] yaml[line-length]
+    - { section: 'auth.ldap',          option: 'enabled',              value: 'false' } # noqa yaml[commas] yaml[line-length]
+  notify: "Service restart grafana"
+  register: grafana_ini_changed
+  community.general.ini_file:
+    path: /etc/grafana/grafana.ini
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+
+- name: "Grafana | Configure | Create histoujs symlink on Grafana public dir"
+  ansible.builtin.file:
+    path: /usr/share/grafana/public/dashboards/histou.js
+    src: /srv/rgm/histou/histou.js
+    state: link
+    mode: "0644"
+
+- name: "Grafana | Configure | Set grafana datasources and dashboards"
+  loop:
+    - { src: rgm_ds.yml.j2, dest: datasources/rgm_ds.yaml }
+  ansible.builtin.template:
+    src: "grafana/{{ item.src }}"
+    dest: "/etc/grafana/provisioning/{{ item.dest }}"
+    owner: "root"
+    group: "grafana"
+    mode: "0640"

@@ -1,0 +1,23 @@
+---
+- name: "Elastic | Curator | Deploy curator configurations"
+  loop:
+    - { src: 'elastic/curator_actions.yml.j2',    dst: '/etc/elasticsearch/actions.yml' } # noqa yaml[commas]
+    - { src: 'elastic/curator.yml.j2',            dst: '/etc/elasticsearch/curator.yml' } # noqa yaml[commas]
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dst }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+
+- name: "Elastic | Curator | Set cron job for curator"
+  notify: "Service restart crond"
+  ansible.builtin.copy:
+    content: |
+      # Ansible managed
+      10 0 * * * root /usr/bin/curator --config /etc/elasticsearch/curator.yml /etc/elasticsearch/actions.yml > /dev/null
+      # LF which change the life
+    dest: "/etc/cron.d/elastic_curator"
+    owner: "root"
+    group: "root"
+    mode: "0644"

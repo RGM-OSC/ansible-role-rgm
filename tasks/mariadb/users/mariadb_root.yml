@@ -1,0 +1,39 @@
+---
+- name: "MariaDB | Users | Root | Check if user is password protected"
+  register: mariadb_status
+  ignore_errors: true
+  community.mysql.mysql_info:
+    config_file: ''
+    login_unix_socket: "{{ mariadb.socket }}"
+    filter: version
+
+- name: "MariaDB | Users | Root | Define user password"
+  when:
+    - not mariadb_status.failed
+  block:
+    - name: "MariaDB | Users | Root | Generate random password"
+      no_log: true
+      ansible.builtin.set_fact:
+        mariadb_root_password: "{{ lookup('password', '/dev/null length=16 chars=ascii_letters,digits,-,_,!,.,*') }}"
+
+    - name: "MariaDB | Users | Root | Set password"
+      no_log: true
+      community.mysql.mysql_user:
+        login_unix_socket: "{{ mariadb.socket }}"
+        config_file: ''
+        name: "root"
+        password: "{{ mariadb_root_password }}"
+        check_implicit_admin: true
+        state: present
+
+    - name: "MariaDB | Users | Root | Set .my.cnf for root user"
+      vars:
+        mariadbuser: "root"
+        mariadbpasswd: "{{ mariadb_root_password }}"
+      no_log: true
+      ansible.builtin.template:
+        src: mariadb/my.cnf.j2
+        dest: "/root/.my.cnf"
+        owner: "root"
+        group: "root"
+        mode: "0600"

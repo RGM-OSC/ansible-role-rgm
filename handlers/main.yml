@@ -1,89 +1,91 @@
 ---
 # handlers file for role-rgm
 # vim: bs=2 sw=2 expandtab:
+- name: "Yum regenerate cache"
+  ansible.builtin.yum:
+    update_cache: true
 
-- name: service_restart_mariadb
-  service:
+- name: "Service restart mariadb"
+  ansible.builtin.service:
     name: mariadb
     state: restarted
 
-- name: service_reload_http
-  service:
+- name: "Service reload http"
+  ansible.builtin.service:
     name: httpd
     state: reloaded
 
-- name: service_restart_firewalld
-  service:
+- name: "Service restart firewalld"
+  ansible.builtin.service:
     name: firewalld
     state: restarted
 
-- name: service_reload_nagios
-  service:
+- name: "Service reload nagios"
+  ansible.builtin.service:
     name: nagios
     state: reloaded
 
-- name: service_reload_ged
-  service:
+- name: "Service reload ged"
+  ansible.builtin.service:
     name: gedd
     state: reloaded
 
-- name: service_restart_chrony
-  service:
+- name: "Service restart chrony"
+  ansible.builtin.service:
     name: chronyd
     state: restarted
 
-- name: service_reload_crond
-  service:
+- name: "Service restart crond"
+  ansible.builtin.service:
     name: crond
     state: reloaded
 
-- name: service_restart_elasticsearch
-  service:
+- name: "Service restart elasticsearch"
+  ansible.builtin.service:
     name: elasticsearch
     state: restarted
 
-- name: service_restart_kibana
-  service:
+- name: "Service restart kibana"
+  ansible.builtin.service:
     name: kibana
     state: restarted
 
-- name: service_restart_metricbeat
-  service:
+- name: "Service restart metricbeat"
+  ansible.builtin.service:
     name: metricbeat
     state: restarted
 
-- name: service_restart_filebeat
-  service:
+- name: "Service restart filebeat"
+  ansible.builtin.service:
     name: filebeat
     state: "{{ filebeat_enabled | ternary('restarted', 'stopped') }}"
 
-- name: service_restart_influxdb
-  service:
+- name: "Service restart influxdb"
+  ansible.builtin.service:
     name: influxdb
     state: restarted
 
-- name: service_restart_nagflux
-  service:
+- name: "Service restart nagflux"
+  ansible.builtin.service:
     name: nagflux
     state: restarted
 
-- name: service_restart_grafana
-  service:
+- name: "Service restart grafana"
+  ansible.builtin.service:
     name: grafana-server
     state: restarted
 
-- name: service_restart_prometheus
-  service:
+- name: "Service restart prometheus"
+  ansible.builtin.service:
     name: prometheus
     state: restarted
 
-- name: service_restart_influxdb_exporter
-  service:
+- name: "Service restart influxdb exporter"
+  ansible.builtin.service:
     name: influxdb_exporter
     state: restarted
 
-- name: service_restart_xinetd
-  service:
+- name: "Service restart xinetd"
+  ansible.builtin.service:
     name: xinetd
     state: restarted
-

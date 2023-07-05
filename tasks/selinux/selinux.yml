@@ -1,0 +1,5 @@
+---
+# TODO: Configure RGM to work smoothly *with* selinux enabled
+- name: "SELinux | Disable SELinux"
+  ansible.posix.selinux:
+    state: disabled

@@ -1,0 +1,28 @@
+---
+- name: "Prerequisites | Rawhide | Disable stable SCC and RGM repositories"
+  loop:
+    - { filename: scc, section: 'scc-services-stable' }
+    - { filename: rgm, section: 'rgm-community-stable' }
+  notify: "Yum regenerate cache"
+  community.general.ini_file:
+    path: "/etc/yum.repos.d/{{ item.path }}.repo"
+    section: "{{ item.section }}"
+    option: "enabled"
+    value: "0"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+
+- name: "Prerequisites | Rawhide | Enable rawhide SCC and RGM repositories"
+  loop:
+    - { filename: scc, section: 'scc-services-rawhide' }
+    - { filename: rgm, section: 'rgm-community-rawhide' }
+  notify: "Yum regenerate cache"
+  community.general.ini_file:
+    path: "/etc/yum.repos.d/{{ item.path }}.repo"
+    section: "{{ item.section }}"
+    option: "enabled"
+    value: "1"
+    owner: "root"
+    group: "root"
+    mode: "0644"

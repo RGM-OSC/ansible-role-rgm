@@ -1,0 +1,31 @@
+---
+- name: "NTP | Ensure Chronyd is running"
+  ansible.builtin.systemd:
+    name: chronyd
+    enabled: true
+    state: started
+
+- name: "NTP | Retrieve chronyd tracking status" # noqa risky-shell-pipe
+  register: chrony_tracking
+  ansible.builtin.shell: chronyc tracking | grep '^Leap status'
+  args:
+    executable: /bin/bash
+
+- name: "NTP | Configure and restart chrony" # noqa risky-shell-pipe
+  when: chrony_tracking.stdout | regex_search('Not synchronised')
+  block:
+    - name: "NTP | Set chrony config file"
+      ansible.builtin.template:
+        src: chrony.conf.j2
+        dest: /etc/chrony.conf
+        owner: "root"
+        group: "root"
+        mode: "0644"
+
+    - name: "NTP | Restart Chronyd with new config"
+      ansible.builtin.systemd:
+        name: chronyd
+        state: restarted
+
+    - name: "NTP | Force chronyd to correct time offsets"
+      ansible.builtin.command: chronyc makestep

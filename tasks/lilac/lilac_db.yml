@@ -1,0 +1,38 @@
+---
+- name: "Lilac | DB | Check if lilac schema is filled"
+  register: lilac_schema
+  ignore_errors: true
+  community.mysql.mysql_query:
+    config_file: "/root/.my.cnf"
+    login_db: "{{ db_lilac }}"
+    query: 'SELECT value FROM lilac_configuration WHERE `key` = "db_build"'
+
+- name: "Lilac | DB | Setup Lilac database"
+  when: lilac_schema.failed
+  block:
+    - name: "Lilac | DB | Inject default Lilac schema"
+      register: lilac_schema_inject
+      changed_when: lilac_schema_inject.rc == 1
+      failed_when: lilac_schema_inject.rc == 2
+      ansible.builtin.shell: "mysql {{ db_lilac }} < /var/lib/rgm/lilac/lilac-rgm.sql"
+      args:
+        executable: /bin/bash
+
+    - name: "Lilac | DB | Update AUTO_INCREMENT for customer"
+      ansible.builtin.command: /usr/sbin/rgm-lilac-manage-auto-increments -s
+
+- name: "Lilac | DB | Check if procedures are present"
+  register: lilac_procedures
+  community.mysql.mysql_query:
+    config_file: "/root/.my.cnf"
+    login_db: "mysql"
+    query: "SELECT COUNT(routine_name) FROM information_schema.routines WHERE routine_type = 'PROCEDURE' AND routine_schema = '{{ db_lilac }}'"
+
+- name: "Lilac | DB | Inject default lilac procedures"
+  when: lilac_procedures.rowcount[0] == 0
+  register: lilac_procedures_inject
+  changed_when: lilac_procedures_inject.rc == 1
+  failed_when: lilac procedures_inject.rc == 2
+  ansible.builtin.shell: "mysql {{ db_lilac }} < /var/lib/rgm/lilac/lilac-procedures.sql"
+  args:
+    executable: /bin/bash

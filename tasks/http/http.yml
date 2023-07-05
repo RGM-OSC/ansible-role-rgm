@@ -1,0 +1,9 @@
+---
+- name: "HTTP | Ensure Apache/PHP is installed"
+  ansible.builtin.yum:
+    update_cache: false
+    name: "{{ packages.apache }}"
+    state: present
+
+- name: "HTTP | Import configure tasks"
+  ansible.builtin.import_tasks: http/http_configure.yml

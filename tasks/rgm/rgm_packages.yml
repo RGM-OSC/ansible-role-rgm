@@ -1,0 +1,21 @@
+---
+- name: "RGM | Packages | Install RGM Packages (it may take some time...)"
+  retries: 10
+  delay: 2
+  register: yum_result
+  until: yum_result.rc == 0
+  ansible.builtin.yum:
+    update_cache: true
+    name: "{{ packages.system + packages.apache + packages.elastic + packages.influx_grafana + packages.prometheus + packages.rgm + packages.partners + extra_packages }}" # noqa yaml[line-length]
+    state: present
+
+- name: "RGM | Packages | Ensure correct capabilities for binaries"
+  loop:
+    - { path: '/usr/bin/ping', caps: 'cap_net_admin,cap_net_raw+p' }
+  tags:
+    - set_capabilities
+    - rgm_set_capabilities
+  community.general.capabilities:
+    path: "{{ item.path }}"
+    capability: "{{ item.caps }}"
+    state: present

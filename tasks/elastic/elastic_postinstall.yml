@@ -1,0 +1,11 @@
+---
+- name: "Elastic | Postinstall | Ensure ES data path is owned by elasticsearch user"
+  ansible.builtin.file:
+    path: "/var/lib/elasticsearch"
+    recurse: true
+    owner: "elasticsearch"
+    group: "elasticsearch"
+    seuser: "system_u"
+    serole: "object_r"
+    setype: "var_lib_t"
+    selevel: "s0"

@@ -1,0 +1,26 @@
+---
+- name: "Prometheus | Ensure prometheus is installed"
+  tags:
+    - packages
+  ansible.builtin.yum:
+    update_cache: false
+    name: "{{ packages.prometheus }}"
+    state: present
+
+- name: "Prometheus | Import prometheus postinstall tasks"
+  ansible.builtin.import_tasks: prometheus/prometheus_postinstall.yml
+
+- name: "Prometheus | Import prometheus configure tasks"
+  ansible.builtin.import_tasks: prometheus/prometheus_configure.yml
+
+- name: "Prometheus | Ensure prometheus services are running"
+  loop:
+    - prometheus
+    - node_exporter
+    - influxdb_exporter
+    - elasticsearch_exporter
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: true
+    masked: false
+    state: started
