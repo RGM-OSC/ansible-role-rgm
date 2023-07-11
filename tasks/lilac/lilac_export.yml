@@ -5,7 +5,7 @@
   community.mysql.mysql_query:
     config_file: '/root/.my.cnf'
     login_db: "{{ db_lilac }}"
-    query: "UPDATE nagios_host SET name = '{{ ansible_fqdn }}' WHERE id = 1;"
+    query: "UPDATE nagios_host SET name = '{{ ansible_nodename }}' WHERE id = 1;"
 
 - name: "Lilac | Export | Get a valid RGMAPI token"
   register: auth_rgmapi
