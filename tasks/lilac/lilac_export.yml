@@ -2,6 +2,7 @@
 - name: "Lilac | Export | Update hostname on {{ db_lilac }} config for RGM host entry" # noqa name[template]
   tags:
     - rgmexport
+    - rgm_host_rename
   community.mysql.mysql_query:
     config_file: '/root/.my.cnf'
     login_db: "{{ db_lilac }}"
@@ -11,6 +12,7 @@
   register: auth_rgmapi
   tags:
     - rgmexport
+    - rgm_host_rename
   ansible.builtin.uri:
     url: "https://localhost/api/v2/token"
     method: POST
@@ -27,6 +29,7 @@
   notify: "Service reload nagios"
   tags:
     - rgmexport
+    - rgm_host_rename
   ansible.builtin.uri:
     url: "https://localhost/api/v2/nagios/export"
     method: POST

@@ -182,6 +182,14 @@
     - rgm_lilac
   ansible.builtin.import_tasks: lilac/lilac_export.yml
 
+- name: "Import NagiosBP tasks"
+  tags:
+    - install
+    - rgm_install
+    - nagiosbp
+    - rgm_nagiosbp
+  ansible.builtin.import_tasks: nagiosbp/nagiosbp.yml
+
 - name: "Enable RGM daemons"
   loop: "{{ rgm_services }}"
   tags:

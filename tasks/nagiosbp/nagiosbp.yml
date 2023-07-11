@@ -1,0 +1,24 @@
+---
+# FIXME: Find a cleaner method
+- name: "NagiosBP | Get RGM server hostname from nagios bp"
+  tags:
+    - rgm_host_rename
+  register: nagiosbp_default_rgm_hostname
+  community.mysql.mysql_query:
+    config_file: '/root/.my.cnf'
+    login_db: "{{ db_nagiosbp }}"
+    query: "SELECT DISTINCT(host) FROM bp_services WHERE bp_name = 'rgm_server';"
+
+- name: "NagiosBP | Replace default RGM hostname in nagios bp configuration"
+  tags:
+    - rgm_host_rename
+  changed_when: false
+  ansible.builtin.command: "sed -i 's|{{ nagiosbp_default_rgm_hostname.query_result[0][0].host }};|{{ ansible_nodename }};|g' /srv/rgm/nagiosbp/etc/nagios-bp.conf"
+
+- name: "NagiosBP | Update hostname for default nagios bp"
+  tags:
+    - rgm_host_rename
+  community.mysql.mysql_query:
+    config_file: '/root/.my.cnf'
+    login_db: "{{ db_nagiosbp }}"
+    query: "UPDATE bp_services SET host = '{{ ansible_nodename }}' WHERE bp_name = 'rgm_server';"
