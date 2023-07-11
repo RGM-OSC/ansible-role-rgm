@@ -24,17 +24,34 @@
         enable_rgm_repo_business: true
 
     - name: "Business | Enable stable RGMB repositories"
+      when: not enable_rawhide
       loop:
-        - { filename: 'rgmb', section: 'rgm-business-stable' }
+        - { filename: 'rgmb', section: 'rgm-business-stable', enable: '1' }
+        - { filename: 'rgmb', section: 'rgm-business-rawhide', enable: '0' }
       notify: "Yum regenerate cache"
       community.general.ini_file:
-        path: "/etc/yum.repos.d/{{ item.path }}.repo"
+        path: "/etc/yum.repos.d/{{ item.filename }}.repo"
         section: "{{ item.section }}"
         option: "enabled"
-        value: "1"
+        value: "{{ item.enable }}"
         owner: "root"
         group: "root"
         mode: "0644"
+
+    - name: "Business | Rawhide | Disable stable RGMB repositories"
+      when: enable_rawhide
+      loop:
+        - { filename: 'rgmb', section: 'rgm-business-stable', enable: '0' }
+        - { filename: 'rgmb', section: 'rgm-business-rawhide', enable: '1' }
+      notify: "Yum regenerate cache"
+      community.general.ini_file:
+        path: "/etc/yum.repos.d/{{ item.filename }}.repo"
+        section: "{{ item.section }}"
+        option: "enabled"
+        value: "{{ item.enable }}"
+        owner: "root"
+        group: "root"
+        mode: "0640"
 
     - name: "Business | Install business packages"
       tags:
@@ -45,6 +62,8 @@
         name:
           - rgm-business-base
 
-    - name: "Business | Import rawhide tasks"
-      when: enable_rawhide
-      ansible.builtin.import_tasks: business/business_rawhide.yml
+    - name: "Business | Import BED tasks"
+      tags:
+        - install
+        - business
+      ansible.builtin.import_tasks: business/business_bed.yml
