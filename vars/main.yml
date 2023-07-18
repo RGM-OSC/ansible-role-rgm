@@ -8,7 +8,7 @@ mariadb:
 
 bed:
   stargate_scc:
-    health_url: 'https://heavendoor.scc-services.fr/api/v1/health'
+    health_url: 'https://stargate.scc-services.fr/api/v1/health'
 
 ### RPM packages ###
 packages:

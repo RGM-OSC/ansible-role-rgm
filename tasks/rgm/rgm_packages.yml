@@ -9,6 +9,14 @@
     name: "{{ packages.system + packages.apache + packages.elastic + packages.influx_grafana + packages.prometheus + packages.rgm + packages.partners + extra_packages }}" # noqa yaml[line-length]
     state: present
 
+- name: "RGM | Packages | Install business packages"
+  tags:
+    - business
+  ansible.builtin.yum:
+    state: present
+    name:
+      - bed-rgm-client
+
 - name: "RGM | Packages | Ensure correct capabilities for binaries"
   loop:
     - { path: '/usr/bin/ping', caps: 'cap_net_admin,cap_net_raw+p' }

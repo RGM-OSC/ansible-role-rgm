@@ -12,6 +12,9 @@
 
 - name: "Business | BED | Ensure bed can contact SCC infra"
   register: heavendoor_status
+  retries: 3
+  delay: 20
+  until: heavendoor_status.status|int == 200
   ansible.builtin.uri:
     url: '{{ bed.stargate_scc.health_url }}'
 
