@@ -1,0 +1,22 @@
+---
+- name: "Business | Teleport | Ensure scc-artifact-release is installed"
+  ansible.builtin.yum:
+    name:
+      - scc-artifacts-release
+      - yum-plugin-versionlock
+    state: present
+
+- name: "Business | Teleport | Enable teleport repository"
+  community.general.ini_file:
+    path: '/etc/yum.repos.d/scc-artifacts.repo'
+    section: 'scc-teleport'
+    option: 'enabled'
+    value: '1'
+
+- name: "Business | Teleport | Set lock for teleport version"
+  community.general.yum_versionlock:
+    name: "0:teleport-{{ rgm_teleport_version }}*"
+
+- name: "Business | Teleport | Install teleport"
+  ansible.builtin.yum:
+    name: rgm-teleport

@@ -7,6 +7,8 @@ rgm_admin_password: 'admin'
 
 rgm_root_path: /srv/rgm
 
+rgm_teleport_version: '12'
+
 # system users/groups
 rgm_user: rgm
 rgm_user_password: changeme

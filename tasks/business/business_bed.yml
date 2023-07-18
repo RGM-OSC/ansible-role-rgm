@@ -6,20 +6,30 @@
     masked: false
     daemon_reload: true
 
+- name: "Business | BED | Pause until stargate firewall opening"
+  ansible.builtin.pause:
+    minutes: 1
+
 - name: "Business | BED | Ensure bed can contact SCC infra"
   register: heavendoor_status
   ansible.builtin.uri:
     url: '{{ bed.stargate_scc.health_url }}'
 
-- name: "Business | BED | Ensure bed-ping is started" # noqa no-handler
-  when: heavendoor_status.status == '200'
-  loop:
-    - bed-ping
-    - bed-runner
-    - bed-metro
-  ansible.builtin.systemd:
-    name: "{{ item }}"
-    state: started
-    enabled: true
-    masked: false
-    daemon_reload: true
+- name: "Business | BED | Post install tasks if BED work"
+  when: heavendoor_status.status|int == 200
+  block:
+    - name: "Business | BED | Ensure bed-ping is started" # noqa no-handler
+      loop:
+        - bed-ping
+        - bed-runner
+        - bed-metro
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+        masked: false
+        daemon_reload: true
+
+
+    - name: "Business | BED | Import Teleport tasks"
+      ansible.builtin.import_tasks: business/business_teleport.yml
