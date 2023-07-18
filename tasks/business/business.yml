@@ -60,6 +60,10 @@
       ansible.builtin.yum:
         state: present
         name:
+          - bed
+          - bed-common
+          - bed-client
+          - bed-rgm-client
           - rgm-business-base
 
     - name: "Business | Import BED tasks"
