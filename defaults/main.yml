@@ -4,10 +4,9 @@
 
 rgm_admin_user: 'admin'
 rgm_admin_password: 'admin'
+rgm_rawhide: false
 
 rgm_root_path: /srv/rgm
-
-rgm_teleport_version: '12'
 
 # system users/groups
 rgm_user: rgm
@@ -21,9 +20,6 @@ prometheus_user: prometheus
 
 # RGM Business licensed customer id
 rgm_business_registration_id:
-
-# Allow "Rawhide" (devel) RPM repositories
-enable_rawhide: false
 
 # internal MariaDB user used by RGM applications
 mariadb_user: 'rgminternal'
@@ -39,7 +35,6 @@ db_grafana: 'grafana'
 db_nagvis: 'nagvis'
 db_notifier: 'notifier'
 db_thruk_log: 'thruk_log_cache'
-db_nagiosbp: 'nagiosbp'
 
 # lilac schema expected version
 db_lilac_schema_version: '61'
@@ -53,7 +48,7 @@ ntp_servers:
 # SSH hardening is enabled by default
 ssh_hardening: true
 
-### Elasticsearch related defaults
+### Elasticsearch related defaults
 
 # Maximum allowed JVM heap size value (in MB)
 max_jvm_heapsize: 8
@@ -66,7 +61,7 @@ es_shards_replicas: 0
 # Elasticsearch Curator values
 curator:
   close_indices_delay: 2
-  delete_indices_delay: 30
+  delete_indices_delay: 7
 
 ### Grafana variables
 grafana_http_addr: '127.0.0.1'
@@ -106,6 +101,6 @@ extra_packages: []
 
 ### Apache HTTPd server customization
 # apache SSLCertificateFile directive
-http_ssl_cert_file: /etc/pki/tls/certs/localhost.crt
+http_ssl_cert_file: /etc/pki/tls/certs/rgm.crt
 # apache SSLCertificateKeyFile directive
-http_ssl_key_file: /etc/pki/tls/private/localhost.key
+http_ssl_key_file: /etc/pki/tls/private/rgm.key
