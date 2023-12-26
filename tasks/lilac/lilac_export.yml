@@ -24,6 +24,13 @@
     use_proxy: false
     status_code: [200, 201]
 
+- name: "Lilac | Export | Ensure nagios is started before lilac export"
+  ansible.builtin.systemd:
+    name: "nagios"
+    enabled: true
+    masked: false
+    state: started
+
 - name: "Lilac | Export | Export Lilac configuration"
   when: auth_rgmapi is succeeded
   notify: "Service reload nagios"
