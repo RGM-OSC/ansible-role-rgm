@@ -7,6 +7,24 @@
     update_cache: false
     name: "{{ packages.mariadb }}"
 
+- name: "MariaDB | Install | Install additionnal packages for EL7"
+  when:
+    - ansible_distribution_major_version|int == 7
+  tags:
+    - packages
+    - rgm_packages
+  ansible.builtin.yum:
+    name: "{{ packages.mariadb_el7 }}"
+
+- name: "MariaDB | Install | Install additionnal packages for EL9"
+  when:
+    - ansible_distribution_major_version|int >= 9
+  tags:
+    - packages
+    - rgm_packages
+  ansible.builtin.yum:
+    name: "{{ packages.mariadb_el9 }}"
+
 - name: "MariaDB | Install | Ensure MariaDB is up and running"
   ansible.builtin.systemd:
     name: mariadb

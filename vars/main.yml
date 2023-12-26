@@ -15,7 +15,10 @@ packages:
   mariadb:
     - mariadb-server
     - mariadb
+  mariadb_el7:
     - python2-PyMySQL
+  mariadb_el9:
+    - python3-PyMySQL
   system:
     - bash-completion
     - bzip2
