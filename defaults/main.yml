@@ -35,6 +35,7 @@ db_grafana: 'grafana'
 db_nagvis: 'nagvis'
 db_notifier: 'notifier'
 db_thruk_log: 'thruk_log_cache'
+db_nagiosbp: 'nagiosbp'
 db_ged: 'ged'
 
 # lilac schema expected version
