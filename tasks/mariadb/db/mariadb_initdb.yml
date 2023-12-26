@@ -7,6 +7,7 @@
     - { name: "{{ db_lilac }}_tmp", user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" } # noqa yaml[commas]
     - { name: "{{ db_notifier }}",  user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" } # noqa yaml[commas]
     - { name: "{{ db_thruk_log }}", user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" } # noqa yaml[commas]
+    - { name: "{{ db_ged }}",       user: "{{ mariadb_user }}", pwd: "{{ mariadb_pwd }}" } # noqa yaml[commas]
   ansible.builtin.include_tasks:
     file: mariadb/db/mariadb_processdb.yml
     apply:

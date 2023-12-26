@@ -4,7 +4,7 @@
 
 rgm_admin_user: 'admin'
 rgm_admin_password: 'admin'
-rgm_rawhide: false
+enable_rawhide: false
 
 rgm_root_path: /srv/rgm
 
@@ -35,6 +35,7 @@ db_grafana: 'grafana'
 db_nagvis: 'nagvis'
 db_notifier: 'notifier'
 db_thruk_log: 'thruk_log_cache'
+db_ged: 'ged'
 
 # lilac schema expected version
 db_lilac_schema_version: '61'
