@@ -9,56 +9,67 @@
   ansible.builtin.service:
     name: mariadb
     state: restarted
+    enabled: true
 
 - name: "Service reload http"
   ansible.builtin.service:
     name: httpd
     state: reloaded
+    enabled: true
 
 - name: 'Service reload fpm'
   ansible.builtin.service:
     name: php-fpm
     state: reloaded
+    enabled: true
 
 - name: "Service restart firewalld"
   ansible.builtin.service:
     name: firewalld
     state: restarted
+    enabled: true
 
 - name: "Service reload nagios"
   ansible.builtin.service:
     name: nagios
     state: reloaded
+    enabled: true
 
 - name: "Service reload ged"
   ansible.builtin.service:
     name: gedd
     state: reloaded
+    enabled: true
 
 - name: "Service restart chrony"
   ansible.builtin.service:
     name: chronyd
     state: restarted
+    enabled: true
 
 - name: "Service restart crond"
   ansible.builtin.service:
     name: crond
     state: reloaded
+    enabled: true
 
 - name: "Service restart elasticsearch"
   ansible.builtin.service:
     name: elasticsearch
     state: restarted
+    enabled: true
 
 - name: "Service restart kibana"
   ansible.builtin.service:
     name: kibana
     state: restarted
+    enabled: true
 
 - name: "Service restart metricbeat"
   ansible.builtin.service:
     name: metricbeat
     state: restarted
+    enabled: true
 
 - name: "Service restart filebeat"
   ansible.builtin.service:
@@ -69,28 +80,34 @@
   ansible.builtin.service:
     name: influxdb
     state: restarted
+    enabled: true
 
 - name: "Service restart nagflux"
   ansible.builtin.service:
     name: nagflux
     state: restarted
+    enabled: true
 
 - name: "Service restart grafana"
   ansible.builtin.service:
     name: grafana-server
     state: restarted
+    enabled: true
 
 - name: "Service restart prometheus"
   ansible.builtin.service:
     name: prometheus
     state: restarted
+    enabled: true
 
 - name: "Service restart influxdb exporter"
   ansible.builtin.service:
     name: influxdb_exporter
     state: restarted
+    enabled: true
 
 - name: "Service restart xinetd"
   ansible.builtin.service:
     name: xinetd
     state: restarted
+    enabled: true
