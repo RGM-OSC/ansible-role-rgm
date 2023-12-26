@@ -30,6 +30,139 @@
     group: "root"
     mode: "0640"
 
+- name: 'Fix seccomp for EL 9 based system'
+  when: ansible_distribution_major_version|int >= 9
+  notify: "Service restart metricbeat"
+  ansible.builtin.blockinfile:
+    path: '/etc/metricbeat/metricbeat.yml'
+    marker: "### {mark} ANSIBLE MANAGED BLOCK"
+    block: |
+      seccomp:
+        default_action: errno
+        syscalls:
+        - action: allow
+          names:
+            - accept
+            - accept4
+            - access
+            - arch_prctl
+            - bind
+            - brk
+            - chmod
+            - chown
+            - clock_gettime
+            - clone
+            - clone3
+            - close
+            - connect
+            - dup
+            - dup2
+            - epoll_create
+            - epoll_create1
+            - epoll_ctl
+            - epoll_pwait
+            - epoll_wait
+            - exit
+            - exit_group
+            - fchdir
+            - fchmod
+            - fchmodat
+            - fchown
+            - fchownat
+            - fcntl
+            - fdatasync
+            - flock
+            - fstat
+            - fstatfs
+            - fsync
+            - ftruncate
+            - futex
+            - getcwd
+            - getdents
+            - getdents64
+            - geteuid
+            - getgid
+            - getpeername
+            - getpid
+            - getppid
+            - getrandom
+            - getrlimit
+            - getrusage
+            - getsockname
+            - getsockopt
+            - gettid
+            - gettimeofday
+            - getuid
+            - inotify_add_watch
+            - inotify_init1
+            - inotify_rm_watch
+            - ioctl
+            - kill
+            - listen
+            - lseek
+            - lstat
+            - madvise
+            - mincore
+            - mkdirat
+            - mmap
+            - mprotect
+            - munmap
+            - nanosleep
+            - newfstatat
+            - open
+            - openat
+            - pipe
+            - pipe2
+            - poll
+            - ppoll
+            - pread64
+            - pselect6
+            - pwrite64
+            - read
+            - readlink
+            - readlinkat
+            - recvfrom
+            - recvmmsg
+            - recvmsg
+            - rename
+            - renameat
+            - rt_sigaction
+            - rt_sigprocmask
+            - rt_sigreturn
+            - sched_getaffinity
+            - sched_yield
+            - sendfile
+            - sendmmsg
+            - sendmsg
+            - sendto
+            - set_robust_list
+            - setitimer
+            - setsockopt
+            - shutdown
+            - sigaltstack
+            - socket
+            - splice
+            - stat
+            - statfs
+            - sysinfo
+            - tgkill
+            - time
+            - tkill
+            - uname
+            - unlink
+            - unlinkat
+            - wait4
+            - waitid
+            - write
+            - writev
+    owner: 'root'
+    group: 'root'
+    mode: '0640'
+    seuser: 'system_u'
+    serole: 'object_r'
+    setype: 'etc_t'
+    selevel: 's0'
+
 - name: "Elastic | Postdeploy | Configure filebeat"
   loop:
     - { src: 'filebeat',    dst: 'filebeat' } # noqa yaml[commas]
