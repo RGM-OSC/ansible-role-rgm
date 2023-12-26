@@ -56,6 +56,55 @@
   when: stat_fcgid_conf.stat.exists
   ansible.builtin.command: mv /etc/httpd/conf.d/fcgid.conf /etc/httpd/conf.d/01_fcgid.conf
 
+- name: 'HTTP | Configure | Stat existing self-signed certificate'
+  register: 'self_signed_certificate'
+  ansible.builtin.stat:
+    path: '/etc/pki/tls/certs/rgm.crt'
+
+- name: 'HTTP | Configure | Generate self signed certificate'
+  when: not self_signed_certificate.stat.exists
+  block:
+    - name: 'Generate self-signed private key'
+      community.crypto.openssl_privatekey:
+        path: '/etc/pki/tls/private/rgm.key'
+        size: 2048
+        type: 'RSA'
+        backup: true
+        owner: 'root'
+        group: 'root'
+        mode: '0600'
+
+    - name: 'HTTP | Configure | Generate self-signed CSR'
+      community.crypto.openssl_csr:
+        path: '/etc/pki/tls/certs/rgm.csr'
+        privatekey_path: '/etc/pki/tls/private/rgm.key'
+        country_name: 'FR'
+        state_or_province_name: 'IDF'
+        locality_name: 'Nanteres'
+        organization_name: 'SCC'
+        organizational_unit_name: 'RGM'
+        email_address: 'admin@{{ ansible_domain|default("localhost", true) }}'
+        common_name: '{{ ansible_fqdn }}'
+        subject_alt_name:
+          - 'IP:127.0.0.1'
+          - 'IP:{{ ansible_default_ipv4.address }}'
+          - 'DNS:localhost'
+        owner: 'root'
+        group: 'root'
+        mode: '0644'
+        backup: true
+
+    - name: 'HTTP | Configure | Generate self-signed certificate'
+      community.crypto.x509_certificate:
+        path: '/etc/pki/tls/certs/rgm.crt'
+        csr_path: '/etc/pki/tls/certs/rgm.csr'
+        privatekey_path: '/etc/pki/tls/private/rgm.key'
+        provider: selfsigned
+        owner: 'root'
+        group: 'root'
+        mode: '0644'
+        backup: true
+
 - name: "HTTP | Configure | Install RGM httpd config files"
   with_items:
     - { src: '00_hardening.conf',  dst: '00_hardening.conf'} # noqa yaml[commas]
