@@ -9,6 +9,30 @@
     name: "{{ packages.system + packages.apache + packages.elastic + packages.influx_grafana + packages.prometheus + packages.rgm + packages.partners + extra_packages }}" # noqa yaml[line-length]
     state: present
 
+- name: "RGM | Packages | Install additionnal RGM Packages for EL7 (it may take some time...)"
+  when:
+    - ansible_distribution_major_version|int == 7
+  retries: 10
+  delay: 2
+  register: yum_result
+  until: yum_result.rc == 0
+  ansible.builtin.yum:
+    update_cache: true
+    name: "{{ packages.system_el7 + packages.prometheus_el7 }}" # noqa yaml[line-length]
+    state: present
+
+- name: "RGM | Packages | Install additionnal RGM Packages for EL9 (it may take some time...)"
+  when:
+    - ansible_distribution_major_version|int >= 9
+  retries: 10
+  delay: 2
+  register: yum_result
+  until: yum_result.rc == 0
+  ansible.builtin.yum:
+    update_cache: true
+    name: "{{ packages.system_el9 }}" # noqa yaml[line-length]
+    state: present
+
 - name: "RGM | Packages | Install business packages"
   tags:
     - business

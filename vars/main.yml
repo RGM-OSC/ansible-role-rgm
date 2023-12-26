@@ -49,7 +49,10 @@ packages:
     - perl-Switch
     - perl-IPC-Cmd
     - ruby
+  system_el7:
     - python2-jmespath
+  system_el9:
+    - python3-jmespath
   apache:
     - httpd
     - php-fpm
@@ -96,11 +99,12 @@ packages:
   prometheus:
     - prometheus
     - prometheus-node_exporter
-    - prometheus-pushgateway
     - prometheus-snmp_exporter
     - prometheus-blackbox_exporter
     - prometheus-ping_exporter
     - prometheus-elasticsearch_exporter
+  prometheus_el7:
+    - prometheus-pushgateway
   python36:
     - python36
     - python36-crypto
