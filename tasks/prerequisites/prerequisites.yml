@@ -54,6 +54,10 @@
     option: exclude
     value: 'nagios* elasticsearch* metricbeat* kibana* grafana* influxdb* snmptt'
 
+- name: 'Prerequisites | Ensure CRB repository is enabled'
+  ansible.builtin.command: dnf config-manager --set-enabled crb
+  changed_when: false
+
 - name: "Prerequisites | Import rawhide tasks"
   when: enable_rawhide
   ansible.builtin.import_tasks: prerequisites/prerequisites_rawhide.yml
