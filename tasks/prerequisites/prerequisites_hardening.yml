@@ -23,6 +23,8 @@
     reload: true
 
 - name: "Prerequisites | Hardening | SSH Hardening"
+  tags:
+    - ssh_hardening
   when: ssh_hardening
   block:
     - name: "Prerequisites | Hardening | Disable weak SSH ECDSA host keys"
@@ -36,15 +38,13 @@
         group: root
         mode: "{{ item.mode }}"
 
-    - name: "Prerequisites | Hardening | SSH daemon hardening"
+    - name: "Prerequisites | Hardening | SSH daemon hardening base"
       loop:
+        - { regex: '^(#\s*)?SyslogFacility',               line: "SyslogFacility AUTHPRIV" }  # noqa yaml[commas]
         - { regex: '^(#\s*)?PermitEmptyPasswords',         line: "PermitEmptyPasswords no" } # noqa yaml[commas]
         - { regex: '^(#\s*)?PermitRootLogin',              line: "PermitRootLogin without-password" } # noqa yaml[commas]
         - { regex: '^(#\s*)?StrictModes',                  line: "StrictModes yes" } # noqa yaml[commas]
         - { regex: '^HostKey /etc/ssh/ssh_host_ecdsa_key', line: "#HostKey /etc/ssh/ssh_host_ecdsa_key" } # noqa yaml[commas]
-        - { regex: '^(#\s*)?Ciphers ',                     line: "Ciphers aes128-ctr,aes192-ctr,aes256-ctr" } # noqa yaml[commas]
-        - { regex: '^(#\s*)?MACs ',                        line: "MACs hmac-sha2-512,hmac-sha2-256,hmac-ripemd160" } # noqa yaml[commas]
-        - { regex: '^(#\s*)?KexAlgorithms ',               line: "KexAlgorithms diffie-hellman-group-exchange-sha256" } # noqa yaml[commas]
         - { regex: '^(#\s*)?RekeyLimit ',                  line: "RekeyLimit default 1200" } # noqa yaml[commas]
         - { regex: '^(#\s*)?TCPKeepAlive ',                line: "TCPKeepAlive yes" } # noqa yaml[commas]
         - { regex: '^(#\s*)?MaxSessions ',                 line: "MaxSessions 10" } # noqa yaml[commas]
@@ -53,3 +53,40 @@
         regexp: "{{ item.regex }}"
         line: "{{ item.line }}"
         insertafter: '^(#\s*)?UsePAM '
+
+    - name: "Prerequisites | Hardening | SSH daemon hardening for EL7"
+      when:
+        ansible_distribution_major_version|int == 7
+      loop:
+        - { regex: '^(#\s*)?Ciphers ',                     line: "Ciphers aes128-ctr,aes192-ctr,aes256-ctr" } # noqa yaml[commas]
+        - { regex: '^(#\s*)?MACs ',                        line: "MACs hmac-sha2-512,hmac-sha2-256,hmac-ripemd160" } # noqa yaml[commas]
+        - { regex: '^(#\s*)?KexAlgorithms ',               line: "KexAlgorithms diffie-hellman-group-exchange-sha256" } # noqa yaml[commas]
+      ansible.builtin.lineinfile:
+        path: "/etc/ssh/sshd_config"
+        regexp: "{{ item.regex }}"
+        line: "{{ item.line }}"
+        insertafter: '^(#\s*)?UsePAM '
+
+    - name: "SSH Hardening for RHEL 9"
+      when:
+        - ansible_distribution_major_version|int == 9
+      block:
+        - name: "Remove default redhat hardening"
+          loop:
+            - '01-permitrootlogin.conf'
+            - '50-redhat.conf'
+          ansible.builtin.file:
+            path: "/etc/ssh/sshd_config.d/{{ item }}"
+            state: absent
+
+        - name: "SSH Configure hardened ciphers"
+          ansible.builtin.copy:
+            dest: /etc/ssh/sshd_config.d/90-rgm.conf
+            src: openssh/90-rgm.conf
+            owner: 'root'
+            group: 'root'
+            mode: '0600'
+            seuser: 'system_u'
+            serole: 'object_r'
+            setype: 'etc_t'
+            selevel: 's0'

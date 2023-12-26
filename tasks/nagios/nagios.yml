@@ -2,7 +2,7 @@
 - name: "Nagios | Create nagios SSH key"
   become: true
   become_user: "nagios"
-  ansible.builtin.command: ssh-keygen -t rsa -b 2048 -C "RGM Nagios ssh key on {{ ansible_hostname }}" -f /home/nagios/.ssh/id_rsa -N '' -q
+  ansible.builtin.command: ssh-keygen -t rsa -b 4096 -C "RGM Nagios ssh key on {{ ansible_hostname }}" -f /home/nagios/.ssh/id_rsa -N '' -q
   args:
     chdir: /home/nagios
     creates: /home/nagios/.ssh/id_rsa
