@@ -31,6 +31,7 @@
       loop:
         - { file: ssh_host_ecdsa_key,     mode: '0400' } # noqa yaml[commas]
         - { file: ssh_host_ecdsa_key.pub, mode: '0644' } # noqa yaml[commas]
+      notify: "Service restart sshd"
       ansible.builtin.copy:
         content: ''
         dest: "/etc/ssh/{{ item.file }}"
@@ -48,6 +49,7 @@
         - { regex: '^(#\s*)?RekeyLimit ',                  line: "RekeyLimit default 1200" } # noqa yaml[commas]
         - { regex: '^(#\s*)?TCPKeepAlive ',                line: "TCPKeepAlive yes" } # noqa yaml[commas]
         - { regex: '^(#\s*)?MaxSessions ',                 line: "MaxSessions 10" } # noqa yaml[commas]
+      notify: "Service restart sshd"
       ansible.builtin.lineinfile:
         path: "/etc/ssh/sshd_config"
         regexp: "{{ item.regex }}"
@@ -61,6 +63,7 @@
         - { regex: '^(#\s*)?Ciphers ',                     line: "Ciphers aes128-ctr,aes192-ctr,aes256-ctr" } # noqa yaml[commas]
         - { regex: '^(#\s*)?MACs ',                        line: "MACs hmac-sha2-512,hmac-sha2-256,hmac-ripemd160" } # noqa yaml[commas]
         - { regex: '^(#\s*)?KexAlgorithms ',               line: "KexAlgorithms diffie-hellman-group-exchange-sha256" } # noqa yaml[commas]
+      notify: "Service restart sshd"
       ansible.builtin.lineinfile:
         path: "/etc/ssh/sshd_config"
         regexp: "{{ item.regex }}"
@@ -75,11 +78,13 @@
           loop:
             - '01-permitrootlogin.conf'
             - '50-redhat.conf'
+          notify: "Service restart sshd"
           ansible.builtin.file:
             path: "/etc/ssh/sshd_config.d/{{ item }}"
             state: absent
 
         - name: "SSH Configure hardened ciphers"
+          notify: "Service restart sshd"
           ansible.builtin.copy:
             dest: /etc/ssh/sshd_config.d/90-rgm.conf
             src: openssh/90-rgm.conf
