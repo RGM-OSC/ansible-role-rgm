@@ -15,6 +15,11 @@
     name: httpd
     state: reloaded
 
+- name: 'Service reload fpm'
+  ansible.builtin.service:
+    name: php-fpm
+    state: reloaded
+
 - name: "Service restart firewalld"
   ansible.builtin.service:
     name: firewalld
