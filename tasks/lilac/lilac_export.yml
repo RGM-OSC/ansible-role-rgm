@@ -8,6 +8,15 @@
     login_db: "{{ db_lilac }}"
     query: "UPDATE nagios_host SET name = '{{ ansible_nodename }}' WHERE id = 1;"
 
+- name: "Ensure gedd is up and running"
+  tags:
+    - rgmexport
+  ansible.builtin.systemd:
+    name: gedd
+    state: restarted
+    daemon_reload: true
+    enabled: true
+
 - name: "Lilac | Export | Get a valid RGMAPI token"
   register: auth_rgmapi
   tags:
