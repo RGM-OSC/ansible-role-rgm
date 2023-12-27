@@ -1,24 +1,4 @@
 ---
-- name: 'Grafana | Ensure dnf versionlock is present'
-  ansible.builtin.yum:
-    update_cache: false
-    name: "python3-dnf-plugin-versionlock"
-    state: present
-
-- name: 'Grafana | Copy grafana repository to fix version (else appstream repository is used)'
-  ansible.builtin.copy:
-    src: "grafana/grafana.repo"
-    dest: "/etc/yum.repos.d/grafana.repo"
-    owner: root
-    group: root
-    mode: "0644"
-
-- name: "Grafana | Prevent grafana version 6.4.0 from being updated"
-  community.general.dnf_versionlock:
-    state: present
-    name:
-      - grafana-6.4.0-1.x86_64
-
 - name: "Grafana | Ensure Grafana and dependencies are installed"
   ansible.builtin.yum:
     update_cache: true
