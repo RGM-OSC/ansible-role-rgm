@@ -57,6 +57,13 @@
     name: "{{ packages.system_el9 }}" # noqa yaml[line-length]
     state: present
 
+- name: "RGM | Packages | Initialize GED database"
+  community.mysql.mysql_db:
+    name: all
+    state: import
+    target: '/srv/rgm/ged/etc/bkd/ged-init.sql'
+    config_file: '/root/.my.cnf'
+
 - name: "RGM | Packages | Install business packages"
   tags:
     - business
