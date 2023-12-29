@@ -26,13 +26,13 @@
   community.mysql.mysql_query:
     config_file: "/root/.my.cnf"
     login_db: "mysql"
-    query: "SELECT COUNT(routine_name) FROM information_schema.routines WHERE routine_type = 'PROCEDURE' AND routine_schema = '{{ db_lilac }}'"
+    query: "SELECT routine_name FROM information_schema.routines WHERE routine_type = 'PROCEDURE' AND routine_schema = '{{ db_lilac }}'"
 
-- name: "Lilac | DB | Inject default lilac procedures"
-  when: lilac_procedures.rowcount[0] == 0
-  register: lilac_procedures_inject
-  changed_when: lilac_procedures_inject.rc == 1
-  failed_when: lilac procedures_inject.rc == 2
-  ansible.builtin.shell: "mysql {{ db_lilac }} < /var/lib/rgm/lilac/lilac-procedures.sql"
-  args:
-    executable: /bin/bash
+- name: "Lilac | DB | Inject lilac routines"
+  when:
+    - lilac_procedures.rowcount[0] == 0
+  community.mysql.mysql_db:
+    name: all
+    state: import
+    target: '/var/lib/rgm/lilac/lilac-procedures.sql'
+    config_file: '/root/.my.cnf'
