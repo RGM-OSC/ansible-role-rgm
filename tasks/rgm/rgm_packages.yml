@@ -57,7 +57,16 @@
     name: "{{ packages.system_el9 }}" # noqa yaml[line-length]
     state: present
 
+- name: "RGM | Packages | Check if gedadmin user exist"
+  register: _gedadmin_db_account
+  community.mysql.mysql_query:
+    query: "SELECT Host,User FROM user WHERE User='gedadmin';"
+    login_db: 'mysql'
+    config_file: '/root/.my.cnf'
+
 - name: "RGM | Packages | Initialize GED database"
+  when:
+    _gedadmin_db_account.rowcount[0] == 0
   community.mysql.mysql_db:
     name: all
     state: import
