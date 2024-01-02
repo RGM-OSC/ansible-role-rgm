@@ -24,6 +24,8 @@ echo 'MySQL DB schema initialization';
 ini_set('display_errors', 'On');
 error_reporting(E_ALL);
 
+$_SERVER['REQUEST_URI']='/nagvis';
+
 require('{{ rgm_root_path }}/nagvis/share/server/core/defines/global.php');
 require('{{ rgm_root_path }}/nagvis/share/server/core/defines/matches.php');
 
@@ -42,7 +44,7 @@ require '{{ rgm_root_path }}/nagvis/share/server/core/classes/GlobalLanguage.php
 require '{{ rgm_root_path }}/nagvis/share/server/core/functions/core.php';
 require '{{ rgm_root_path }}/nagvis/etc/nagvis.ini.php';
 
-require '{{ rgm_root_path }}/nagvis/share/server/core/classes/CoreMySQLHandler.php';
+require '{{ rgm_root_path }}/nagvis/share/server/core/classes/CorePDOHandler.php';
 require '{{ rgm_root_path }}/nagvis/share/server/core/classes/CoreAuthModule.php';
 require '{{ rgm_root_path }}/nagvis/share/server/core/classes/CoreAuthModMySQL.php';
 
