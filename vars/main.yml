@@ -57,14 +57,19 @@ packages:
     - python3-jmespath
   apache:
     - httpd
-    - php-fpm
     - mod_perl
     - mod_ssl
+    - mod_fcgid
     - php
     - php-mysqlnd
     - php-ldap
     - php-xml
     - php-mcrypt
+  apache_el9:
+    - php-fpm
+  apache_el7:
+    - php-process
+    - php-snmp
   elastic:
     - java-11-openjdk-headless
     - elasticsearch-oss

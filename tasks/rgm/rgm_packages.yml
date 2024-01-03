@@ -67,7 +67,7 @@
   until: yum_result.rc == 0
   ansible.builtin.yum:
     update_cache: true
-    name: "{{ packages.system_el7 + packages.prometheus_el7 }}" # noqa yaml[line-length]
+    name: "{{ packages.system_el7 + packages.prometheus_el7 + packages.apache_el7 }}" # noqa yaml[line-length]
     state: present
 
 - name: "RGM | Packages | Install additionnal RGM Packages for EL9 (it may take some time...)"
@@ -79,7 +79,7 @@
   until: yum_result.rc == 0
   ansible.builtin.yum:
     update_cache: true
-    name: "{{ packages.system_el9 }}" # noqa yaml[line-length]
+    name: "{{ packages.system_el9 + packages.apache_el9 }}" # noqa yaml[line-length]
     state: present
 
 - name: "RGM | Packages | Check if gedadmin user exist"

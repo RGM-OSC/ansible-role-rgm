@@ -110,6 +110,19 @@
     - { src: '00_hardening.conf',  dst: '00_hardening.conf'} # noqa yaml[commas]
     - { src: 'ssl.conf',           dst: '10_ssl.conf'} # noqa yaml[commas]
     - { src: 'zz_elastic_hq.conf', dst: 'zz_elastic_hq.conf.disabled'} # noqa yaml[commas]
+  notify:
+    - "Service reload http"
+  ansible.builtin.template:
+    src: "httpd/{{ item.src }}.j2"
+    dest: "/etc/httpd/conf.d/{{ item.dst }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+
+- name: "HTTP | Configure | Install RGM httpd config files for EL9"
+  when:
+    - ansible_distribution_major_version|int >= 9
+  with_items:
     - { src: '00_fpm.conf',        dst: '00_fpm.conf'}  # noqa yaml[commas]
   notify:
     - "Service reload http"
@@ -120,6 +133,8 @@
     owner: "root"
     group: "root"
     mode: "0644"
+
+
 
 ## restart apache now as we'll use RGM API later on role
 - name: 'HTTP | Configure | Flush handlers'
