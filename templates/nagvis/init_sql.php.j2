@@ -44,7 +44,11 @@ require '{{ rgm_root_path }}/nagvis/share/server/core/classes/GlobalLanguage.php
 require '{{ rgm_root_path }}/nagvis/share/server/core/functions/core.php';
 require '{{ rgm_root_path }}/nagvis/etc/nagvis.ini.php';
 
+{% if ansible_distribution_major_version|int == 7 %}
+require '{{ rgm_root_path }}/nagvis/share/server/core/classes/CoreMySQLHandler.php';
+{% else %}
 require '{{ rgm_root_path }}/nagvis/share/server/core/classes/CorePDOHandler.php';
+{% endif %}
 require '{{ rgm_root_path }}/nagvis/share/server/core/classes/CoreAuthModule.php';
 require '{{ rgm_root_path }}/nagvis/share/server/core/classes/CoreAuthModMySQL.php';
 
