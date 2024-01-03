@@ -1,5 +1,15 @@
 ---
-- name: 'RGM | Packages | Ensure dnf versionlock is present'
+- name: 'RGM | Packages | Ensure dnf versionlock is present for EL7'
+  when:
+    ansible_distribution_major_version|int == 7
+  ansible.builtin.yum:
+    update_cache: false
+    name: "yum-plugin-versionlock"
+    state: present
+
+- name: 'RGM | Packages | Ensure dnf versionlock is present for EL9'
+  when:
+    ansible_distribution_major_version|int >= 9
   ansible.builtin.yum:
     update_cache: false
     name: "python3-dnf-plugin-versionlock"
@@ -17,7 +27,22 @@
   ansible.builtin.yum:
     update_cache: true
 
+- name: "RGM | Packages | Import grafana repository GPG key"
+  ansible.builtin.rpm_key:
+    key: https://rpm.grafana.com/gpg.key
+    state: present
+
+- name: "RGM | Packages | Prevent grafana version 6.4.0 from being updated on EL7"
+  when:
+    - ansible_distribution_major_version|int == 7
+  community.general.yum_versionlock:
+    state: present
+    name:
+      - grafana-6.4.0-1.x86_64
+
 - name: "RGM | Packages | Prevent grafana version 6.4.0 from being updated"
+  when:
+    - ansible_distribution_major_version|int >= 9
   community.general.dnf_versionlock:
     state: present
     name:
