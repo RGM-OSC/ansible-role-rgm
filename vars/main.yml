@@ -22,6 +22,7 @@ packages:
   system:
     - bash-completion
     - bzip2
+    - tar
     - vim
     - sudo
     - net-snmp
@@ -29,6 +30,8 @@ packages:
     - chrony
     - net-tools
     - htop
+    - nmon
+    - btop
     - iftop
     - iotop
     - telnet
