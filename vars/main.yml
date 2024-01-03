@@ -31,7 +31,6 @@ packages:
     - net-tools
     - htop
     - nmon
-    - btop
     - iftop
     - iotop
     - telnet
