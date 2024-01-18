@@ -23,7 +23,6 @@
     gpgcheck: true
     enabled: true
     sslverify: true
-    keepcache: false
     gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rgm
 
 - name: "Include ES common preliminary tasks"
@@ -34,7 +33,7 @@
   notify: "Service restart elasticsearch"
   register: elasticsearch_conf
   ansible.builtin.template:
-    src: ../../templates/elastic/elasticsearch-cluster.yml.j2
+    src: elastic/elasticsearch-cluster.yml.j2
     dest: "/etc/elasticsearch/elasticsearch.yml"
     owner: "root"
     group: "elasticsearch"

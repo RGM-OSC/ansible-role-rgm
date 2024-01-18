@@ -11,17 +11,17 @@
     name: "{{ packages_elastic }}"
     state: present
 
-- block:
+- name: "ES control"
+  block:
+    - name: ensure elasticsearch is enabled and started
+      systemd:
+        name: elasticsearch
+        state: stopped
 
-  - name: ensure elasticsearch is enabled and started
-    systemd:
-      name: elasticsearch
-      state: stopped
-
-  - name: force la suppression du sto ES
-    file:
-      path: /var/lib/elasticsearch/nodes
-      state: absent
+    - name: force la suppression du sto ES
+      file:
+        path: /var/lib/elasticsearch/nodes
+        state: absent
 
   when: force_delete_es is defined and force_delete_es
 
@@ -60,16 +60,16 @@
     line: "{{ item.line }}"
     insertafter: "{{ item.after }}"
   with_items:
-  - { regex: '^-Xms\d+\w$',                                           line: "-Xms{{ jvmheapsize }}g",                            after: 'EOF' }
-  - { regex: '^-Xmx\d+\w$',                                           line: "-Xmx{{ jvmheapsize }}g",                            after: 'EOF' }
-  - { regex: '^.*-XX:\+UseConcMarkSweepGC$',                          line: '# -XX:+UseConcMarkSweepGC',                         after: 'EOF' }
-  - { regex: '^.*-XX:CMSInitiatingOccupancyFraction=\d+$',            line: '# -XX:CMSInitiatingOccupancyFraction=75',           after: 'EOF' }
-  - { regex: '^.*-XX:\+UseCMSInitiatingOccupancyOnly$',               line: '# -XX:+UseCMSInitiatingOccupancyOnly',              after: 'EOF' }
-  - { regex: '^.*10-:-XX:\+UseG1GC$',                                 line: '10-:-XX:+UseG1GC',                                  after: '^#+ G1GC Configuration$' }
-  - { regex: '^.*10-:-XX:G1ReservePercent=\d+$',                      line: '10-:-XX:G1ReservePercent=25',                       after: '^.*-XX:\+UseG1GC$' }
-  - { regex: '^.*10-:-XX:InitiatingHeapOccupancyPercent=\d+$',        line: '10-:-XX:InitiatingHeapOccupancyPercent=30',         after: '^.*-XX:\+UseG1GC$' }
-  - { regex: '^# LOG4J2 CVE',                                         line: '# LOG4J2 CVE',                                      after: 'EOF' }
-  - { regex: '^-Dlog4j2.formatMsgNoLookups=true',                     line: '-Dlog4j2.formatMsgNoLookups=true',                  after: 'EOF' }
+    - { regex: '^-Xms\d+\w$',                                           line: "-Xms{{ jvmheapsize }}g",                            after: 'EOF' }
+    - { regex: '^-Xmx\d+\w$',                                           line: "-Xmx{{ jvmheapsize }}g",                            after: 'EOF' }
+    - { regex: '^.*-XX:\+UseConcMarkSweepGC$',                          line: '# -XX:+UseConcMarkSweepGC',                         after: 'EOF' }
+    - { regex: '^.*-XX:CMSInitiatingOccupancyFraction=\d+$',            line: '# -XX:CMSInitiatingOccupancyFraction=75',           after: 'EOF' }
+    - { regex: '^.*-XX:\+UseCMSInitiatingOccupancyOnly$',               line: '# -XX:+UseCMSInitiatingOccupancyOnly',              after: 'EOF' }
+    - { regex: '^.*10-:-XX:\+UseG1GC$',                                 line: '10-:-XX:+UseG1GC',                                  after: '^#+ G1GC Configuration$' }
+    - { regex: '^.*10-:-XX:G1ReservePercent=\d+$',                      line: '10-:-XX:G1ReservePercent=25',                       after: '^.*-XX:\+UseG1GC$' }
+    - { regex: '^.*10-:-XX:InitiatingHeapOccupancyPercent=\d+$',        line: '10-:-XX:InitiatingHeapOccupancyPercent=30',         after: '^.*-XX:\+UseG1GC$' }
+    - { regex: '^# LOG4J2 CVE',                                         line: '# LOG4J2 CVE',                                      after: 'EOF' }
+    - { regex: '^-Dlog4j2.formatMsgNoLookups=true',                     line: '-Dlog4j2.formatMsgNoLookups=true',                  after: 'EOF' }
   register: elasticsearch_conf_jvm
   notify: service_restart_elasticsearch
 
@@ -80,13 +80,13 @@
     line: "{{ item.line }}"
     insertafter: "{{ item.after }}"
   with_items:
-  - { regex: '^# JMX',                                                line: '# JMX',                                             after: 'EOF' }
-  - { regex: '^.*-Dcom.sun.management.jmxremote$',                    line: '-Dcom.sun.management.jmxremote',                    after: '^# JMX$' }
-  - { regex: '^.*-Dcom.sun.management.jmxremote.port=\d+$',           line: '-Dcom.sun.management.jmxremote.port=10001',         after: '^-Dcom.sun.management.jmxremote.*$' }
-  - { regex: '^.*-Dcom.sun.management.jmxremote.host=\d+$',           line: '-Dcom.sun.management.jmxremote.host=localhost',     after: '^-Dcom.sun.management.jmxremote.*$' }
-  - { regex: '^.*-Dcom.sun.management.jmxremote.rmi.port=\d+$',       line: '-Dcom.sun.management.jmxremote.rmi.port=10002',     after: '^-Dcom.sun.management.jmxremote.*$' }
-  - { regex: '^.*-Dcom.sun.management.jmxremote.ssl=false$',          line: '-Dcom.sun.management.jmxremote.ssl=false',          after: '^-Dcom.sun.management.jmxremote.*$' }
-  - { regex: '^.*-Dcom.sun.management.jmxremote.authenticate=false$', line: '-Dcom.sun.management.jmxremote.authenticate=false', after: '^-Dcom.sun.management.jmxremote.*$' }
+    - { regex: '^# JMX',                                                line: '# JMX',                                             after: 'EOF' }
+    - { regex: '^.*-Dcom.sun.management.jmxremote$',                    line: '-Dcom.sun.management.jmxremote',                    after: '^# JMX$' }
+    - { regex: '^.*-Dcom.sun.management.jmxremote.port=\d+$',           line: '-Dcom.sun.management.jmxremote.port=10001',         after: '^-Dcom.sun.management.jmxremote.*$' }
+    - { regex: '^.*-Dcom.sun.management.jmxremote.host=\d+$',           line: '-Dcom.sun.management.jmxremote.host=localhost',     after: '^-Dcom.sun.management.jmxremote.*$' }
+    - { regex: '^.*-Dcom.sun.management.jmxremote.rmi.port=\d+$',       line: '-Dcom.sun.management.jmxremote.rmi.port=10002',     after: '^-Dcom.sun.management.jmxremote.*$' }
+    - { regex: '^.*-Dcom.sun.management.jmxremote.ssl=false$',          line: '-Dcom.sun.management.jmxremote.ssl=false',          after: '^-Dcom.sun.management.jmxremote.*$' }
+    - { regex: '^.*-Dcom.sun.management.jmxremote.authenticate=false$', line: '-Dcom.sun.management.jmxremote.authenticate=false', after: '^-Dcom.sun.management.jmxremote.*$' }
   when: es_jvm_jmx
   notify: service_restart_elasticsearch
 
@@ -98,10 +98,10 @@
     insertafter: '^appender.deprecation_rolling_old.strategy.max.*'
     backrefs: "{{ item.br | default('no') }}"
   with_items:
-  - { regex: '^appender.deprecation_rolling_old.regexfilter.onmatch =.*$',            line: 'appender.deprecation_rolling_old.regexfilter.onmatch = DENY' }
-  - { regex: '^appender.deprecation_rolling_old.regexfilter.regex =.*$',              line: 'appender.deprecation_rolling_old.regexfilter.regex = .*\\[\\.kibana_\\d+\\].*' }
-  - { regex: '^appender.deprecation_rolling_old.regexfilter.type =.*$',               line: 'appender.deprecation_rolling_old.regexfilter.type = RegexFilter' }
-  - { regex: '^(#\s*?)?(logger.deprecation.appenderRef.deprecation_rolling.ref\s*=.*)$', line: '#\2', br: 'yes' }
+    - { regex: '^appender.deprecation_rolling_old.regexfilter.onmatch =.*$',            line: 'appender.deprecation_rolling_old.regexfilter.onmatch = DENY' }
+    - { regex: '^appender.deprecation_rolling_old.regexfilter.regex =.*$',              line: 'appender.deprecation_rolling_old.regexfilter.regex = .*\\[\\.kibana_\\d+\\].*' }
+    - { regex: '^appender.deprecation_rolling_old.regexfilter.type =.*$',               line: 'appender.deprecation_rolling_old.regexfilter.type = RegexFilter' }
+    - { regex: '^(#\s*?)?(logger.deprecation.appenderRef.deprecation_rolling.ref\s*=.*)$', line: '#\2', br: 'yes' }
 
 - name: ensure ES data path is owned by elasticsearch user
   file:
@@ -128,8 +128,8 @@
     group: root
     mode: 0644
   with_items:
-  - { src: 'elastic/curator_actions.yml.j2',    dst: '/etc/elasticsearch/actions.yml' }
-  - { src: 'elastic/curator.yml.j2',            dst: '/etc/elasticsearch/curator.yml' }
+    - { src: 'elastic/curator_actions.yml.j2',    dst: '/etc/elasticsearch/actions.yml' }
+    - { src: 'elastic/curator.yml.j2',            dst: '/etc/elasticsearch/curator.yml' }
 
 - name: set cron job for curator
   copy:
@@ -151,13 +151,13 @@
     regexp: "{{ item.regex }}"
     line: "{{ item.line }}"
   with_items:
-  - { regex: '^(#\s*)?server.port',                         line: 'server.port: 5601' }
-  - { regex: '^(#\s*)?server.host',                         line: 'server.host: "localhost"' }
-  - { regex: '^(#\s*)?server.basePath',                     line: 'server.basePath: "/kibana"' }
-  - { regex: '^(#\s*)?server.rewriteBasePath',              line: 'server.rewriteBasePath: true' }
-  - { regex: '^(#\s*)?kibana.defaultAppId',                 line: 'kibana.defaultAppId: "discover"' }
-  - { regex: '^(#\s*)?newsfeed.enabled',                    line: 'newsfeed.enabled: false' }
-  - { regex: '^(#\s*)?security.showInsecureClusterWarning', line: 'security.showInsecureClusterWarning: false' }
+    - { regex: '^(#\s*)?server.port',                         line: 'server.port: 5601' }
+    - { regex: '^(#\s*)?server.host',                         line: 'server.host: "localhost"' }
+    - { regex: '^(#\s*)?server.basePath',                     line: 'server.basePath: "/kibana"' }
+    - { regex: '^(#\s*)?server.rewriteBasePath',              line: 'server.rewriteBasePath: true' }
+    - { regex: '^(#\s*)?kibana.defaultAppId',                 line: 'kibana.defaultAppId: "discover"' }
+    - { regex: '^(#\s*)?newsfeed.enabled',                    line: 'newsfeed.enabled: false' }
+    - { regex: '^(#\s*)?security.showInsecureClusterWarning', line: 'security.showInsecureClusterWarning: false' }
   notify: service_restart_kibana
 
 
@@ -171,11 +171,11 @@
     group: root
     mode: 0640
   with_items:
-  - { src: 'metricbeat',    dst: 'metricbeat' }
-  - { src: 'module_apache', dst: 'modules.d/apache' }
-  - { src: 'module_kibana', dst: 'modules.d/kibana' }
-  - { src: 'module_mysql',  dst: 'modules.d/mysql' }
-  - { src: 'module_system', dst: 'modules.d/system' }
+    - { src: 'metricbeat',    dst: 'metricbeat' }
+    - { src: 'module_apache', dst: 'modules.d/apache' }
+    - { src: 'module_kibana', dst: 'modules.d/kibana' }
+    - { src: 'module_mysql',  dst: 'modules.d/mysql' }
+    - { src: 'module_system', dst: 'modules.d/system' }
   register: metricbeat_config
   notify: service_restart_metricbeat
 
@@ -189,8 +189,8 @@
     group: root
     mode: 0640
   with_items:
-  - { src: 'filebeat',    dst: 'filebeat' }
-  - { src: 'system', dst: 'modules.d/system' }
-  - { src: 'apache', dst: 'modules.d/apache' }
+    - { src: 'filebeat',    dst: 'filebeat' }
+    - { src: 'system', dst: 'modules.d/system' }
+    - { src: 'apache', dst: 'modules.d/apache' }
   register: filebeat_config
   notify: service_restart_filebeat

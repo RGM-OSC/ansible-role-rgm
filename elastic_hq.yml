@@ -33,7 +33,7 @@
 - name: "Install Elasticsearch-HQ systemd service unit"
   register: systemd_elastic_hq
   ansible.builtin.template:
-    src: ../../templates/elastic/elastic-hq.service.j2
+    src: elastic/elastic-hq.service.j2
     dest: "/etc/systemd/system/elasticsearch-hq.service"
     owner: "root"
     group: "root"
@@ -51,7 +51,7 @@
 - name: "Configure Apache for ElasticHQ reverse-proxying"
   notify: "Service reload http"
   ansible.builtin.template:
-    src: httpd/15_elastic_hq.conf.j2
+    src: httpd/zz_elastic_hq.conf.j2
     dest: "/etc/httpd/conf.d/15_elastic_hq.conf"
     owner: "root"
     group: "root"
