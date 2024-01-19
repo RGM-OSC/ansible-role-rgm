@@ -25,11 +25,59 @@
   ansible.builtin.yum:
     name: "{{ packages.mariadb_el9 }}"
 
+- name: "MariaDB | Install | Configure InnoDB to create tablespace per database on EL7"
+  when:
+    - ansible_distribution_major_version|int == 7
+  tags:
+    - packages
+    - rgm_packages
+  ansible.builtin.blockinfile:
+    path: '/etc/my.cnf'
+    marker: "#### {mark} ANSIBLE MANAGED BLOCK ####"
+    insertafter: '\[mysqld\]'
+    block: |
+      innodb_file_per_table=ON
+      innodb_defragment=ON
+
+- name: "MariaDB | Install | Configure InnoDB to create tablespace per database on EL7"
+  when:
+    - ansible_distribution_major_version|int == 9
+  tags:
+    - packages
+    - rgm_packages
+  ansible.builtin.blockinfile:
+    path: '/etc/my.cnf.d/mariadb-server.cnf'
+    marker: "#### {mark} ANSIBLE MANAGED BLOCK ####"
+    insertafter: '\[mysqld\]'
+    block: |
+      innodb_file_per_table=ON
+      innodb_defragment=ON
+
+- name: "MariaDB | Install | Deploy cron to optimize table"
+  tags:
+    - packages
+    - rgm_packages
+  ansible.builtin.copy:
+    dest: /etc/cron.daily/mariadb_optimize
+    owner: 'root'
+    group: 'root'
+    mode: '0750'
+    seuser: 'system_u'
+    serole: 'object_r'
+    setype: 'bin_t'
+    selevel: 's0'
+    content: |
+      #!/bin/bash
+      for table in $(/usr/bin/mysql thruk_log_cache --batch -e 'show tables;' | grep -vE '^Tables_in_'); do
+        echo "Optimize table : ${table}"
+        /usr/bin/mysql thruk_log_cache --batch -e "OPTIMIZE TABLE ${table};"
+      done
+
 - name: "MariaDB | Install | Ensure MariaDB is up and running"
   ansible.builtin.systemd:
     name: mariadb
     enabled: true
-    state: started
+    state: restarted
 
 - name: "MariaDB | Install | Import root user configuration tasks"
   ansible.builtin.import_tasks: mariadb/users/mariadb_root.yml
