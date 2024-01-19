@@ -37,9 +37,8 @@
     insertafter: '\[mysqld\]'
     block: |
       innodb_file_per_table=ON
-      innodb_defragment=ON
 
-- name: "MariaDB | Install | Configure InnoDB to create tablespace per database on EL7"
+- name: "MariaDB | Install | Configure InnoDB to create tablespace per database on EL9"
   when:
     - ansible_distribution_major_version|int == 9
   tags:
