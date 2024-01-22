@@ -50,7 +50,7 @@ ntp_servers:
 # SSH hardening is enabled by default
 ssh_hardening: true
 
-### Elasticsearch related defaults
+### Elasticsearch related defaults
 
 # Maximum allowed JVM heap size value (in MB)
 max_jvm_heapsize: 8
