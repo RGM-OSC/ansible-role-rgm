@@ -7,6 +7,43 @@
     name: "{{ packages.elastic }}"
     state: present
 
+- name: "Elastic | Ensure ElasticStack curator is installed on EL7"
+  when:
+    - ansible_distribution_major_version|int == 7
+  tags:
+    - packages
+  ansible.builtin.yum:
+    update_cache: false
+    name: "{{ packages.elasic_el7 }}"
+    state: present
+
+- name: "Elastic | Install elastic curator from pip on EL9"
+  when:
+    - ansible_distribution_major_version|int >= 9
+  block:
+    - name: "Elasticsearch | Create venv for curator on EL9"
+      ansible.builtin.pip:
+        virtualenv: "{{ curator.venv_path }}"
+        virtualenv_command: /usr/bin/python3 -m venv
+        extra_args: '--upgrade'
+        name:
+          - pip
+          - setuptools
+    - name: "Elasticsearch | Install curator on EL9"
+      ansible.builtin.pip:
+        virtualenv: "{{ curator.venv_path }}"
+        name:
+          - elasticsearch==7.12.0
+          - elasticsearch-curator==5.8.4
+
+    - name: "Elasticsearch | Create symlink to system binary path"
+      ansible.builtin.file:
+        src: /opt/elasticsearch-curator/bin/curator
+        path: /usr/bin/curator
+        owner: 'root'
+        group: 'root'
+        state: link
+
 - name: "Elastic | Clean elasticsearch sto"
   when:
     - force_delete_es is defined

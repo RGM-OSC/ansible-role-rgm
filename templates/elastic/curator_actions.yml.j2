@@ -1,10 +1,10 @@
 ---
 # {{ ansible_managed }}
 # vim: expandtab ts=2 sw=2:
-{% set count = 0 %}
+{% set count = namespace(total=0) %}
 actions:
 
-{% set count = count + 1 %}  {{ count }}:
+{% set count.total = count.total + 1 %}  {{ count.total }}:
     action: index_settings
     description: >-
       Force indexes for be writable and force set replicas shards to {{ es_shards_replicas }} (ES defaults to 1)
@@ -20,7 +20,7 @@ actions:
     - filtertype: none
 
 {% for pattern in curator_patterns %}
-{% set count = count + 1 %}  {{ count }}:
+{% set count.total = count.total + 1 %}  {{ count.total }}:
     action: close
     description: >-
       close beats indices older than {{ curator.close_indices_delay }} days
@@ -38,7 +38,7 @@ actions:
       unit: days
       unit_count: {{ curator.close_indices_delay }}
 
-{% set count = count + 1 %}  {{ count }}:
+{% set count.total = count.total + 1 %}  {{ count.total }}:
     action: delete_indices
     description: >-
       permanently delete beats indices older than {{ curator.delete_indices_delay }} days
