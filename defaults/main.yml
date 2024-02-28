@@ -61,7 +61,7 @@ es_shards: 1
 es_shards_replicas: 0
 
 # Elasticsearch Curator values
-curator:
+curator_indices:
   close_indices_delay: 2
   delete_indices_delay: 7
 

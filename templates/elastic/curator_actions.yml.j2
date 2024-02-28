@@ -23,7 +23,7 @@ actions:
 {% set count.total = count.total + 1 %}  {{ count.total }}:
     action: close
     description: >-
-      close beats indices older than {{ curator.close_indices_delay }} days
+      close beats indices older than {{ curator_indices.close_indices_delay }} days
     options:
       delete_aliases: False
       ignore_empty_list: True
@@ -36,12 +36,12 @@ actions:
       source: name
       timestring: '%Y.%m.%d'
       unit: days
-      unit_count: {{ curator.close_indices_delay }}
+      unit_count: {{ curator_indices.close_indices_delay }}
 
 {% set count.total = count.total + 1 %}  {{ count.total }}:
     action: delete_indices
     description: >-
-      permanently delete beats indices older than {{ curator.delete_indices_delay }} days
+      permanently delete beats indices older than {{ curator_indices.delete_indices_delay }} days
     options:
       ignore_empty_list: True
     filters:
@@ -53,6 +53,6 @@ actions:
       source: name
       timestring: '%Y.%m.%d'
       unit: days
-      unit_count: {{ curator.delete_indices_delay }}
+      unit_count: {{ curator_indices.delete_indices_delay }}
 
 {% endfor %}
