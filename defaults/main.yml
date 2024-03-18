@@ -20,6 +20,7 @@ prometheus_user: prometheus
 
 # RGM Business licensed customer id
 rgm_business_registration_id:
+rgm_teleport_version: 14
 
 # internal MariaDB user used by RGM applications
 mariadb_user: 'rgminternal'
